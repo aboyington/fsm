@@ -5,18 +5,24 @@ namespace App\Controllers;
 use App\Models\OrganizationModel;
 use App\Models\FiscalYearModel;
 use App\Models\BusinessHoursModel;
+use App\Models\UserModel;
+use App\Models\AuditLogModel;
 
 class Settings extends BaseController
 {
     protected $organizationModel;
     protected $fiscalYearModel;
     protected $businessHoursModel;
+    protected $userModel;
+    protected $auditLogModel;
     
     public function __construct()
     {
         $this->organizationModel = new OrganizationModel();
         $this->fiscalYearModel = new FiscalYearModel();
         $this->businessHoursModel = new BusinessHoursModel();
+        $this->userModel = new UserModel();
+        $this->auditLogModel = new AuditLogModel();
     }
     
     public function index()
@@ -106,15 +112,265 @@ class Settings extends BaseController
         return view('settings/currency', $data);
     }
 
-    public function users()
-    {
-        $data = [
-            'title' => 'Users',
-            'activeTab' => 'users'
-        ];
-        
-        return view('settings/users', $data);
+public function users()
+{
+    $status = $this->request->getVar('status') ?? 'active';
+    $search = $this->request->getVar('search') ?? '';
+    
+    // Start with a fresh query builder
+    $builder = $this->userModel->builder();
+    
+    // Apply status filter
+    if ($status !== 'all') {
+        $builder->where('status', $status);
     }
+    
+    // Apply search filter
+    if (!empty($search)) {
+        $builder->groupStart()
+                ->like('first_name', $search)
+                ->orLike('last_name', $search)
+                ->orLike('email', $search)
+                ->groupEnd();
+    }
+    
+    // Get all users (no pagination for now)
+    $users = $builder->get()->getResultArray();
+    
+    $data = [
+        'title' => 'Users',
+        'activeTab' => 'users',
+        'users' => $users,
+        'status' => $status,
+        'search' => $search
+    ];
+    
+    return view('settings/users', $data);
+}
+
+public function addUser()
+{
+    if ($this->request->getMethod() === 'post') {
+        $userData = $this->request->getPost();
+        
+        // Remove CSRF and confirm password fields
+        unset($userData['csrf_test_name']);
+        unset($userData['csrf_token']);
+        unset($userData['confirm_password']);
+        
+        // Generate username from email if not provided
+        if (!isset($userData['username']) || empty($userData['username'])) {
+            $userData['username'] = explode('@', $userData['email'])[0];
+        }
+        
+        // Set created_by from session
+        $currentUser = session()->get('user');
+        if ($currentUser) {
+            $userData['created_by'] = $currentUser['first_name'] . ' ' . $currentUser['last_name'];
+        }
+        
+        // Set default values for optional fields if not provided
+        if (!isset($userData['language'])) {
+            $userData['language'] = 'en-US';
+        }
+        if (!isset($userData['enable_rtl'])) {
+            $userData['enable_rtl'] = 0;
+        }
+        
+        if ($this->userModel->save($userData)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'User added successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to add user', 'errors' => $this->userModel->errors()]);
+        }
+    }
+    
+    return redirect()->to('/settings/users');
+}
+
+public function getUser($id)
+{
+    // Check if user is logged in
+    if (!session()->get('auth_token')) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Unauthorized: Please login to continue'
+        ])->setStatusCode(401);
+    }
+    
+    $user = $this->userModel->find($id);
+    
+    if ($user) {
+        unset($user['password']); // Don't send password
+        return $this->response->setJSON([
+            'success' => true,
+            'user' => $user
+        ]);
+    } else {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'User not found'
+        ])->setStatusCode(404);
+    }
+}
+
+    public function updateUser()
+    {
+        // Force JSON response even if errors occur
+        header('Content-Type: application/json');
+        
+        // Set JSON content type header immediately
+        $this->response->setContentType('application/json');
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // Log the request method for debugging
+        log_message('debug', 'updateUser called - Method from getMethod(): ' . $method);
+        log_message('debug', 'updateUser called - Method from $_SERVER: ' . $serverMethod);
+        log_message('debug', 'updateUser called - POST data exists: ' . (!empty($this->request->getPost()) ? 'YES' : 'NO'));
+        log_message('debug', 'updateUser called - Raw input: ' . file_get_contents('php://input'));
+        
+        // For now, accept any method if POST data exists
+        // This is a temporary workaround for the routing issue
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        try {
+            // Log request details for debugging
+            log_message('debug', 'updateUser called - Method: ' . $this->request->getMethod());
+            log_message('debug', 'Is AJAX: ' . ($this->request->isAJAX() ? 'YES' : 'NO'));
+            log_message('debug', 'Headers: ' . json_encode($this->request->getHeaders()));
+            
+            $userData = $this->request->getPost();
+            log_message('debug', 'Raw POST data: ' . json_encode($userData));
+            
+            // Validate required fields
+            if (!isset($userData['id']) || empty($userData['id'])) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'User ID is required'
+                ]);
+            }
+            
+            $userId = $userData['id'];
+            
+            // Remove CSRF token from data if present
+            unset($userData['csrf_test_name']);
+            unset($userData['csrf_token']);
+            
+            // Remove password from update if not provided
+            if (empty($userData['password'])) {
+                unset($userData['password']);
+            }
+            
+            // Don't allow username change
+            unset($userData['username']);
+            
+            // Log the data being updated for debugging
+            log_message('debug', 'Updating user ' . $userId . ' with data: ' . json_encode($userData));
+            
+            if ($this->userModel->update($userId, $userData)) {
+                log_message('debug', 'User update successful');
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'User updated successfully'
+                ]);
+            } else {
+                $errors = $this->userModel->errors();
+                log_message('error', 'Failed to update user: ' . json_encode($errors));
+                
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update user',
+                    'errors' => $errors
+                ]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Exception in updateUser: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
+            
+            // Force JSON response even in exception
+            echo json_encode([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ]);
+            exit;
+        }
+    }
+
+public function getUserTimeline($userId)
+{
+    // Check if user is logged in
+    if (!session()->get('auth_token')) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Unauthorized: Please login to continue'
+        ])->setStatusCode(401);
+    }
+    
+    $filter = $this->request->getVar('filter') ?? 'all';
+    
+    // Get current date
+    $now = new \DateTime();
+    $startDate = null;
+    
+    // Apply date filter
+    switch ($filter) {
+        case 'today':
+            $startDate = new \DateTime('today');
+            break;
+        case 'yesterday':
+            $startDate = new \DateTime('yesterday');
+            $endDate = new \DateTime('today');
+            break;
+        case 'last_week':
+            $startDate = new \DateTime('-1 week');
+            break;
+        case 'last_month':
+            $startDate = new \DateTime('-1 month');
+            break;
+        case 'last_year':
+            $startDate = new \DateTime('-1 year');
+            break;
+    }
+    
+    // Fetch real timeline data from the audit_logs table
+    $timelineData = $this->auditLogModel->getUserTimeline($userId, $filter);
+    // Filter by date if needed
+    if ($startDate) {
+        $timelineData = array_filter($timelineData, function($item) use ($startDate, $filter) {
+            $itemDate = new \DateTime($item['created_at']);
+            
+            if ($filter === 'yesterday') {
+                $endDate = new \DateTime('today');
+                return $itemDate >= $startDate && $itemDate < $endDate;
+            }
+            
+            return $itemDate >= $startDate;
+        });
+    }
+    
+    // Re-index array after filtering
+    $timelineData = array_values($timelineData);
+    
+    return $this->response->setJSON([
+        'success' => true,
+        'timeline' => $timelineData
+    ]);
+}
 
     public function territories()
     {

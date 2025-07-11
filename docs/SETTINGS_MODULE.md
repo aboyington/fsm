@@ -60,6 +60,32 @@ Support for multiple currencies and exchange rates.
 
 **Access:** Settings → Currency
 
+### 5. User Management
+Comprehensive user administration and access control.
+
+**Features:**
+- User creation with full profile management
+- Role-based access control (5 predefined roles)
+- Status management (Active, Inactive, Suspended)
+- Advanced filtering and search
+- Activity timeline and audit trail
+- Multi-language support with RTL preparation
+- Address management
+- Employee ID tracking
+
+**Key Capabilities:**
+- Tabbed interface for user editing
+- Real-time search and filtering
+- Password security with bcrypt hashing
+- Session-based authentication
+- CSRF protection
+
+**Database Table:** `users`
+
+**Access:** Settings → Workforce → Users
+
+**Documentation:** See [USER_MANAGEMENT.md](USER_MANAGEMENT.md) for detailed documentation
+
 ## Technical Implementation
 
 ### Models

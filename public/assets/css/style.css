@@ -1,5 +1,141 @@
 /* FSM Platform Styles */
 
+/* Calendar styling */
+.calendar-container {
+    margin-top: 20px;
+}
+
+.calendar-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.calendar-table th {
+    text-align: center;
+    font-weight: 600;
+    background-color: #f8f9fa;
+    padding: 10px;
+}
+
+.calendar-table td {
+    height: 80px;
+    vertical-align: top;
+    padding: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.calendar-table td:hover {
+    background-color: #f0f0f0;
+}
+
+.calendar-table td.today {
+    background-color: #e7f3ff;
+    font-weight: bold;
+}
+
+.calendar-table td.today .date-number {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-table td.other-month {
+    color: #ccc;
+    background-color: #fafafa;
+}
+
+.calendar-table .date-number {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.calendar-event {
+    font-size: 11px;
+    padding: 2px 4px;
+    margin: 1px 0;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#calendar-month-year {
+    min-width: 150px;
+    text-align: center;
+}
+
+/* Calendar view mode styles */
+.calendar-view-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Timeline styling */
+.timeline {
+    position: relative;
+    padding-left: 20px;
+    border-left: 4px solid var(--secondary-color);
+    margin-left: 10px;
+    margin-bottom: 20px;
+}
+
+.timeline-date {
+    font-weight: bold;
+    margin: 10px 0;
+    color: var(--primary-color);
+}
+
+.timeline-item {
+    margin: 15px 0;
+    position: relative;
+}
+
+.timeline-icon {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    background-color: var(--primary-color);
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-content {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.timeline-title {
+    font-weight: bold;
+}
+
+.timeline-time {
+    font-size: 0.85em;
+    color: var(--secondary-color);
+}
+
 :root {
     --primary-color: #0d6efd;
     --secondary-color: #6c757d;

@@ -14,7 +14,9 @@ class UserModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'email', 'username', 'password', 'first_name', 'last_name', 
-        'phone', 'role', 'status', 'session_token', 'last_login'
+        'phone', 'mobile', 'language', 'enable_rtl',
+        'role', 'status', 'session_token', 'last_login', 'created_by',
+        'employee_id', 'street', 'city', 'state', 'country', 'zip_code'
     ];
 
     // Dates
@@ -25,12 +27,12 @@ class UserModel extends Model
 
     // Validation
     protected $validationRules = [
-        'email'      => 'required|valid_email|is_unique[users.email,id,{id}]',
-        'username'   => 'required|min_length[3]|max_length[100]|is_unique[users.username,id,{id}]',
-        'password'   => 'required|min_length[6]',
+        'email'      => 'required|valid_email',
+        'username'   => 'permit_empty|min_length[3]|max_length[100]',
+        'password'   => 'permit_empty|min_length[6]',
         'first_name' => 'required|max_length[100]',
         'last_name'  => 'required|max_length[100]',
-        'role'       => 'required|in_list[admin,dispatcher,field_tech]',
+        'role'       => 'required|in_list[admin,call_center_agent,dispatcher,field_agent,limited_field_agent]',
         'status'     => 'required|in_list[active,inactive,suspended]',
     ];
 
@@ -49,7 +51,7 @@ class UserModel extends Model
     // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['hashPassword'];
-    protected $beforeUpdate   = ['hashPassword'];
+    protected $beforeUpdate   = ['hashPassword', 'validateUniqueOnUpdate'];
 
     /**
      * Hash password before saving
@@ -111,5 +113,42 @@ class UserModel extends Model
     public function logout($userId)
     {
         return $this->update($userId, ['session_token' => null]);
+    }
+
+    /**
+     * Validate unique fields on update
+     */
+    protected function validateUniqueOnUpdate(array $data)
+    {
+        if (!isset($data['id']) || !isset($data['data'])) {
+            return $data;
+        }
+
+        $id = $data['id'][0] ?? null;
+        if (!$id) {
+            return $data;
+        }
+
+        // Check email uniqueness
+        if (isset($data['data']['email'])) {
+            $existingUser = $this->where('email', $data['data']['email'])
+                                 ->where('id !=', $id)
+                                 ->first();
+            if ($existingUser) {
+                throw new \Exception('This email address is already registered.');
+            }
+        }
+
+        // Check username uniqueness if provided
+        if (isset($data['data']['username']) && !empty($data['data']['username'])) {
+            $existingUser = $this->where('username', $data['data']['username'])
+                                 ->where('id !=', $id)
+                                 ->first();
+            if ($existingUser) {
+                throw new \Exception('This username is already taken.');
+            }
+        }
+
+        return $data;
     }
 }

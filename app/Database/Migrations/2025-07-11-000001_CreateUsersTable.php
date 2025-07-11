@@ -42,10 +42,36 @@ class CreateUsersTable extends Migration
                 'constraint' => '20',
                 'null'       => true,
             ],
+            'mobile' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '20',
+                'null'       => true,
+            ],
+            'employee_id' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '50',
+                'null'       => true,
+            ],
+            'language' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '10',
+                'default'    => 'en-US',
+            ],
+            'enable_rtl' => [
+                'type'       => 'TINYINT',
+                'constraint' => 1,
+                'default'    => 0,
+            ],
+            'created_by' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => true,
+            ],
             'role' => [
                 'type'       => 'ENUM',
-                'constraint' => ['admin', 'dispatcher', 'field_tech'],
-                'default'    => 'field_tech',
+                'constraint' => ['admin', 'call_center_agent', 'dispatcher', 'field_agent', 'limited_field_agent'],
+                'default'    => 'field_agent',
             ],
             'status' => [
                 'type'       => 'ENUM',

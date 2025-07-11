@@ -24,6 +24,12 @@ $routes->group('settings', function($routes) {
     $routes->get('general', 'Settings::general', ['filter' => 'auth']);
     $routes->get('currency', 'Settings::currency', ['filter' => 'auth']);
     $routes->get('users', 'Settings::users', ['filter' => 'auth']);
+    $routes->post('addUser', 'Settings::addUser');
+    $routes->get('getUser/(:num)', 'Settings::getUser/$1');
+    $routes->post('updateUser', 'Settings::updateUser');
+    $routes->get('updateUser', 'Settings::updateUser');  // Add GET route to handle any method issues
+    $routes->match(['get', 'post'], 'update-user', 'Settings::updateUser');  // Alternative route
+    $routes->get('getUserTimeline/(:num)', 'Settings::getUserTimeline/$1');
     $routes->get('territories', 'Settings::territories', ['filter' => 'auth']);
     $routes->get('skills', 'Settings::skills', ['filter' => 'auth']);
     $routes->get('holiday', 'Settings::holiday', ['filter' => 'auth']);

@@ -27,13 +27,21 @@
   - Exchange rates configuration
   - Number formatting preferences
   - Base currency designation
+- ✅ User Management
+  - Comprehensive user profiles with address management
+  - 5 predefined roles (Admin, Call Center Agent, Dispatcher, Field Agent, Limited Field Agent)
+  - Advanced filtering and search
+  - Activity timeline and audit trail
+  - Multi-language support preparation
+  - Tabbed interface with calendar, timeline, and related data views
 
 #### Database Models Created
-- ✅ Users (with authentication)
+- ✅ Users (with authentication, full profiles, address management)
 - ✅ Organizations
 - ✅ Fiscal Years
 - ✅ Business Hours
 - ✅ Currencies
+- ✅ Audit Logs (user activity tracking)
 - ✅ Customers (basic structure)
 - ✅ Work Orders (basic structure)
 
@@ -132,8 +140,10 @@ Expand capabilities based on initial usage:
 ### Local Development
 - **Server**: MAMP (already configured)
 - **Project Path**: `/Users/anthony/Sites/fsm`
-- **Local URL**: `http://localhost/fsm/`
+- **Local URL**: `http://localhost/fsm/public/`
 - **Database**: SQLite in `/writable/database/fsm.db`
+  - WAL mode enabled for better performance
+  - Concurrent read/write support
 
 ### Deployment Environment
 - **Initial**: Namecheap Shared Hosting

@@ -15,14 +15,25 @@ This document provides information about the Field Service Management (FSM) plat
 ### Configuration Files
 - **Environment**: `.env` (configured for development)
 - **Database**: SQLite at `/Users/anthony/Sites/fsm/writable/database/fsm.db`
+  - **Mode**: WAL (Write-Ahead Logging) enabled for better performance
+  - **Optimization**: Concurrent reads/writes supported
 - **Base URL**: `http://localhost/fsm/public/`
 
 ## Database Schema
 
 ### Tables Created
-1. **users** - System users (admins, dispatchers, field technicians)
+1. **users** - System users with comprehensive profiles
+   - Full address management
+   - Multi-language support
+   - Employee ID tracking
+   - Session management
 2. **customers** - Customer information with Canvass Global integration
 3. **work_orders** - Work order management
+4. **organizations** - Company settings and preferences
+5. **fiscal_years** - Fiscal year configuration
+6. **business_hours** - Operating hours management
+7. **currencies** - Multi-currency support
+8. **audit_logs** - User activity tracking
 
 ### Migrations
 - `2025-07-11-000001_CreateUsersTable.php`
@@ -43,8 +54,10 @@ Run migrations with: `php spark migrate`
 
 ### User Roles
 - **admin**: Full system access
+- **call_center_agent**: Customer service operations
 - **dispatcher**: Work order management and scheduling
-- **field_tech**: Field operations and work order completion
+- **field_agent**: Field operations and work order completion
+- **limited_field_agent**: Restricted field operations
 
 ### Initial Users (Seeded)
 | Role | Username | Password | Email |
@@ -154,6 +167,20 @@ curl -X GET http://localhost/fsm/public/api/customers \
 
 ## Next Steps
 
+### Completed Features
+1. ✓ Comprehensive Settings module
+   - Organization profile management
+   - Business hours configuration
+   - Fiscal year settings
+   - Multi-currency support
+   - User management with roles
+2. ✓ User Management System
+   - Full CRUD operations
+   - Advanced filtering and search
+   - Activity timeline
+   - Tabbed interface
+   - Address management
+
 ### Immediate Tasks
 1. Create dashboard view with statistics
 2. Implement work order management
@@ -210,7 +237,15 @@ Change to production before deployment.
 ---
 
 *Last Updated: 2025-07-11*
-*Version: 1.0.0*
+*Version: 1.1.0*
+
+## Recent Updates (v1.1.0)
+- Implemented comprehensive Settings module
+- Added User Management with advanced features
+- Enabled SQLite WAL mode for better performance
+- Added multi-language support preparation
+- Implemented audit logging for user activities
+- Enhanced security with role-based access control
 
  #212129
 Background
