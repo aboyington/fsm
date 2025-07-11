@@ -31,6 +31,10 @@ $routes->group('settings', function($routes) {
     $routes->match(['get', 'post'], 'update-user', 'Settings::updateUser');  // Alternative route
     $routes->get('getUserTimeline/(:num)', 'Settings::getUserTimeline/$1');
     $routes->get('territories', 'Settings::territories', ['filter' => 'auth']);
+    $routes->post('territories/add', 'Settings::addTerritory');
+    $routes->get('territories/get/(:num)', 'Settings::getTerritory/$1');
+    $routes->post('territories/update/(:num)', 'Settings::updateTerritory/$1');
+    $routes->post('territories/delete/(:num)', 'Settings::deleteTerritory/$1');
     $routes->get('skills', 'Settings::skills', ['filter' => 'auth']);
     $routes->get('holiday', 'Settings::holiday', ['filter' => 'auth']);
     $routes->get('billing-setup', 'Settings::billing', ['filter' => 'auth']);

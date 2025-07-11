@@ -7,6 +7,7 @@ use App\Models\FiscalYearModel;
 use App\Models\BusinessHoursModel;
 use App\Models\UserModel;
 use App\Models\AuditLogModel;
+use App\Models\TerritoryModel;
 
 class Settings extends BaseController
 {
@@ -15,6 +16,7 @@ class Settings extends BaseController
     protected $businessHoursModel;
     protected $userModel;
     protected $auditLogModel;
+    protected $territoryModel;
     
     public function __construct()
     {
@@ -23,6 +25,7 @@ class Settings extends BaseController
         $this->businessHoursModel = new BusinessHoursModel();
         $this->userModel = new UserModel();
         $this->auditLogModel = new AuditLogModel();
+        $this->territoryModel = new TerritoryModel();
     }
     
     public function index()
@@ -374,12 +377,207 @@ public function getUserTimeline($userId)
 
     public function territories()
     {
+        $status = $this->request->getVar('status') ?? 'active';
+        $search = $this->request->getVar('search') ?? '';
+        
+        // Start with a fresh query builder
+        $builder = $this->territoryModel->builder();
+        
+        // Join with users table to get creator name
+        $builder->select('territories.*, CONCAT(users.first_name, " ", users.last_name) as creator_name')
+                ->join('users', 'users.id = territories.created_by', 'left');
+        
+        // Apply status filter
+        if ($status !== 'all') {
+            $builder->where('territories.status', $status);
+        }
+        
+        // Apply search filter
+        if (!empty($search)) {
+            $builder->groupStart()
+                    ->like('territories.name', $search)
+                    ->orLike('territories.description', $search)
+                    ->groupEnd();
+        }
+        
+        // Get all territories
+        $territories = $builder->get()->getResultArray();
+        
         $data = [
             'title' => 'Territories',
-            'activeTab' => 'territories'
+            'activeTab' => 'territories',
+            'territories' => $territories,
+            'status' => $status,
+            'search' => $search
         ];
         
         return view('settings/territories', $data);
+    }
+    
+    public function addTerritory()
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // Log the request method for debugging
+        log_message('debug', 'addTerritory called - Method from getMethod(): ' . $method);
+        log_message('debug', 'addTerritory called - Method from $_SERVER: ' . $serverMethod);
+        log_message('debug', 'addTerritory called - POST data exists: ' . (!empty($this->request->getPost()) ? 'YES' : 'NO'));
+        
+        // For now, accept any method if POST data exists
+        // This is a temporary workaround for the routing issue
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        $territoryData = $this->request->getPost();
+        
+        // Remove CSRF token
+        unset($territoryData['csrf_test_name']);
+        unset($territoryData['csrf_token']);
+        unset($territoryData['csrf_ghash']);
+        
+        // Set created_by from session
+        $currentUser = session()->get('user');
+        if ($currentUser && isset($currentUser['id'])) {
+            $territoryData['created_by'] = $currentUser['id'];
+        } else {
+            // If no user ID in session, default to 1 (admin)
+            $territoryData['created_by'] = 1;
+        }
+        
+        if ($this->territoryModel->save($territoryData)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Territory added successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to add territory', 'errors' => $this->territoryModel->errors()]);
+        }
+    }
+
+    public function getTerritory($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $territory = $this->territoryModel->find($id);
+        
+        if ($territory) {
+            return $this->response->setJSON([
+                'success' => true,
+                'territory' => $territory
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Territory not found'
+            ])->setStatusCode(404);
+        }
+    }
+
+    public function updateTerritory($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // Log the request method for debugging
+        log_message('debug', 'updateTerritory called - Method from getMethod(): ' . $method);
+        log_message('debug', 'updateTerritory called - Method from $_SERVER: ' . $serverMethod);
+        log_message('debug', 'updateTerritory called - POST data exists: ' . (!empty($this->request->getPost()) ? 'YES' : 'NO'));
+        
+        // For now, accept any method if POST data exists
+        // This is a temporary workaround for the routing issue
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        $territoryData = $this->request->getPost();
+        
+        // Remove CSRF token and id field (id is passed in URL)
+        unset($territoryData['csrf_test_name']);
+        unset($territoryData['csrf_token']);
+        unset($territoryData['csrf_ghash']);
+        unset($territoryData['id']);
+        
+        if ($this->territoryModel->update($id, $territoryData)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Territory updated successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update territory', 'errors' => $this->territoryModel->errors()]);
+        }
+    }
+
+    public function deleteTerritory($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // Log the request method for debugging
+        log_message('debug', 'deleteTerritory called - Method from getMethod(): ' . $method);
+        log_message('debug', 'deleteTerritory called - Method from $_SERVER: ' . $serverMethod);
+        log_message('debug', 'deleteTerritory called - POST data exists: ' . (!empty($this->request->getPost()) ? 'YES' : 'NO'));
+        
+        // For now, accept any method if POST data exists (including empty POST for delete operations)
+        // Delete operations might not have body data, so we're more lenient here
+        if ($method !== 'post' && $serverMethod !== 'POST' && empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request method. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        if ($this->territoryModel->delete($id)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Territory deleted successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete territory']);
+        }
     }
 
     public function skills()

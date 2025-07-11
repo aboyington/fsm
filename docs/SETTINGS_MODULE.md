@@ -86,6 +86,29 @@ Comprehensive user administration and access control.
 
 **Documentation:** See [USER_MANAGEMENT.md](USER_MANAGEMENT.md) for detailed documentation
 
+### 6. Territory Management
+Geographic territory definition and assignment for field service operations.
+
+**Features:**
+- Territory creation and management
+- Geographic boundary definition
+- Status management (Active/Inactive)
+- Address-based territory mapping
+- Search and filter capabilities
+- Audit trail with creator tracking
+
+**Key Capabilities:**
+- Full CRUD operations for territories
+- Real-time search and filtering
+- Modal-based editing interface
+- Status-based filtering
+- Address components (Street, City, State, Zip, Country)
+- Description field for additional details
+
+**Database Table:** `territories`
+
+**Access:** Settings → Workforce → Territories
+
 ## Technical Implementation
 
 ### Models
@@ -93,6 +116,9 @@ Comprehensive user administration and access control.
 - `FiscalYearModel` - Handles fiscal year configurations
 - `BusinessHoursModel` - Manages business hours settings
 - `CurrencyModel` - Handles currency data and validations
+- `TerritoryModel` - Manages territory data and geographic assignments
+- `UserModel` - Handles user authentication and profile management
+- `AuditLogModel` - Tracks user activities and system events
 
 ### Controllers
 - `Settings` - Main settings controller handling all settings routes
@@ -103,6 +129,9 @@ Comprehensive user administration and access control.
 2. `2025-01-11-000002_CreateFiscalYearsTable.php`
 3. `2025-01-11-000004_CreateBusinessHoursTable.php`
 4. `2025-01-11-000005_CreateCurrenciesTable.php`
+5. `2025-01-11-000003_CreateTerritoriesTable.php`
+6. `2025-01-10-120000_create_users_table.php`
+7. `2025-01-10-000001_create_audit_logs_table.php`
 
 ### API Endpoints
 
@@ -115,6 +144,20 @@ Comprehensive user administration and access control.
 - `POST /settings/currency/store` - Add new currency
 - `GET /settings/currency/get/{id}` - Get currency details
 - `POST /settings/currency/update/{id}` - Update currency
+
+#### Territories
+- `GET /settings/territories` - List territories with filtering
+- `POST /settings/territories/add` - Create new territory
+- `GET /settings/territories/get/{id}` - Get territory details
+- `POST /settings/territories/update/{id}` - Update territory
+- `POST /settings/territories/delete/{id}` - Delete territory
+
+#### Users
+- `GET /settings/users` - List users with filtering
+- `POST /settings/addUser` - Create new user
+- `GET /settings/getUser/{id}` - Get user details
+- `POST /settings/updateUser` - Update user information
+- `GET /settings/getUserTimeline/{userId}` - Get user activity timeline
 
 ### Security
 - All endpoints require authentication
@@ -149,6 +192,29 @@ Comprehensive user administration and access control.
 2. Select Calendar Year or Custom
 3. If Custom, set start and end dates
 4. Save configuration
+
+### Managing Territories
+1. Navigate to Settings → Workforce → Territories
+2. To add a new territory:
+   - Click "New Territory" button
+   - Enter territory name (required)
+   - Fill in address details (optional):
+     - Street, City, State, Zip Code, Country
+   - Add description if needed
+   - Select status (Active/Inactive)
+   - Click "Save Territory"
+3. To edit a territory:
+   - Click the pencil icon in the Actions column
+   - Update information in the modal
+   - Click "Update Territory"
+4. To delete a territory:
+   - Click the trash icon in the Actions column
+   - Confirm deletion
+5. Use filters to view:
+   - Active Territories
+   - Inactive Territories
+   - All Territories
+6. Use search to find specific territories
 
 ## Default Configuration
 
