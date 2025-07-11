@@ -1,68 +1,190 @@
-# CodeIgniter 4 Application Starter
+# FSM - Field Service Management System
 
-## What is CodeIgniter?
+## Overview
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+FSM (Field Service Management) is a comprehensive web-based application designed to streamline field service operations. Built with CodeIgniter 4, it provides tools for managing technicians, work orders, customer relationships, and organizational settings.
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## Features
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+### Current Features
+- **Organization Management**
+  - Company profile configuration
+  - Business location settings
+  - Timezone and locale preferences
+  - Industry-specific configurations
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+- **Fiscal Year Settings**
+  - Calendar year or custom fiscal year configuration
+  - Flexible start/end date settings
+  - Year-over-year tracking
 
-## Installation & updates
+- **Authentication System**
+  - Session-based authentication for web interface
+  - JWT token-based authentication for API
+  - Secure login/logout functionality
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+- **RESTful API**
+  - Customer management endpoints
+  - Authentication endpoints
+  - JSON response format
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+### Planned Features
+- Work order management
+- Technician scheduling
+- Route optimization
+- Customer portal
+- Inventory management
+- Reporting and analytics
 
-## Setup
+## Technology Stack
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+- **Backend**: CodeIgniter 4.6.1 (PHP 8.1+)
+- **Frontend**: Bootstrap 5, Vanilla JavaScript
+- **Database**: SQLite (development), MySQL/PostgreSQL (production ready)
+- **Authentication**: Session-based for web, JWT for API
 
-## Important Change with index.php
+## Requirements
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+- PHP 8.1 or higher
+- Composer
+- SQLite (for development) or MySQL/PostgreSQL (for production)
+- Extensions:
+  - intl
+  - mbstring
+  - json
+  - sqlite3 or mysqlnd
+  - curl
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+## Installation
 
-**Please** read the user guide for a better explanation of how CI4 works!
+1. Clone the repository:
+```bash
+git clone https://github.com/aboyington/fsm.git
+cd fsm
+```
 
-## Repository Management
+2. Install dependencies:
+```bash
+composer install
+```
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+3. Copy and configure environment file:
+```bash
+cp env .env
+# Edit .env file with your settings
+```
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+4. Set up the database:
+```bash
+php spark migrate
+php spark db:seed UserSeeder
+```
 
-## Server Requirements
+5. Start the development server:
+```bash
+php spark serve
+```
 
-PHP version 8.1 or higher is required, with the following extensions installed:
+6. Access the application:
+- Web: http://localhost:8080
+- Default login: admin@example.com / password123
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+## Project Structure
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
+```
+fsm/
+├── app/
+│   ├── Controllers/      # Application controllers
+│   ├── Models/          # Database models
+│   ├── Views/           # View templates
+│   ├── Database/        # Migrations and seeders
+│   └── Config/          # Configuration files
+├── public/              # Public assets
+├── writable/            # Logs, cache, uploads
+└── docs/                # Documentation
+```
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+## API Documentation
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+### Authentication
+```bash
+# Login
+POST /api/auth/login
+{
+  "email": "admin@example.com",
+  "password": "password123"
+}
+
+# Response
+{
+  "status": "success",
+  "token": "jwt_token_here",
+  "user": {...}
+}
+```
+
+### Customers
+```bash
+# Get all customers
+GET /api/customers
+Authorization: Bearer {token}
+
+# Create customer
+POST /api/customers
+Authorization: Bearer {token}
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone": "123-456-7890"
+}
+```
+
+## Development
+
+### Running Tests
+```bash
+php spark test
+```
+
+### Database Migrations
+```bash
+# Run migrations
+php spark migrate
+
+# Rollback migrations
+php spark migrate:rollback
+
+# Create new migration
+php spark make:migration CreateTableName
+```
+
+### Seeding Data
+```bash
+# Run all seeders
+php spark db:seed
+
+# Run specific seeder
+php spark db:seed UserSeeder
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, please open an issue in the GitHub repository or contact the development team.
+
+## Acknowledgments
+
+- Built with [CodeIgniter 4](https://codeigniter.com/)
+- UI components from [Bootstrap 5](https://getbootstrap.com/)
+- Icons from [Bootstrap Icons](https://icons.getbootstrap.com/)
