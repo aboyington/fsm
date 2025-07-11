@@ -12,11 +12,19 @@ FSM (Field Service Management) is a comprehensive web-based application designed
   - Business location settings
   - Timezone and locale preferences
   - Industry-specific configurations
+  - Business hours management (24x7, 24x5, custom)
 
 - **Fiscal Year Settings**
   - Calendar year or custom fiscal year configuration
   - Flexible start/end date settings
   - Year-over-year tracking
+
+- **Currency Management**
+  - Multiple currency support
+  - Exchange rate configuration
+  - Base currency designation
+  - Number formatting preferences (thousand/decimal separators)
+  - ISO code compliance
 
 - **Authentication System**
   - Session-based authentication for web interface
