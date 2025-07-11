@@ -1,0 +1,209 @@
+/* FSM Platform Styles */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --navbar-bg: #252D43;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Navbar customization */
+.navbar {
+    background-color: var(--navbar-bg) !important;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* Card styling */
+.card {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+/* Table styling */
+.table {
+    font-size: 0.95rem;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Form styling */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Button styling */
+.btn {
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+/* Status badges */
+.badge-status-active {
+    background-color: var(--success-color);
+}
+
+.badge-status-inactive {
+    background-color: var(--secondary-color);
+}
+
+.badge-status-pending {
+    background-color: var(--warning-color);
+}
+
+/* Loading spinner overlay */
+#loadingSpinner {
+    z-index: 9999;
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dashboard stats */
+.stat-card {
+    border-left: 4px solid var(--primary-color);
+    transition: transform 0.2s ease-in-out;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.stat-card .stat-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Different colors for different stat cards */
+.stat-card:nth-child(1) { border-left-color: #0d6efd; }
+.stat-card:nth-child(1) .stat-value { color: #0d6efd; }
+
+.stat-card:nth-child(2) { border-left-color: #198754; }
+.stat-card:nth-child(2) .stat-value { color: #198754; }
+
+.stat-card:nth-child(3) { border-left-color: #ffc107; }
+.stat-card:nth-child(3) .stat-value { color: #ffc107; }
+
+.stat-card:nth-child(4) { border-left-color: #dc3545; }
+.stat-card:nth-child(4) .stat-value { color: #dc3545; }
+
+/* Work order status colors */
+.work-order-new {
+    border-left-color: var(--info-color);
+}
+
+.work-order-assigned {
+    border-left-color: var(--warning-color);
+}
+
+.work-order-in-progress {
+    border-left-color: var(--primary-color);
+}
+
+.work-order-completed {
+    border-left-color: var(--success-color);
+}
+
+.work-order-cancelled {
+    border-left-color: var(--danger-color);
+}
+
+/* Dashboard specific */
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+/* Schedule widget */
+.schedule-item {
+    border-left: 3px solid var(--primary-color);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.schedule-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Chart container */
+#statusChart {
+    max-height: 300px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .stat-card .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar,
+    .footer,
+    .btn,
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+}
