@@ -20,6 +20,7 @@ $routes->group('settings', function($routes) {
     $routes->get('/', 'Settings::index', ['filter' => 'auth']);
     $routes->get('organization', 'Settings::organization', ['filter' => 'auth']);
     $routes->post('organization/update', 'Settings::updateOrganization');
+    $routes->post('business-hours/update', 'Settings::updateBusinessHours');
     $routes->get('general', 'Settings::general', ['filter' => 'auth']);
     $routes->get('currency', 'Settings::currency', ['filter' => 'auth']);
     $routes->get('users', 'Settings::users', ['filter' => 'auth']);
@@ -30,6 +31,19 @@ $routes->group('settings', function($routes) {
     $routes->get('tax-settings', 'Settings::taxSettings', ['filter' => 'auth']);
     $routes->get('fiscal-year', 'Settings::fiscalYear', ['filter' => 'auth']);
     $routes->post('fiscal-year/update', 'Settings::updateFiscalYear');
+    
+    // Currency routes
+    $routes->post('currency/store', 'Settings::storeCurrency');
+    $routes->post('currency/update/(:num)', 'Settings::updateCurrency/$1');
+    $routes->get('currency/get/(:num)', 'Settings::getCurrency/$1');
+});
+
+// Currency Routes
+$routes->group('currency', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'CurrencyController::index');
+    $routes->post('store', 'CurrencyController::store');
+    $routes->post('update/(:num)', 'CurrencyController::update/$1');
+    $routes->get('get/(:num)', 'CurrencyController::getCurrency/$1');
 });
 
 // API Routes

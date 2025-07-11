@@ -99,7 +99,8 @@
                 </tbody>
             </table>
 
-            <h6 class="text-muted mb-3 mt-4"><i class="bi bi-caret-down-fill"></i> Business Hours Details &nbsp;<a href="#" class="text-primary">Configure</a></h6>
+            <h6 class="text-muted mb-3 mt-4"><i class="bi bi-caret-down-fill"></i> Business Hours Details &nbsp;<a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#businessHoursModal">Configure</a></h6>
+            <p class="mb-0"><?= esc($businessHoursFormatted ?? '24 Hours X 7 days') ?></p>
             
             <div class="mt-5">
                 <button class="btn btn-danger">Delete FSM Organization</button>
@@ -288,6 +289,85 @@
     </div>
 </div>
 
+<!-- Business Hours Modal -->
+<div class="modal fade" id="businessHoursModal" tabindex="-1" aria-labelledby="businessHoursModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="businessHoursModalLabel">Business Hours</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="businessHoursForm" action="<?= base_url('settings/business-hours/update') ?>" method="POST">
+                <?= csrf_field() ?>
+                <div class="modal-body">
+                    <h6 class="mb-3">Business Hours Details</h6>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Business Hours</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="business_hours_type" id="hours24x7" value="24x7" <?= ($businessHours['business_hours_type'] ?? '24x7') == '24x7' ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="hours24x7">
+                                24 Hours X 7 days
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="business_hours_type" id="hours24x5" value="24x5" <?= ($businessHours['business_hours_type'] ?? '') == '24x5' ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="hours24x5">
+                                24 Hours X 5 days
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="business_hours_type" id="hoursCustom" value="custom" <?= ($businessHours['business_hours_type'] ?? '') == 'custom' ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="hoursCustom">
+                                Custom Hours
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="customHoursSection" style="<?= ($businessHours['business_hours_type'] ?? '24x7') == 'custom' ? '' : 'display: none;' ?>">
+                        <label class="form-label">Week Starts On</label>
+                        <select class="form-select mb-3" name="week_starts_on">
+                            <option value="">Select Weekday</option>
+                            <?php foreach ($weekdays as $key => $day): ?>
+                                <option value="<?= esc($key) ?>"><?= esc($day) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        
+                        <label class="form-label mb-2">Working Hours</label>
+                        <?php foreach ($weekdays as $key => $day): ?>
+                            <div class="row mb-2">
+                                <div class="col-4">
+                                    <label class="form-label small"><?= esc($day) ?></label>
+                                </div>
+                                <div class="col-4">
+                                    <select class="form-select form-select-sm" name="<?= $key ?>_start">
+                                        <option value="">Start Time</option>
+                                        <?php foreach ($timeOptions as $value => $label): ?>
+                                            <option value="<?= esc($value) ?>" <?= ($businessHours[$key . '_start'] ?? '') == $value ? 'selected' : '' ?>><?= esc($label) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <select class="form-select form-select-sm" name="<?= $key ?>_end">
+                                        <option value="">End Time</option>
+                                        <?php foreach ($timeOptions as $value => $label): ?>
+                                            <option value="<?= esc($value) ?>" <?= ($businessHours[$key . '_end'] ?? '') == $value ? 'selected' : '' ?>><?= esc($label) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 // Industry options data
 const industryOptions = <?= json_encode($industryOptions) ?>;
@@ -408,6 +488,72 @@ document.getElementById('editCompanyForm').addEventListener('submit', async func
     } catch (error) {
         console.error('Error:', error);
         showAlert('An error occurred while updating', 'danger');
+    }
+});
+
+// Business Hours Modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle custom hours section based on business hours type
+    const businessHoursRadios = document.querySelectorAll('input[name="business_hours_type"]');
+    const customHoursSection = document.getElementById('customHoursSection');
+    
+    businessHoursRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customHoursSection.style.display = '';
+            } else {
+                customHoursSection.style.display = 'none';
+            }
+        });
+    });
+    
+    // Handle business hours form submission
+    const businessHoursForm = document.getElementById('businessHoursForm');
+    if (businessHoursForm) {
+        businessHoursForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const authToken = getAuthToken();
+            
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+                headers['X-API-Token'] = authToken;
+            }
+            
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: headers
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('businessHoursModal'));
+                    modal.hide();
+                    
+                    // Show success message
+                    showAlert(data.message || 'Business hours updated successfully', 'success');
+                    
+                    // Reload page to show updated data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Failed to update business hours', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('An error occurred while updating business hours', 'danger');
+            }
+        });
     }
 });
 </script>

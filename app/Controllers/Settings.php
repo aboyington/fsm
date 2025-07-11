@@ -4,16 +4,19 @@ namespace App\Controllers;
 
 use App\Models\OrganizationModel;
 use App\Models\FiscalYearModel;
+use App\Models\BusinessHoursModel;
 
 class Settings extends BaseController
 {
     protected $organizationModel;
     protected $fiscalYearModel;
+    protected $businessHoursModel;
     
     public function __construct()
     {
         $this->organizationModel = new OrganizationModel();
         $this->fiscalYearModel = new FiscalYearModel();
+        $this->businessHoursModel = new BusinessHoursModel();
     }
     
     public function index()
@@ -24,13 +27,18 @@ class Settings extends BaseController
     public function organization()
     {
         $organization = $this->organizationModel->getOrganization();
+        $businessHours = $this->businessHoursModel->getByOrganizationId(1);
         
         $data = [
             'title' => 'Organization Profile',
             'activeTab' => 'organization',
             'organization' => $organization,
+            'businessHours' => $businessHours,
+            'businessHoursFormatted' => $this->businessHoursModel->getFormattedHours($businessHours),
             'industryOptions' => $this->organizationModel->getIndustryOptions(),
-            'timezoneOptions' => $this->organizationModel->getTimezoneOptions()
+            'timezoneOptions' => $this->organizationModel->getTimezoneOptions(),
+            'weekdays' => $this->businessHoursModel->getWeekdays(),
+            'timeOptions' => $this->businessHoursModel->getTimeOptions()
         ];
         
         return view('settings/organization', $data);
@@ -87,9 +95,12 @@ class Settings extends BaseController
 
     public function currency()
     {
+        $currencyModel = new \App\Models\CurrencyModel();
+        
         $data = [
             'title' => 'Currency Settings',
-            'activeTab' => 'currency'
+            'activeTab' => 'currency',
+            'currencies' => $currencyModel->findAll()
         ];
         
         return view('settings/currency', $data);
@@ -230,5 +241,161 @@ class Settings extends BaseController
             'message' => 'Failed to update fiscal year settings',
             'errors' => $this->fiscalYearModel->errors()
         ]);
+    }
+    
+    public function updateBusinessHours()
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Unauthorized: Please login to continue'
+                ])->setStatusCode(401);
+            }
+            return redirect()->to('/login');
+        }
+        
+        // Check if request is AJAX
+        if (!$this->request->isAJAX()) {
+            return redirect()->to('/settings/organization');
+        }
+        
+        // Get POST data
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token from data
+        unset($data['csrf_test_name']);
+        
+        // Add organization ID
+        $data['organization_id'] = 1;
+        
+        // If business hours type is not custom, clear all time fields
+        if ($data['business_hours_type'] !== 'custom') {
+            $weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            foreach ($weekdays as $day) {
+                $data[$day . '_start'] = null;
+                $data[$day . '_end'] = null;
+            }
+        }
+        
+        // Check if business hours exists
+        $existingBusinessHours = $this->businessHoursModel->getByOrganizationId(1);
+        
+        if ($existingBusinessHours) {
+            // Update existing record
+            if ($this->businessHoursModel->update($existingBusinessHours['id'], $data)) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Business hours updated successfully'
+                ]);
+            }
+        } else {
+            // Insert new record
+            if ($this->businessHoursModel->insert($data)) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Business hours created successfully'
+                ]);
+            }
+        }
+        
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Failed to update business hours',
+            'errors' => $this->businessHoursModel->errors()
+        ]);
+    }
+    
+    public function storeCurrency()
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Unauthorized: Please login to continue'
+                ])->setStatusCode(401);
+            }
+            return redirect()->to('/login');
+        }
+        
+        $currencyModel = new \App\Models\CurrencyModel();
+        
+        // Get JSON data
+        $json = $this->request->getJSON();
+        
+        $data = [
+            'name' => $json->name,
+            'symbol' => $json->symbol,
+            'iso_code' => strtoupper($json->iso_code),
+            'exchange_rate' => $json->exchange_rate,
+            'thousand_separator' => $json->thousand_separator,
+            'decimal_spaces' => $json->decimal_spaces,
+            'decimal_separator' => $json->decimal_separator,
+            'is_active' => 1
+        ];
+        
+        if ($currencyModel->save($data)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Currency added successfully']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to add currency', 'errors' => $currencyModel->errors()]);
+        }
+    }
+    
+    public function updateCurrency($id = null)
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Unauthorized: Please login to continue'
+                ])->setStatusCode(401);
+            }
+            return redirect()->to('/login');
+        }
+        
+        $currencyModel = new \App\Models\CurrencyModel();
+        
+        // Get JSON data
+        $json = $this->request->getJSON();
+        
+        $data = [
+            'id' => $id,
+            'exchange_rate' => $json->exchange_rate,
+            'thousand_separator' => $json->thousand_separator,
+            'decimal_spaces' => $json->decimal_spaces,
+            'decimal_separator' => $json->decimal_separator
+        ];
+        
+        if ($currencyModel->save($data)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Currency updated successfully']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update currency', 'errors' => $currencyModel->errors()]);
+        }
+    }
+    
+    public function getCurrency($id)
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Unauthorized: Please login to continue'
+                ])->setStatusCode(401);
+            }
+            return redirect()->to('/login');
+        }
+        
+        $currencyModel = new \App\Models\CurrencyModel();
+        $currency = $currencyModel->find($id);
+        
+        if ($currency) {
+            return $this->response->setJSON(['success' => true, 'currency' => $currency]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Currency not found'])->setStatusCode(404);
+        }
     }
 }
