@@ -61,6 +61,11 @@
                                             data-bs-target="#editUserModal">
                                         <i class="bi bi-pencil"></i>
                                     </button>
+                                    <button class="btn btn-sm btn-link text-danger delete-user" 
+                                            data-id="<?= $user['id'] ?>" 
+                                            data-name="<?= esc($user['first_name'] . ' ' . $user['last_name']) ?>">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -73,6 +78,26 @@
             </table>
         </div>
         
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+                <p class="text-muted small">The user's data, including their skills assignments and related records, will be permanently removed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteUser">Delete User</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -358,7 +383,9 @@
                             <p class="text-muted">No Crew Found</p>
                             
                             <h6 class="mb-3 mt-4">Skills</h6>
-                            <p class="text-muted">No Skills Found</p>
+                            <div id="overviewSkillsContent">
+                                <p class="text-muted">Loading skills...</p>
+                            </div>
                         </div>
                         
                         <div class="tab-pane fade" id="timeline-tab">
@@ -479,13 +506,21 @@
                         </div>
                         
                         <div class="tab-pane fade" id="skills-tab">
-                            <div class="mb-3">
-                                <label class="form-label">User Skills</label>
-                                <div class="text-muted">No skills assigned to this user</div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">Skills</h6>
+                                <button class="btn btn-sm btn-success" id="assignSkillBtn">
+                                    <i class="bi bi-plus"></i> Assign
+                                </button>
                             </div>
-                            <button class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-plus"></i> Add Skill
-                            </button>
+                            
+                            <div id="userSkillsContent">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="text-muted mt-2">Loading skills...</p>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="tab-pane fade" id="trips-tab">
@@ -815,9 +850,62 @@ $('#calendar-container').html(`
                     
                     // Load timeline data when modal opens
                     loadUserTimeline(user.id);
+                    
+                    // Load skills for overview tab
+                    loadOverviewSkills(user.id);
                 }
             }
         });
+    });
+    
+    // Delete user button click
+    $('.delete-user').on('click', function() {
+        const userId = $(this).data('id');
+        const userName = $(this).data('name');
+        
+        // Update modal content with user name
+        $('#deleteUserModal .modal-body p:first').text(
+            `Are you sure you want to delete ${userName}? This action cannot be undone.`
+        );
+        
+        // Show the modal
+        $('#deleteUserModal').modal('show');
+        
+        // Store the user ID for the confirm button
+        $('#confirmDeleteUser').data('user-id', userId);
+    });
+    
+    // Confirm delete user
+    $('#confirmDeleteUser').on('click', function() {
+        const userId = $(this).data('user-id');
+        
+        $.ajax({
+            url: '<?= base_url('settings/deleteUser') ?>/' + userId,
+            type: 'POST',
+            data: {
+                '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('User deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error deleting user: ' + (response.message || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                let errorMsg = 'Error deleting user: ';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg += xhr.responseJSON.message;
+                } else {
+                    errorMsg += error || 'Unknown error';
+                }
+                alert(errorMsg);
+            }
+        });
+        
+        // Hide the modal
+        $('#deleteUserModal').modal('hide');
     });
     
     // Load user timeline data
@@ -998,6 +1086,8 @@ $('#calendar-container').html(`
     $('#addUserForm').on('submit', function(e) {
         e.preventDefault();
         
+        console.log('Form submission started');
+        
         // Validate passwords match
         const password = $('#add_password').val();
         const confirmPassword = $('#add_confirm_password').val();
@@ -1009,12 +1099,18 @@ $('#calendar-container').html(`
         }
         
         const formData = $(this).serialize();
+        console.log('Form data:', formData);
         
         $.ajax({
             url: '<?= base_url('settings/addUser') ?>',
             type: 'POST',
             data: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
             success: function(response) {
+                console.log('Success response:', response);
                 if (response.success) {
                     alert('User added successfully!');
                     location.reload();
@@ -1023,8 +1119,19 @@ $('#calendar-container').html(`
                 }
             },
             error: function(xhr, status, error) {
+                console.error('AJAX Error:', {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText,
+                    error: error
+                });
+                
                 let errorMsg = 'Error adding user: ';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
+                if (xhr.status === 404) {
+                    errorMsg += 'URL not found. Please check your routes.';
+                } else if (xhr.status === 500) {
+                    errorMsg += 'Server error. Check the logs for details.';
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMsg += xhr.responseJSON.message;
                 } else {
                     errorMsg += error || 'Unknown error';
@@ -1074,6 +1181,316 @@ $('#calendar-container').html(`
         
         window.location.href = newUrl;
     }
+    
+    // Skills management functionality
+    let currentUserId = null;
+    let availableSkills = [];
+    
+    // Load skills for overview tab
+    function loadOverviewSkills(userId) {
+        $('#overviewSkillsContent').html('<p class="text-muted">Loading skills...</p>');
+        
+        $.ajax({
+            url: '<?= base_url('settings/users') ?>/' + userId + '/skills',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    displayOverviewSkills(response.userSkills);
+                } else {
+                    $('#overviewSkillsContent').html('<p class="text-muted">Error loading skills</p>');
+                }
+            },
+            error: function() {
+                $('#overviewSkillsContent').html('<p class="text-muted">Error loading skills</p>');
+            }
+        });
+    }
+    
+    // Display skills in overview tab
+    function displayOverviewSkills(userSkills) {
+        if (!userSkills || userSkills.length === 0) {
+            $('#overviewSkillsContent').html('<p class="text-muted">No skills assigned to this user</p>');
+            return;
+        }
+        
+        let skillsHtml = '<div class="row">';
+        
+        userSkills.forEach(function(skill, index) {
+            const statusBadgeClass = skill.certificate_status === 'active' ? 'bg-success' : 
+                                   skill.certificate_status === 'pending' ? 'bg-warning' : 
+                                   skill.certificate_status === 'expired' ? 'bg-danger' : 'bg-secondary';
+            
+            if (index > 0 && index % 3 === 0) {
+                skillsHtml += '</div><div class="row">';
+            }
+            
+            skillsHtml += `
+                <div class="col-md-4 mb-2">
+                    <div class="card card-body p-2 border-0 bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="fw-bold">${skill.skill_name || 'N/A'}</small>
+                                ${skill.skill_level ? `<br><small class="text-muted">Level: ${skill.skill_level}</small>` : ''}
+                            </div>
+                            <span class="badge ${statusBadgeClass} badge-sm">${skill.certificate_status}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        skillsHtml += '</div>';
+        $('#overviewSkillsContent').html(skillsHtml);
+    }
+    
+    // Load user skills when Skills tab is clicked
+    $(document).on('click', 'a[data-bs-target="#skills-tab"]', function(e) {
+        e.preventDefault();
+        const userId = $('#edit_user_id').val();
+        if (userId && userId !== currentUserId) {
+            currentUserId = userId;
+            loadUserSkills(userId);
+        }
+    });
+    
+    // Also handle when Skills tab is shown (Bootstrap tab shown event)
+    $(document).on('shown.bs.tab', 'a[data-bs-target="#skills-tab"]', function(e) {
+        const userId = $('#edit_user_id').val();
+        if (userId && userId !== currentUserId) {
+            currentUserId = userId;
+            loadUserSkills(userId);
+        }
+    });
+    
+    // Load user skills
+    function loadUserSkills(userId) {
+        $('#userSkillsContent').html(`
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-muted mt-2">Loading skills...</p>
+            </div>
+        `);
+        
+        $.ajax({
+            url: '<?= base_url('settings/users') ?>/' + userId + '/skills',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    availableSkills = response.availableSkills;
+                    displayUserSkills(response.userSkills);
+                } else {
+                    $('#userSkillsContent').html('<p class="text-center text-muted py-4">Error loading skills</p>');
+                }
+            },
+            error: function() {
+                $('#userSkillsContent').html('<p class="text-center text-danger py-4">Error loading skills</p>');
+            }
+        });
+    }
+    
+    // Display user skills
+    function displayUserSkills(userSkills) {
+        if (!userSkills || userSkills.length === 0) {
+            $('#userSkillsContent').html(`
+                <div class="text-center py-4">
+                    <p class="text-muted mb-0">No skills assigned to this user</p>
+                </div>
+            `);
+            return;
+        }
+        
+        let skillsHtml = `
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Skill</th>
+                            <th>Level</th>
+                            <th>Certificate Status</th>
+                            <th>Issue</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        userSkills.forEach(function(skill) {
+            const statusBadgeClass = skill.certificate_status === 'active' ? 'bg-success' : 
+                                   skill.certificate_status === 'pending' ? 'bg-warning' : 
+                                   skill.certificate_status === 'expired' ? 'bg-danger' : 'bg-secondary';
+            
+            skillsHtml += `
+                <tr>
+                    <td>${skill.skill_name || 'N/A'}</td>
+                    <td>${skill.skill_name || 'N/A'}</td>
+                    <td>${skill.skill_level || ''}</td>
+                    <td><span class="badge ${statusBadgeClass}">${skill.certificate_status}</span></td>
+                    <td>${skill.issue_date ? new Date(skill.issue_date).toLocaleDateString() : ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary edit-user-skill" data-id="${skill.id}" data-skill-id="${skill.skill_id}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger remove-user-skill ms-1" data-user-id="${skill.user_id}" data-skill-id="${skill.skill_id}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        skillsHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        $('#userSkillsContent').html(skillsHtml);
+    }
+    
+    // Assign skill button click
+    $(document).on('click', '#assignSkillBtn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('Assign button clicked');
+        console.log('Current User ID:', currentUserId);
+        console.log('Available Skills:', availableSkills);
+        
+        if (!currentUserId) {
+            alert('Please select a user first');
+            return;
+        }
+        
+        if (availableSkills.length === 0) {
+            alert('No skills available for assignment');
+            return;
+        }
+        
+        showAssignSkillModal();
+    });
+    
+    // Show assign skill modal
+    function showAssignSkillModal() {
+        let skillOptions = '';
+        availableSkills.forEach(function(skill) {
+            skillOptions += `<option value="${skill.id}">${skill.name}</option>`;
+        });
+        
+        const modalHtml = `
+            <div class="modal fade" id="assignSkillModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Assign Skill</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="assignSkillForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Skill *</label>
+                                    <select class="form-select" name="skill_id" required>
+                                        <option value="">Select a skill</option>
+                                        ${skillOptions}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Level</label>
+                                    <input type="text" class="form-control" name="skill_level" placeholder="e.g., L1, L2, Beginner, Advanced">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Certificate Status</label>
+                                    <select class="form-select" name="certificate_status" required>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="expired">Expired</option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Issue Date</label>
+                                        <input type="date" class="form-control" name="issue_date">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Expiry Date</label>
+                                        <input type="date" class="form-control" name="expiry_date">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="assignSkillConfirm">Assign Skill</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if any
+        $('#assignSkillModal').remove();
+        
+        // Add modal to body and show
+        $('body').append(modalHtml);
+        $('#assignSkillModal').modal('show');
+        
+        // Handle assign confirm
+        $('#assignSkillConfirm').off('click').on('click', function() {
+            const formData = $('#assignSkillForm').serialize();
+            
+            $.ajax({
+                url: '<?= base_url('settings/users/skills/assign') ?>',
+                type: 'POST',
+                data: formData + '&user_id=' + currentUserId + '&<?= csrf_token() ?>=<?= csrf_hash() ?>',
+                success: function(response) {
+                    if (response.success) {
+                        $('#assignSkillModal').modal('hide');
+                        loadUserSkills(currentUserId);
+                        loadOverviewSkills(currentUserId); // Reload overview skills
+                        alert('Skill assigned successfully!');
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to assign skill'));
+                    }
+                },
+                error: function() {
+                    alert('Error assigning skill');
+                }
+            });
+        });
+    }
+    
+    // Remove user skill
+    $(document).on('click', '.remove-user-skill', function() {
+        const userId = $(this).data('user-id');
+        const skillId = $(this).data('skill-id');
+        
+        if (confirm('Are you sure you want to remove this skill from the user?')) {
+            $.ajax({
+                url: '<?= base_url('settings/users/skills/remove') ?>',
+                type: 'POST',
+                data: {
+                    user_id: userId,
+                    skill_id: skillId,
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        loadUserSkills(currentUserId);
+                        loadOverviewSkills(currentUserId); // Reload overview skills
+                        alert('Skill removed successfully!');
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to remove skill'));
+                    }
+                },
+                error: function() {
+                    alert('Error removing skill');
+                }
+            });
+        }
+    });
 });
 </script>
 <?= $this->endSection() ?>

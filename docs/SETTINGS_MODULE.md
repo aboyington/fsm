@@ -109,6 +109,56 @@ Geographic territory definition and assignment for field service operations.
 
 **Access:** Settings → Workforce → Territories
 
+**Documentation:** See [TERRITORIES.md](TERRITORIES.md) for detailed documentation
+
+### 7. Skills Management
+Comprehensive skill tracking and workforce capability management.
+
+**Features:**
+- Custom skill definition and categorization
+- Skill level tracking (Beginner, Intermediate, Advanced, Expert)
+- Multiple skill categories (Technical, Soft Skills, Certifications, Safety, Specialized)
+- Status management (Active/Inactive)
+- Search and filtering capabilities
+- Audit trail with creator tracking
+
+**Key Capabilities:**
+- Full CRUD operations for skills
+- Real-time search and filtering
+- Modal-based editing interface
+- Category-based organization
+- Detailed skill descriptions
+- Proficiency level tracking
+
+**Database Table:** `skills`
+
+**Access:** Settings → Workforce → Skills
+
+### 8. Holiday Management
+Business holiday configuration and calendar management.
+
+**Features:**
+- Year-based holiday management (2023-2027)
+- Custom holiday definition
+- Holiday calendar visualization
+- Bulk holiday operations
+- Automatic day-of-week calculation
+- Multi-year holiday planning
+
+**Key Capabilities:**
+- Year-specific holiday configuration
+- Flexible holiday editing interface
+- Pre-configured common holidays
+- Easy holiday addition/removal
+- Clear calendar view
+- Year navigation support
+
+**Database Table:** `holidays`
+
+**Access:** Settings → Workforce → Holiday
+
+**Documentation:** See [SKILLS_HOLIDAY_MANAGEMENT.md](SKILLS_HOLIDAY_MANAGEMENT.md) for detailed documentation
+
 ## Technical Implementation
 
 ### Models
@@ -119,6 +169,8 @@ Geographic territory definition and assignment for field service operations.
 - `TerritoryModel` - Manages territory data and geographic assignments
 - `UserModel` - Handles user authentication and profile management
 - `AuditLogModel` - Tracks user activities and system events
+- `SkillModel` - Manages skill definitions and categorization
+- `HolidayModel` - Handles holiday configuration and year-based management
 
 ### Controllers
 - `Settings` - Main settings controller handling all settings routes
@@ -132,6 +184,8 @@ Geographic territory definition and assignment for field service operations.
 5. `2025-01-11-000003_CreateTerritoriesTable.php`
 6. `2025-01-10-120000_create_users_table.php`
 7. `2025-01-10-000001_create_audit_logs_table.php`
+8. `2025-01-11-000006_CreateSkillsTable.php`
+9. `2025-01-11-000007_CreateHolidaysTable.php`
 
 ### API Endpoints
 
@@ -158,6 +212,20 @@ Geographic territory definition and assignment for field service operations.
 - `GET /settings/getUser/{id}` - Get user details
 - `POST /settings/updateUser` - Update user information
 - `GET /settings/getUserTimeline/{userId}` - Get user activity timeline
+
+#### Skills
+- `GET /settings/skills` - List all skills with filtering
+- `POST /settings/skills/add` - Create new skill
+- `GET /settings/skills/get/{id}` - Get skill details
+- `POST /settings/skills/update/{id}` - Update skill
+- `POST /settings/skills/delete/{id}` - Delete skill
+
+#### Holidays
+- `GET /settings/holiday` - Display holiday management page
+- `POST /settings/holiday/save` - Save holidays for a specific year
+- `GET /settings/holiday/get/{year}` - Get holidays for a specific year
+- `POST /settings/holiday/update/{year}` - Update holidays for a specific year
+- `POST /settings/holiday/delete/{id}` - Delete a specific holiday
 
 ### Security
 - All endpoints require authentication

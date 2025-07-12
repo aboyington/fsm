@@ -8,6 +8,9 @@ use App\Models\BusinessHoursModel;
 use App\Models\UserModel;
 use App\Models\AuditLogModel;
 use App\Models\TerritoryModel;
+use App\Models\SkillModel;
+use App\Models\UserSkillModel;
+use App\Models\HolidayModel;
 
 class Settings extends BaseController
 {
@@ -17,6 +20,9 @@ class Settings extends BaseController
     protected $userModel;
     protected $auditLogModel;
     protected $territoryModel;
+    protected $skillModel;
+    protected $userSkillModel;
+    protected $holidayModel;
     
     public function __construct()
     {
@@ -26,6 +32,9 @@ class Settings extends BaseController
         $this->userModel = new UserModel();
         $this->auditLogModel = new AuditLogModel();
         $this->territoryModel = new TerritoryModel();
+        $this->skillModel = new SkillModel();
+        $this->userSkillModel = new UserSkillModel();
+        $this->holidayModel = new HolidayModel();
     }
     
     public function index()
@@ -153,17 +162,78 @@ public function users()
 
 public function addUser()
 {
-    if ($this->request->getMethod() === 'post') {
+    // Force JSON response to prevent debug toolbar injection
+    header('Content-Type: application/json');
+    
+    // Add detailed logging
+    log_message('debug', 'addUser method called');
+    log_message('debug', 'Request method: ' . $this->request->getMethod());
+    log_message('debug', 'POST data: ' . json_encode($this->request->getPost()));
+    
+    // Check if user is logged in
+    if (!session()->get('auth_token')) {
+        log_message('error', 'addUser: User not authenticated');
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Unauthorized: Please login to continue'
+        ])->setStatusCode(401);
+    }
+    
+    // Check multiple ways to detect POST request
+    $method = $this->request->getMethod();
+    $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+    
+    // Log the request method for debugging
+    log_message('debug', 'addUser called - Method from getMethod(): ' . $method);
+    log_message('debug', 'addUser called - Method from $_SERVER: ' . $serverMethod);
+    log_message('debug', 'addUser called - POST data exists: ' . (!empty($this->request->getPost()) ? 'YES' : 'NO'));
+    
+    // For now, accept any method if POST data exists
+    // This is a temporary workaround for the routing issue
+    if (empty($this->request->getPost()) && empty($_POST)) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+        ])->setStatusCode(400);
+    }
         $userData = $this->request->getPost();
+        
+        // Log raw data
+        log_message('debug', 'Raw user data: ' . json_encode($userData));
         
         // Remove CSRF and confirm password fields
         unset($userData['csrf_test_name']);
         unset($userData['csrf_token']);
         unset($userData['confirm_password']);
         
+        // Check for required fields
+        if (empty($userData['email'])) {
+            log_message('error', 'addUser: Email is required');
+            return $this->response->setJSON(['success' => false, 'message' => 'Email is required']);
+        }
+        
+        if (empty($userData['password'])) {
+            log_message('error', 'addUser: Password is required');
+            return $this->response->setJSON(['success' => false, 'message' => 'Password is required']);
+        }
+        
+        // Check if email already exists
+        $existingUser = $this->userModel->where('email', $userData['email'])->first();
+        if ($existingUser) {
+            log_message('error', 'addUser: Email already exists: ' . $userData['email']);
+            return $this->response->setJSON(['success' => false, 'message' => 'This email address is already registered.']);
+        }
+        
         // Generate username from email if not provided
         if (!isset($userData['username']) || empty($userData['username'])) {
             $userData['username'] = explode('@', $userData['email'])[0];
+        }
+        
+        // Check if username already exists
+        $existingUsername = $this->userModel->where('username', $userData['username'])->first();
+        if ($existingUsername) {
+            log_message('error', 'addUser: Username already exists: ' . $userData['username']);
+            return $this->response->setJSON(['success' => false, 'message' => 'This username is already taken.']);
         }
         
         // Set created_by from session
@@ -180,15 +250,23 @@ public function addUser()
             $userData['enable_rtl'] = 0;
         }
         
-        if ($this->userModel->save($userData)) {
-            return $this->response->setJSON(['success' => true, 'message' => 'User added successfully.']);
-        } else {
-            return $this->response->setJSON(['success' => false, 'message' => 'Failed to add user', 'errors' => $this->userModel->errors()]);
+        // Log final data before save
+        log_message('debug', 'Final user data before save: ' . json_encode($userData));
+        
+        try {
+            if ($this->userModel->save($userData)) {
+                log_message('info', 'User added successfully: ' . $userData['email']);
+                return $this->response->setJSON(['success' => true, 'message' => 'User added successfully.']);
+            } else {
+                $errors = $this->userModel->errors();
+                log_message('error', 'UserModel validation errors: ' . json_encode($errors));
+                return $this->response->setJSON(['success' => false, 'message' => 'Failed to add user', 'errors' => $errors]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Exception in addUser: ' . $e->getMessage());
+            return $this->response->setJSON(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
         }
     }
-    
-    return redirect()->to('/settings/users');
-}
 
 public function getUser($id)
 {
@@ -582,12 +660,169 @@ public function getUserTimeline($userId)
 
     public function skills()
     {
+        $status = $this->request->getVar('status') ?? 'active';
+        $search = $this->request->getVar('search') ?? '';
+        
+        // Get skills with creator information
+        $skills = $this->skillModel->getSkillsWithCreator($status, $search);
+        
         $data = [
             'title' => 'Skills',
-            'activeTab' => 'skills'
+            'activeTab' => 'skills',
+            'skills' => $skills,
+            'status' => $status,
+            'search' => $search
         ];
         
         return view('settings/skills', $data);
+    }
+    
+    public function addSkill()
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // For now, accept any method if POST data exists
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        $skillData = $this->request->getPost();
+        
+        // Remove CSRF token
+        unset($skillData['csrf_test_name']);
+        unset($skillData['csrf_token']);
+        unset($skillData['csrf_ghash']);
+        
+        // Set created_by from session
+        $currentUser = session()->get('user');
+        if ($currentUser && isset($currentUser['id'])) {
+            $skillData['created_by'] = $currentUser['id'];
+        } else {
+            // If no user ID in session, default to 1 (admin)
+            $skillData['created_by'] = 1;
+        }
+        
+        if ($this->skillModel->save($skillData)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Skill added successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to add skill', 'errors' => $this->skillModel->errors()]);
+        }
+    }
+
+    public function getSkill($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $skill = $this->skillModel->find($id);
+        
+        if ($skill) {
+            return $this->response->setJSON([
+                'success' => true,
+                'skill' => $skill
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Skill not found'
+            ])->setStatusCode(404);
+        }
+    }
+
+    public function updateSkill($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // For now, accept any method if POST data exists
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        $skillData = $this->request->getPost();
+        
+        // Remove CSRF token and id field (id is passed in URL)
+        unset($skillData['csrf_test_name']);
+        unset($skillData['csrf_token']);
+        unset($skillData['csrf_ghash']);
+        unset($skillData['id']);
+        
+        if ($this->skillModel->update($id, $skillData)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Skill updated successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update skill', 'errors' => $this->skillModel->errors()]);
+        }
+    }
+
+    public function deleteSkill($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // For now, accept any method if POST data exists (including empty POST for delete operations)
+        if ($method !== 'post' && $serverMethod !== 'POST' && empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request method. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        if ($this->skillModel->delete($id)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Skill deleted successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete skill']);
+        }
     }
 
     public function holiday()
@@ -850,6 +1085,216 @@ public function getUserTimeline($userId)
             return $this->response->setJSON(['success' => true, 'currency' => $currency]);
         } else {
             return $this->response->setJSON(['success' => false, 'message' => 'Currency not found'])->setStatusCode(404);
+        }
+    }
+    
+    // User Skills Management Methods
+    
+    public function getUserSkills($userId)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $userSkills = $this->userSkillModel->getUserSkillsWithDetails($userId);
+        $availableSkills = $this->userSkillModel->getAvailableSkills();
+        
+        return $this->response->setJSON([
+            'success' => true,
+            'userSkills' => $userSkills,
+            'availableSkills' => $availableSkills
+        ]);
+    }
+    
+    public function assignUserSkill()
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        
+        // Set assigned_by from session
+        $currentUser = session()->get('user');
+        if ($currentUser && isset($currentUser['id'])) {
+            $data['assigned_by'] = $currentUser['id'];
+        } else {
+            $data['assigned_by'] = 1; // Default to admin
+        }
+        
+        // Check if user already has this skill
+        if ($this->userSkillModel->userHasSkill($data['user_id'], $data['skill_id'])) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User already has this skill assigned'
+            ]);
+        }
+        
+        if ($this->userSkillModel->assignSkillToUser($data)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Skill assigned to user successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to assign skill to user', 'errors' => $this->userSkillModel->errors()]);
+        }
+    }
+    
+    public function updateUserSkill($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token and id field (id is passed in URL)
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        unset($data['id']);
+        
+        if ($this->userSkillModel->updateUserSkill($id, $data)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'User skill updated successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update user skill', 'errors' => $this->userSkillModel->errors()]);
+        }
+    }
+    
+    public function removeUserSkill()
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        $userId = $data['user_id'] ?? null;
+        $skillId = $data['skill_id'] ?? null;
+        
+        if (!$userId || !$skillId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User ID and Skill ID are required'
+            ]);
+        }
+        
+        if ($this->userSkillModel->removeSkillFromUser($userId, $skillId)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Skill removed from user successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to remove skill from user']);
+        }
+    }
+    
+    public function deleteUser($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // Log the request method for debugging
+        log_message('debug', 'deleteUser called - Method from getMethod(): ' . $method);
+        log_message('debug', 'deleteUser called - Method from $_SERVER: ' . $serverMethod);
+        log_message('debug', 'deleteUser called - POST data exists: ' . (!empty($this->request->getPost()) ? 'YES' : 'NO'));
+        
+        // For now, accept any method if POST data exists (including empty POST for delete operations)
+        // Delete operations might not have body data, so we're more lenient here
+        if ($method !== 'post' && $serverMethod !== 'POST' && empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request method. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        // Prevent deletion of current user
+        $currentUser = session()->get('user');
+        if ($currentUser && isset($currentUser['id']) && $currentUser['id'] == $id) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'You cannot delete your own user account'
+            ])->setStatusCode(403);
+        }
+        
+        // Check if user exists
+        $user = $this->userModel->find($id);
+        if (!$user) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not found'
+            ])->setStatusCode(404);
+        }
+        
+        // Log deletion attempt
+        log_message('info', 'Attempting to delete user: ' . $user['email'] . ' (ID: ' . $id . ')');
+        
+        if ($this->userModel->delete($id)) {
+            log_message('info', 'User deleted successfully: ' . $user['email'] . ' (ID: ' . $id . ')');
+            return $this->response->setJSON(['success' => true, 'message' => 'User deleted successfully.']);
+        } else {
+            log_message('error', 'Failed to delete user: ' . $user['email'] . ' (ID: ' . $id . ')');
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete user']);
         }
     }
 }

@@ -29,6 +29,7 @@ $routes->group('settings', function($routes) {
     $routes->post('updateUser', 'Settings::updateUser');
     $routes->get('updateUser', 'Settings::updateUser');  // Add GET route to handle any method issues
     $routes->match(['get', 'post'], 'update-user', 'Settings::updateUser');  // Alternative route
+    $routes->post('deleteUser/(:num)', 'Settings::deleteUser/$1');
     $routes->get('getUserTimeline/(:num)', 'Settings::getUserTimeline/$1');
     $routes->get('territories', 'Settings::territories', ['filter' => 'auth']);
     $routes->post('territories/add', 'Settings::addTerritory');
@@ -36,6 +37,14 @@ $routes->group('settings', function($routes) {
     $routes->post('territories/update/(:num)', 'Settings::updateTerritory/$1');
     $routes->post('territories/delete/(:num)', 'Settings::deleteTerritory/$1');
     $routes->get('skills', 'Settings::skills', ['filter' => 'auth']);
+    $routes->post('skills/add', 'Settings::addSkill');
+    $routes->get('skills/get/(:num)', 'Settings::getSkill/$1');
+    $routes->post('skills/update/(:num)', 'Settings::updateSkill/$1');
+    $routes->post('skills/delete/(:num)', 'Settings::deleteSkill/$1');
+    $routes->get('users/(:num)/skills', 'Settings::getUserSkills/$1');
+    $routes->post('users/skills/assign', 'Settings::assignUserSkill');
+    $routes->post('users/skills/update/(:num)', 'Settings::updateUserSkill/$1');
+    $routes->post('users/skills/remove', 'Settings::removeUserSkill');
     $routes->get('holiday', 'Settings::holiday', ['filter' => 'auth']);
     $routes->get('billing-setup', 'Settings::billing', ['filter' => 'auth']);
     $routes->get('tax-settings', 'Settings::taxSettings', ['filter' => 'auth']);
