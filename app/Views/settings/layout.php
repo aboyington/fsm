@@ -62,7 +62,7 @@
                             <a href="<?= base_url('settings/audit-log') ?>" class="settings-link <?= $activeTab == 'audit-log' ? 'active' : '' ?>">
                                 Audit Log
                             </a>
-                            <a href="<?= base_url('settings/pit-fields') ?>" class="settings-link <?= $activeTab == 'pit-fields' ? 'active' : '' ?>">
+                            <a href="<?= base_url('settings/pii-fields') ?>" class="settings-link <?= $activeTab == 'pii-fields' ? 'active' : '' ?>">
                                 PII Fields
                             </a>
                         </div>
@@ -75,10 +75,10 @@
                         </div>
                         <div id="fieldServiceSection" class="collapse show">
                             <a href="<?= base_url('settings/transaction-settings') ?>" class="settings-link <?= $activeTab == 'transaction-settings' ? 'active' : '' ?>">
-                                Transaction Settings <i class="bi bi-key-fill"></i>
+                                Transaction Settings
                             </a>
                             <a href="<?= base_url('settings/record-templates') ?>" class="settings-link <?= $activeTab == 'record-templates' ? 'active' : '' ?>">
-                                Record Templates <i class="bi bi-key-fill"></i>
+                                Record Templates
                             </a>
                         </div>
                     </div>

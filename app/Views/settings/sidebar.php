@@ -23,6 +23,7 @@
         <h3 class="nav-section-title">Security Control</h3>
         <ul class="nav-links">
             <li><a href="/settings/roles" class="nav-link <?= $activeTab === 'roles' ? 'active' : '' ?>">Roles & Permissions</a></li>
+            <li><a href="<?= site_url('settings/pii-fields') ?>" class="nav-link <?= $activeTab === 'pii-fields' ? 'active' : '' ?>">PII Fields</a></li>
         </ul>
     </div>
     

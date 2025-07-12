@@ -95,6 +95,27 @@ if ($method !== 'post' && $serverMethod !== 'POST' && empty($this->request->getP
 - Ensure jQuery is loaded before Bootstrap
 - Check for conflicting JavaScript that might prevent event handlers
 
+**Advanced Solution - Start Over Pattern:**
+If modal issues persist despite multiple fixes, consider starting over with a working pattern:
+
+1. **Identify a Working Reference:** Find a similar page/modal that works correctly (e.g., users page, profiles page)
+2. **Copy Exact Structure:** Use the working page as a template, copying:
+   - Button structure with exact data attributes
+   - Modal HTML structure
+   - JavaScript event handling patterns
+   - Form structure and naming
+3. **Adapt Content Only:** Change only the content-specific parts (field names, endpoints, etc.)
+4. **Avoid Custom Modifications:** Don't add custom JavaScript or modify the working pattern initially
+
+**Example Success Case:** Record Templates Modal Fix
+- Problem: Custom `onclick="openModal()"` functions causing "undefined" errors
+- Solution: Copied exact pattern from working users page:
+  ```html
+  <!-- Instead of custom onclick -->
+  <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTemplateModal">
+  ```
+- Result: Immediate fix with consistent behavior across application
+
 ### 5. Data Not Saving
 
 **Problem:** Form submissions appear successful but data isn't saved
@@ -145,6 +166,52 @@ Add debug logging:
 ```php
 log_message('debug', 'Method called - Data: ' . json_encode($data));
 ```
+
+## Development Best Practices
+
+### 1. When to Start Over vs. Debug
+
+**Start Over When:**
+- Multiple failed debugging attempts on the same issue
+- Custom code has grown complex and hard to maintain
+- You have a proven working pattern elsewhere in the codebase
+- Debugging time exceeds rebuild time
+- Code has accumulated too many "quick fixes"
+
+**Continue Debugging When:**
+- Issue is isolated and specific
+- Working with unique/custom functionality
+- No existing patterns to reference
+- Learning/educational value in solving the problem
+
+### 2. Pattern-Based Development
+
+**Benefits:**
+- Consistent user experience across the application
+- Reduced development time
+- Lower risk of introducing bugs
+- Easier maintenance and updates
+- Proven functionality
+
+**Implementation:**
+1. **Identify Successful Patterns:** Document working implementations (modals, forms, AJAX calls)
+2. **Create Templates:** Save working code snippets for reuse
+3. **Follow Conventions:** Use consistent naming, structure, and approaches
+4. **Test Early:** Verify new implementations match existing patterns
+
+### 3. Code Quality Guidelines
+
+**Avoid:**
+- Custom JavaScript when Bootstrap/jQuery patterns exist
+- Reinventing functionality that already works
+- Complex debugging when simple solutions exist
+- Inconsistent patterns across similar features
+
+**Prefer:**
+- Proven, working code patterns
+- Consistent naming conventions
+- Standard library features over custom implementations
+- Simple, readable solutions
 
 ## Performance Optimization
 

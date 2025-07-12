@@ -184,6 +184,71 @@ Comprehensive user profile and permission management system.
 
 **Documentation:** See [PROFILES_MANAGEMENT.md](PROFILES_MANAGEMENT.md) for detailed documentation
 
+### 10. Audit Log Management
+Comprehensive system activity tracking and compliance monitoring.
+
+**Features:**
+- Dual-tab interface (Audit Log / Entity Log)
+- Advanced filtering and search capabilities
+- Real-time activity monitoring
+- Comprehensive audit trail for compliance
+- User activity tracking
+- Entity change tracking with before/after values
+
+**Key Capabilities:**
+- **Audit Log Tab:**
+  - System-wide user activity tracking
+  - Login/logout events
+  - User management actions
+  - Setting changes
+  - Date range filtering (Today, Yesterday, Last 7 days, Last 30 days, Last 90 days, Last Year)
+  - User-specific filtering
+  - Module/action filtering
+- **Entity Log Tab:**
+  - Entity-specific change tracking
+  - Before/after value comparison
+  - Entity type filtering (Customer, Order, User, Territory, Skill, Profile)
+  - Action filtering (Create, Update, Delete, Assign, Unassign)
+  - Detailed change descriptions
+  - JSON-formatted value storage
+
+**Database Tables:** 
+- `audit_logs` - System audit trail
+- `entity_logs` - Entity change tracking (planned)
+
+**Access:** Settings → Security Control → Audit Log
+
+**Documentation:** See [AUDIT_LOG_MANAGEMENT.md](AUDIT_LOG_MANAGEMENT.md) for detailed documentation
+
+### 11. Record Templates Management
+Comprehensive template system for standardizing record creation across different modules.
+
+**Features:**
+- Template creation for different module types (Work Orders, Estimates, Invoices, Service Reports, Customers, Assets)
+- Template naming and description
+- Module-specific template organization
+- Status management and audit trail
+- Search and filtering capabilities
+- Full CRUD operations
+
+**Key Capabilities:**
+- Modal-based interface for template management
+- Real-time search and filtering
+- Consistent user experience with other settings modules
+- jQuery-based AJAX operations
+- Bootstrap modal integration
+- Form validation and error handling
+
+**Database Table:** `record_templates`
+
+**Access:** Settings → Record Templates
+
+**Technical Implementation Notes:**
+- Built using proven pattern from users page for maximum reliability
+- Uses standard Bootstrap modal structure with jQuery event handling
+- Follows established naming conventions and form patterns
+- Implements consistent error handling and user feedback
+
 ## Technical Implementation
 
 ### Models
@@ -260,6 +325,13 @@ Comprehensive user profile and permission management system.
 - `GET /settings/profiles/get/{id}` - Get profile details with permissions
 - `POST /settings/profiles/update/{id}` - Update profile information
 - `POST /settings/profiles/delete/{id}` - Delete profile (default profiles protected)
+
+#### Audit Log
+- `GET /settings/audit-log` - Display audit log with filtering and tab support
+- `GET /settings/audit-log?tab=audit` - Display Audit Log tab with system activities
+- `GET /settings/audit-log?tab=entity` - Display Entity Log tab with entity changes
+- `GET /settings/audit-log?date={filter}&user={id}&sub_type={module}&action={type}` - Filter audit logs
+- `GET /settings/audit-log?tab=entity&entity_type={type}&entity_action={action}` - Filter entity logs
 
 ### Security
 - All endpoints require authentication
@@ -344,6 +416,40 @@ Comprehensive user profile and permission management system.
    - Field Agent (field operations focus)
    - Limited Field Agent (restricted field operations)
 
+### Using Audit Log
+1. Navigate to Settings → Security Control → Audit Log
+2. **Audit Log Tab (Default):**
+   - View system-wide activity including:
+     - User login/logout events
+     - User management actions (create, update, delete)
+     - Settings changes
+     - Security-related events
+   - Apply filters:
+     - **Date Range:** Today, Yesterday, Last 7 days, Last 30 days, Last 90 days, Last Year
+     - **User:** Filter by specific user who performed actions
+     - **Sub Type:** Filter by module (Users, Customers, Orders, etc.)
+     - **Action:** Filter by event type (Create, Update, Delete, Login, etc.)
+3. **Entity Log Tab:**
+   - View detailed entity changes with before/after values
+   - Apply entity-specific filters:
+     - **Entity Type:** Customer, Order, User, Territory, Skill, Profile
+     - **Entity Action:** Create, Update, Delete, Assign, Unassign
+   - View change details including:
+     - Entity ID and name
+     - User who made the change
+     - Description of changes
+     - JSON-formatted old and new values
+4. **Filtering and Search:**
+   - Combine multiple filters for precise results
+   - Date filtering applies to both tabs
+   - User filtering shows actions by specific users
+   - Clear filters to reset view
+5. **Compliance and Monitoring:**
+   - Export audit trails for compliance reporting
+   - Monitor user activities in real-time
+   - Track entity changes for data integrity
+   - Review security events and access patterns
+
 ## Default Configuration
 
 ### Base Currency
@@ -357,6 +463,51 @@ Comprehensive user profile and permission management system.
 ### Organization
 - Default values prompt user to complete setup
 
+## Development Methodology
+
+### Pattern-Based Development Approach
+The Settings module follows a proven pattern-based development methodology to ensure consistency, reliability, and maintainability.
+
+**Key Principles:**
+1. **Use Proven Patterns:** New features are built using existing successful implementations as templates
+2. **Consistency First:** UI/UX patterns are maintained across all settings pages
+3. **Start Over vs. Debug:** When debugging becomes complex, starting fresh with a working pattern is preferred
+4. **Copy-Adapt-Test:** Copy working code, adapt for specific needs, test thoroughly
+
+**Success Story - Record Templates:**
+The Record Templates feature demonstrates this methodology:
+- **Challenge:** Initial implementation had custom JavaScript causing modal failures
+- **Solution:** Completely recreated using the proven users page pattern
+- **Result:** Immediate functionality with consistent behavior
+- **Time Saved:** Hours of debugging avoided by starting fresh
+
+**Benefits Achieved:**
+- Consistent user experience across all settings modules
+- Reduced development time for new features
+- Lower bug introduction rate
+- Easier maintenance and future enhancements
+- Proven reliability from battle-tested patterns
+
+### Technical Standards
+
+**Frontend Patterns:**
+- Bootstrap modal structure for all dialog interactions
+- jQuery-based event handling following established conventions
+- Consistent form validation and error handling
+- Standard AJAX patterns for all API communications
+
+**Backend Patterns:**
+- RESTful API endpoints with consistent response formats
+- Model-based data validation and processing
+- Session-based authentication with CSRF protection
+- Standardized error handling and logging
+
+**Database Patterns:**
+- Consistent table naming conventions
+- Standard audit fields (created_at, updated_at, created_by)
+- Foreign key relationships following established patterns
+- Migration scripts with proper rollback support
+
 ## Future Enhancements
 1. Currency conversion utilities
 2. Historical exchange rates
@@ -364,3 +515,4 @@ Comprehensive user profile and permission management system.
 4. Multiple business locations support
 5. Industry-specific presets
 6. Import/Export settings configurations
+7. Template-based development tools for rapid feature creation

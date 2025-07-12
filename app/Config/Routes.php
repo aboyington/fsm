@@ -51,10 +51,24 @@ $routes->group('settings', function($routes) {
     $routes->get('profiles/get/(:num)', 'Settings::getProfile/$1');
     $routes->post('profiles/update/(:num)', 'Settings::updateProfile/$1');
     $routes->post('profiles/delete/(:num)', 'Settings::deleteProfile/$1');
+    $routes->get('audit-log', 'Settings::auditLog', ['filter' => 'auth']);
+    $routes->get('pii-fields', 'Settings::piiFields', ['filter' => 'auth']);
     $routes->get('billing-setup', 'Settings::billing', ['filter' => 'auth']);
     $routes->get('tax-settings', 'Settings::taxSettings', ['filter' => 'auth']);
     $routes->get('fiscal-year', 'Settings::fiscalYear', ['filter' => 'auth']);
     $routes->post('fiscal-year/update', 'Settings::updateFiscalYear');
+    
+    // Transaction Settings routes
+    $routes->get('transaction-settings', 'Settings::transactionSettings', ['filter' => 'auth']);
+    $routes->post('transaction-settings/update', 'Settings::updateTransactionSettings');
+    
+    // Record Templates routes
+    $routes->get('record-templates', 'Settings::recordTemplates', ['filter' => 'auth']);
+    $routes->post('record-templates/create', 'Settings::createRecordTemplate');
+    $routes->get('record-templates/get/(:num)', 'Settings::getRecordTemplate/$1');
+    $routes->post('record-templates/update/(:num)', 'Settings::updateRecordTemplate/$1');
+    $routes->post('record-templates/delete/(:num)', 'Settings::deleteRecordTemplate/$1');
+    $routes->post('record-templates/duplicate/(:num)', 'Settings::duplicateRecordTemplate/$1');
     
     // Currency routes
     $routes->post('currency/store', 'Settings::storeCurrency');

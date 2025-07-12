@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jQuery Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>jQuery Test</h1>
+    <input type="text" id="testInput" placeholder="Type something...">
+    <div id="output"></div>
+
+    <script>
+    // Wait for jQuery to load
+    (function checkJQuery() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(checkJQuery, 50);
+            return;
+        }
+        
+        // Use jQuery safely
+        jQuery(document).ready(function($) {
+            console.log('jQuery loaded successfully!');
+            
+            $('#testInput').on('keyup', function() {
+                $('#output').text('You typed: ' + $(this).val());
+            });
+            
+            // Test the same pattern as PII Fields
+            let searchTimeout;
+            $('#testInput').on('keyup', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    console.log('Debounced search triggered');
+                }, 500);
+            });
+        });
+    })();
+    </script>
+</body>
+</html>

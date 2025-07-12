@@ -15,10 +15,13 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 - **[Setup Guide](SETUP_GUIDE.md)** - Installation and configuration instructions
 - **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues and solutions
 
-### 📦 Module Documentation
+### 📆 Module Documentation
 - **[Settings Module](SETTINGS_MODULE.md)** - Organization, currency, and system configuration
 - **[User Management](USER_MANAGEMENT.md)** - User administration and access control
 - **[Territory Management](TERRITORIES.md)** - Geographic service area management
+- **[Skills & Holiday Management](SKILLS_HOLIDAY_MANAGEMENT.md)** - Skill tracking and holiday configuration
+- **[Profiles Management](PROFILES_MANAGEMENT.md)** - User profiles and permission management
+- **[Audit Log Management](AUDIT_LOG_MANAGEMENT.md)** - System activity tracking and compliance
 
 ### 🔧 Technical Details
 - **Database**: SQLite with CodeIgniter 4 migrations
@@ -47,6 +50,10 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 
 ### New Features
 - ✅ Territory Management system implemented
+- ✅ Skills Management with categorization and proficiency tracking
+- ✅ Holiday Management with year-based configuration
+- ✅ Profiles Management with permission matrix
+- ✅ Audit Log Management with dual-tab interface
 - ✅ User Management with role-based access
 - ✅ Organization and currency configuration
 - ✅ Business hours and fiscal year settings
@@ -70,6 +77,10 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 | Settings | ✅ Complete | [SETTINGS_MODULE.md](SETTINGS_MODULE.md) |
 | Users | ✅ Complete | [USER_MANAGEMENT.md](USER_MANAGEMENT.md) |
 | Territories | ✅ Complete | [TERRITORIES.md](TERRITORIES.md) |
+| Skills | ✅ Complete | [SKILLS_HOLIDAY_MANAGEMENT.md](SKILLS_HOLIDAY_MANAGEMENT.md) |
+| Holidays | ✅ Complete | [SKILLS_HOLIDAY_MANAGEMENT.md](SKILLS_HOLIDAY_MANAGEMENT.md) |
+| Profiles | ✅ Complete | [PROFILES_MANAGEMENT.md](PROFILES_MANAGEMENT.md) |
+| Audit Log | ✅ Complete | [AUDIT_LOG_MANAGEMENT.md](AUDIT_LOG_MANAGEMENT.md) |
 | Customers | 🚧 In Progress | Coming Soon |
 | Work Orders | 📋 Planned | Coming Soon |
 | Scheduling | 📋 Planned | Coming Soon |

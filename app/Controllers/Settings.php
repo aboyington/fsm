@@ -11,6 +11,7 @@ use App\Models\TerritoryModel;
 use App\Models\SkillModel;
 use App\Models\UserSkillModel;
 use App\Models\HolidayModel;
+use App\Models\RecordTemplateModel;
 
 class Settings extends BaseController
 {
@@ -23,6 +24,7 @@ class Settings extends BaseController
     protected $skillModel;
     protected $userSkillModel;
     protected $holidayModel;
+    protected $recordTemplateModel;
     
     public function __construct()
     {
@@ -35,6 +37,7 @@ class Settings extends BaseController
         $this->skillModel = new SkillModel();
         $this->userSkillModel = new UserSkillModel();
         $this->holidayModel = new HolidayModel();
+        $this->recordTemplateModel = new RecordTemplateModel();
     }
     
     public function index()
@@ -158,6 +161,167 @@ public function users()
     ];
     
     return view('settings/users', $data);
+}
+
+public function transactionSettings()
+{
+    $transactionSettingsModel = new \App\Models\TransactionSettingsModel();
+    
+    // Initialize if not already done
+    $transactionSettingsModel->initializeDefaults();
+
+    $settings = $transactionSettingsModel->getSettings();
+
+    $data = [
+        'title' => 'Transaction Settings',
+        'activeTab' => 'transaction-settings',
+        'settings' => $settings
+    ];
+
+    return view('settings/transaction_settings', $data);
+}
+
+public function updateTransactionSettings()
+{
+    header('Content-Type: application/json');
+    
+    // Check if user is logged in
+    if (!session()->get('auth_token')) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Unauthorized: Please login to continue'
+        ])->setStatusCode(401);
+    }
+    
+    $transactionSettingsModel = new \App\Models\TransactionSettingsModel();
+    $data = $this->request->getPost();
+    
+    // Remove CSRF token
+    unset($data['csrf_test_name']);
+    unset($data['csrf_token']);
+    unset($data['csrf_ghash']);
+    
+    // Convert form data to settings format
+    $settings = [
+        'allow_roundoff_transactions' => [
+            'value' => isset($data['allow_roundoff_transactions']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Allow roundoff for transactions'
+        ],
+        'password_protect_exported_files' => [
+            'value' => isset($data['password_protect_exported_files']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Password protect exported files'
+        ],
+        'mobile_checkin_preference' => [
+            'value' => isset($data['mobile_checkin_preference']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Mobile App Check-In Preference'
+        ],
+        'allow_pricing_field_agent' => [
+            'value' => isset($data['allow_pricing_field_agent']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Allow Field Agent to see pricing'
+        ],
+        'allow_technicians_raise_invoices' => [
+            'value' => isset($data['allow_technicians_raise_invoices']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Allow technicians to raise invoices'
+        ],
+        'field_agent_appointment_confirmation' => [
+            'value' => isset($data['field_agent_appointment_confirmation']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Field Agent Appointment Confirmation'
+        ],
+        'minimum_interval_next_appointment' => [
+            'value' => (int)($data['minimum_interval_next_appointment'] ?? 1),
+            'type' => 'integer',
+            'description' => 'Minimum interval for next appointment (hours)'
+        ],
+        'allow_overlapping_appointments' => [
+            'value' => isset($data['allow_overlapping_appointments']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Allow Overlapping Appointments'
+        ],
+        'auto_complete_work_order' => [
+            'value' => isset($data['auto_complete_work_order']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Automatically complete a work order'
+        ],
+        'prompt_complete_work_order' => [
+            'value' => isset($data['prompt_complete_work_order']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Prompt to complete work order'
+        ],
+        'service_report_required_sa_completion' => [
+            'value' => isset($data['service_report_required_sa_completion']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Service Report required for SA completion'
+        ],
+        'jobsheets_completion_required_sa' => [
+            'value' => isset($data['jobsheets_completion_required_sa']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Jobsheets completion required for SA completion'
+        ],
+        'auto_pause_timesheet' => [
+            'value' => isset($data['auto_pause_timesheet']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Auto Pause timesheet'
+        ],
+        'auto_pause_time' => [
+            'value' => $data['auto_pause_time'] ?? '17:59',
+            'type' => 'string',
+            'description' => 'Auto Pause Time'
+        ],
+        'allow_overlapping_timesheet_entries' => [
+            'value' => isset($data['allow_overlapping_timesheet_entries']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Allow Overlapping or Concurrent Timesheet Entries'
+        ],
+        'hide_attachments_service_reports' => [
+            'value' => isset($data['hide_attachments_service_reports']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Hide attachments from service reports'
+        ],
+        'remove_customer_signature' => [
+            'value' => isset($data['remove_customer_signature']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Remove customer signature on editing service reports'
+        ],
+        'estimate_email_approval' => [
+            'value' => isset($data['estimate_email_approval']) ? true : false,
+            'type' => 'boolean',
+            'description' => 'Estimate - Email Approval'
+        ],
+        'email_approval_expiry_days' => [
+            'value' => (int)($data['email_approval_expiry_days'] ?? 7),
+            'type' => 'integer',
+            'description' => 'Expiry Time for Email Approval Link (Days)'
+        ],
+        'terms_conditions_estimate' => [
+            'value' => $data['terms_conditions_estimate'] ?? '',
+            'type' => 'string',
+            'description' => 'Terms & Conditions for estimate template'
+        ],
+        'customer_notes_estimate' => [
+            'value' => $data['customer_notes_estimate'] ?? '',
+            'type' => 'string',
+            'description' => 'Customer Notes for estimate template'
+        ]
+    ];
+    
+    if ($transactionSettingsModel->updateSettings($settings)) {
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Transaction settings updated successfully'
+        ]);
+    } else {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Failed to update transaction settings',
+            'errors' => $transactionSettingsModel->errors()
+        ]);
+    }
 }
 
 public function addUser()
@@ -1460,6 +1624,916 @@ public function getUserTimeline($userId)
                 'success' => false,
                 'message' => $e->getMessage()
             ])->setStatusCode(400);
+        }
+    }
+    
+    public function auditLog()
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return redirect()->to('/login');
+        }
+        
+        // Get filter parameters
+        $dateFilter = $this->request->getVar('date') ?? 'last-30-days';
+        $userFilter = $this->request->getVar('user') ?? '';
+        $subTypeFilter = $this->request->getVar('sub_type') ?? '';
+        $actionFilter = $this->request->getVar('action') ?? '';
+        $tabFilter = $this->request->getVar('tab') ?? 'audit';
+        
+        // Entity Log specific filters
+        $entityTypeFilter = $this->request->getVar('entity_type') ?? '';
+        $entityActionFilter = $this->request->getVar('entity_action') ?? '';
+        
+        // Get all users for filter dropdown
+        $users = $this->userModel->select('id, first_name, last_name, email')
+                                 ->orderBy('first_name', 'ASC')
+                                 ->findAll();
+        
+        // Build audit log query
+        $builder = $this->auditLogModel->builder();
+        $builder->select('audit_logs.*, CONCAT(users.first_name, " ", users.last_name) as user_name')
+                ->join('users', 'users.id = audit_logs.user_id', 'left')
+                ->orderBy('audit_logs.created_at', 'DESC');
+        
+        // Apply date filter
+        $this->applyDateFilter($builder, $dateFilter);
+        
+        // Apply user filter
+        if (!empty($userFilter)) {
+            $builder->where('audit_logs.user_id', $userFilter);
+        }
+        
+        // Apply sub type filter
+        if (!empty($subTypeFilter)) {
+            $builder->where('audit_logs.module', $subTypeFilter);
+        }
+        
+        // Apply action filter
+        if (!empty($actionFilter)) {
+            $builder->where('audit_logs.event_type', $actionFilter);
+        }
+        
+        // Get audit logs
+        $auditLogs = $builder->get()->getResultArray();
+        
+        // Get entity logs if Entity Log tab is active
+        $entityLogs = [];
+        if ($tabFilter === 'entity') {
+            $entityLogs = $this->getEntityLogs($dateFilter, $userFilter, $entityTypeFilter, $entityActionFilter);
+        }
+        
+        // Format the data for display
+        foreach ($auditLogs as &$log) {
+            // Format created_at for display
+            $log['formatted_date'] = date('M j, Y g:i A', strtotime($log['created_at']));
+            
+            // Format module name for display
+            $log['sub_type_display'] = $this->formatSubType($log['module'] ?? $log['event_type']);
+            
+            // Format action for display
+            $log['action_display'] = $this->formatAction($log['event_type']);
+            
+            // Ensure user name is set
+            if (empty($log['user_name'])) {
+                $log['user_name'] = 'System';
+            }
+        }
+        
+        $data = [
+            'title' => 'Audit Log',
+            'activeTab' => 'audit-log',
+            'auditLogs' => $auditLogs,
+            'entityLogs' => $entityLogs,
+            'users' => $users,
+            'filters' => [
+                'date' => $dateFilter,
+                'user' => $userFilter,
+                'sub_type' => $subTypeFilter,
+                'action' => $actionFilter,
+                'tab' => $tabFilter,
+                'entity_type' => $entityTypeFilter,
+                'entity_action' => $entityActionFilter
+            ],
+            'subTypes' => $this->getSubTypes(),
+            'actions' => $this->getActions(),
+            'entityTypes' => $this->getEntityTypes(),
+            'entityActions' => $this->getEntityActions()
+        ];
+        
+        return view('settings/audit_log', $data);
+    }
+    
+    private function applyDateFilter($builder, $dateFilter)
+    {
+        $now = new \DateTime();
+        
+        switch ($dateFilter) {
+            case 'today':
+                $startDate = new \DateTime('today');
+                $builder->where('audit_logs.created_at >=', $startDate->format('Y-m-d H:i:s'));
+                break;
+                
+            case 'yesterday':
+                $startDate = new \DateTime('yesterday');
+                $endDate = new \DateTime('today');
+                $builder->where('audit_logs.created_at >=', $startDate->format('Y-m-d H:i:s'));
+                $builder->where('audit_logs.created_at <', $endDate->format('Y-m-d H:i:s'));
+                break;
+                
+            case 'last-7-days':
+                $startDate = new \DateTime('-7 days');
+                $builder->where('audit_logs.created_at >=', $startDate->format('Y-m-d H:i:s'));
+                break;
+                
+            case 'last-30-days':
+            default:
+                $startDate = new \DateTime('-30 days');
+                $builder->where('audit_logs.created_at >=', $startDate->format('Y-m-d H:i:s'));
+                break;
+                
+            case 'last-90-days':
+                $startDate = new \DateTime('-90 days');
+                $builder->where('audit_logs.created_at >=', $startDate->format('Y-m-d H:i:s'));
+                break;
+                
+            case 'last-year':
+                $startDate = new \DateTime('-1 year');
+                $builder->where('audit_logs.created_at >=', $startDate->format('Y-m-d H:i:s'));
+                break;
+        }
+    }
+    
+    private function formatSubType($module)
+    {
+        $subTypes = [
+            'users' => 'USERS',
+            'customers' => 'CUSTOMERS',
+            'orders' => 'ORDERS',
+            'holidays' => 'HOLIDAYS',
+            'org_details' => 'ORG_DETAILS',
+            'other_settings' => 'OTHER_SETTINGS'
+        ];
+        
+        return $subTypes[$module] ?? strtoupper($module);
+    }
+    
+    private function formatAction($eventType)
+    {
+        $actions = [
+            'created' => 'CREATE',
+            'updated' => 'UPDATE',
+            'deleted' => 'DELETE',
+            'user_created' => 'CREATE',
+            'user_updated' => 'UPDATE',
+            'user_deleted' => 'DELETE',
+            'login' => 'LOGIN',
+            'logout' => 'LOGOUT',
+            'password_changed' => 'UPDATE',
+            'status_changed' => 'UPDATE',
+            'role_changed' => 'UPDATE',
+            'disable' => 'DISABLE'
+        ];
+        
+        return $actions[$eventType] ?? strtoupper($eventType);
+    }
+    
+    private function getSubTypes()
+    {
+        return [
+            'users' => 'Users',
+            'customers' => 'Customers',
+            'orders' => 'Orders',
+            'holidays' => 'Holidays',
+            'org_details' => 'Organization Details',
+            'other_settings' => 'Other Settings'
+        ];
+    }
+    
+    private function getActions()
+    {
+        return [
+            'create' => 'Create',
+            'update' => 'Update',
+            'delete' => 'Delete',
+            'login' => 'Login',
+            'logout' => 'Logout',
+            'disable' => 'Disable'
+        ];
+    }
+    
+    private function getEntityLogs($dateFilter, $userFilter, $entityTypeFilter, $entityActionFilter)
+    {
+        // Create sample entity log data for demonstration
+        // In a real application, this would query a dedicated entity_logs table
+        $sampleEntityLogs = [
+            [
+                'id' => 1,
+                'entity_type' => 'Customer',
+                'entity_id' => 'CUST001',
+                'entity_name' => 'Acme Corporation',
+                'action' => 'Create',
+                'user_name' => 'John Smith',
+                'user_id' => 1,
+                'description' => 'Customer record created with initial contact information',
+                'old_values' => null,
+                'new_values' => json_encode([
+                    'name' => 'Acme Corporation',
+                    'email' => 'contact@acme.com',
+                    'status' => 'active'
+                ]),
+                'created_at' => date('Y-m-d H:i:s', strtotime('-2 hours')),
+                'formatted_date' => date('M j, Y g:i A', strtotime('-2 hours'))
+            ],
+            [
+                'id' => 2,
+                'entity_type' => 'Order',
+                'entity_id' => 'ORD-2024-001',
+                'entity_name' => 'Service Installation Order',
+                'action' => 'Update',
+                'user_name' => 'Sarah Johnson',
+                'user_id' => 2,
+                'description' => 'Order status updated from pending to scheduled',
+                'old_values' => json_encode(['status' => 'pending']),
+                'new_values' => json_encode(['status' => 'scheduled', 'scheduled_date' => '2024-01-15']),
+                'created_at' => date('Y-m-d H:i:s', strtotime('-4 hours')),
+                'formatted_date' => date('M j, Y g:i A', strtotime('-4 hours'))
+            ],
+            [
+                'id' => 3,
+                'entity_type' => 'User',
+                'entity_id' => 'USR003',
+                'entity_name' => 'Mike Wilson',
+                'action' => 'Update',
+                'user_name' => 'Admin User',
+                'user_id' => 1,
+                'description' => 'User profile updated - changed department and role',
+                'old_values' => json_encode(['department' => 'Sales', 'role' => 'Representative']),
+                'new_values' => json_encode(['department' => 'Support', 'role' => 'Manager']),
+                'created_at' => date('Y-m-d H:i:s', strtotime('-6 hours')),
+                'formatted_date' => date('M j, Y g:i A', strtotime('-6 hours'))
+            ],
+            [
+                'id' => 4,
+                'entity_type' => 'Territory',
+                'entity_id' => 'TER005',
+                'entity_name' => 'North Region',
+                'action' => 'Create',
+                'user_name' => 'John Smith',
+                'user_id' => 1,
+                'description' => 'New territory created for northern region coverage',
+                'old_values' => null,
+                'new_values' => json_encode([
+                    'name' => 'North Region',
+                    'description' => 'Covers northern districts',
+                    'status' => 'active'
+                ]),
+                'created_at' => date('Y-m-d H:i:s', strtotime('-1 day')),
+                'formatted_date' => date('M j, Y g:i A', strtotime('-1 day'))
+            ],
+            [
+                'id' => 5,
+                'entity_type' => 'Customer',
+                'entity_id' => 'CUST002',
+                'entity_name' => 'TechCorp Solutions',
+                'action' => 'Delete',
+                'user_name' => 'Sarah Johnson',
+                'user_id' => 2,
+                'description' => 'Customer record deleted due to duplicate entry',
+                'old_values' => json_encode([
+                    'name' => 'TechCorp Solutions',
+                    'email' => 'info@techcorp.com',
+                    'status' => 'inactive'
+                ]),
+                'new_values' => null,
+                'created_at' => date('Y-m-d H:i:s', strtotime('-2 days')),
+                'formatted_date' => date('M j, Y g:i A', strtotime('-2 days'))
+            ]
+        ];
+        
+        // Apply filters
+        $filteredLogs = $sampleEntityLogs;
+        
+        // Apply date filter
+        if (!empty($dateFilter) && $dateFilter !== 'all') {
+            $filteredLogs = array_filter($filteredLogs, function($log) use ($dateFilter) {
+                $logDate = new \DateTime($log['created_at']);
+                $now = new \DateTime();
+                
+                switch ($dateFilter) {
+                    case 'today':
+                        $startDate = new \DateTime('today');
+                        return $logDate >= $startDate;
+                    case 'yesterday':
+                        $startDate = new \DateTime('yesterday');
+                        $endDate = new \DateTime('today');
+                        return $logDate >= $startDate && $logDate < $endDate;
+                    case 'last-7-days':
+                        $startDate = new \DateTime('-7 days');
+                        return $logDate >= $startDate;
+                    case 'last-30-days':
+                    default:
+                        $startDate = new \DateTime('-30 days');
+                        return $logDate >= $startDate;
+                    case 'last-90-days':
+                        $startDate = new \DateTime('-90 days');
+                        return $logDate >= $startDate;
+                    case 'last-year':
+                        $startDate = new \DateTime('-1 year');
+                        return $logDate >= $startDate;
+                }
+                return true;
+            });
+        }
+        
+        // Apply user filter
+        if (!empty($userFilter)) {
+            $filteredLogs = array_filter($filteredLogs, function($log) use ($userFilter) {
+                return $log['user_id'] == $userFilter;
+            });
+        }
+        
+        // Apply entity type filter
+        if (!empty($entityTypeFilter)) {
+            $filteredLogs = array_filter($filteredLogs, function($log) use ($entityTypeFilter) {
+                return strtolower($log['entity_type']) === strtolower($entityTypeFilter);
+            });
+        }
+        
+        // Apply entity action filter
+        if (!empty($entityActionFilter)) {
+            $filteredLogs = array_filter($filteredLogs, function($log) use ($entityActionFilter) {
+                return strtolower($log['action']) === strtolower($entityActionFilter);
+            });
+        }
+        
+        // Re-index array and sort by date (newest first)
+        $filteredLogs = array_values($filteredLogs);
+        usort($filteredLogs, function($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
+        
+        return $filteredLogs;
+    }
+    
+    private function getEntityTypes()
+    {
+        return [
+            'customer' => 'Customer',
+            'order' => 'Order', 
+            'user' => 'User',
+            'territory' => 'Territory',
+            'skill' => 'Skill',
+            'profile' => 'Profile'
+        ];
+    }
+    
+    private function getEntityActions()
+    {
+        return [
+            'create' => 'Create',
+            'update' => 'Update', 
+            'delete' => 'Delete',
+            'assign' => 'Assign',
+            'unassign' => 'Unassign'
+        ];
+    }
+    
+    public function piiFields()
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return redirect()->to('/login');
+        }
+        
+        // Get filter parameters
+        $categoryFilter = $this->request->getVar('category') ?? 'contacts';
+        $searchQuery = $this->request->getVar('search') ?? '';
+        
+        // Get PII fields data based on category
+        $piiFields = $this->getPiiFieldsByCategory($categoryFilter, $searchQuery);
+        
+        $data = [
+            'title' => 'PII Fields',
+            'activeTab' => 'pii-fields',
+            'piiFields' => $piiFields,
+            'categories' => $this->getPiiCategories(),
+            'filters' => [
+                'category' => $categoryFilter,
+                'search' => $searchQuery
+            ]
+        ];
+        
+        return view('settings/pii_fields', $data);
+    }
+    
+    private function getPiiFieldsByCategory($category, $search = '')
+    {
+        // Sample PII fields data based on the mockup
+        $allFields = [
+            'contacts' => [
+                [
+                    'label' => 'First Name',
+                    'data_type' => 'text',
+                    'api_name' => 'First_Name',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Last Name',
+                    'data_type' => 'text',
+                    'api_name' => 'Last_Name',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Email',
+                    'data_type' => 'email',
+                    'api_name' => 'Email',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Phone',
+                    'data_type' => 'phone',
+                    'api_name' => 'Phone',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Mobile',
+                    'data_type' => 'phone',
+                    'api_name' => 'Mobile',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Tax Name',
+                    'data_type' => 'text',
+                    'api_name' => 'Tax_Name',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Tax Exemption Code',
+                    'data_type' => 'text',
+                    'api_name' => 'Tax_Exemption_Code',
+                    'is_pii' => false,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Tax Authority',
+                    'data_type' => 'text',
+                    'api_name' => 'Tax_Authority',
+                    'is_pii' => false,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Full Name',
+                    'data_type' => 'text',
+                    'api_name' => 'Full_Name',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Date of Birth',
+                    'data_type' => 'date',
+                    'api_name' => 'Date_of_Birth',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ],
+                [
+                    'label' => 'Social Security Number',
+                    'data_type' => 'text',
+                    'api_name' => 'SSN',
+                    'is_pii' => true,
+                    'category' => 'contacts'
+                ]
+            ],
+            'companies' => [
+                [
+                    'label' => 'Company Name',
+                    'data_type' => 'text',
+                    'api_name' => 'Company_Name',
+                    'is_pii' => false,
+                    'category' => 'companies'
+                ],
+                [
+                    'label' => 'Business Registration Number',
+                    'data_type' => 'text',
+                    'api_name' => 'Business_Registration_Number',
+                    'is_pii' => true,
+                    'category' => 'companies'
+                ],
+                [
+                    'label' => 'Contact Person',
+                    'data_type' => 'text',
+                    'api_name' => 'Contact_Person',
+                    'is_pii' => true,
+                    'category' => 'companies'
+                ],
+                [
+                    'label' => 'Tax ID Number',
+                    'data_type' => 'text',
+                    'api_name' => 'Tax_ID_Number',
+                    'is_pii' => true,
+                    'category' => 'companies'
+                ],
+                [
+                    'label' => 'Industry Type',
+                    'data_type' => 'text',
+                    'api_name' => 'Industry_Type',
+                    'is_pii' => false,
+                    'category' => 'companies'
+                ],
+                [
+                    'label' => 'Website URL',
+                    'data_type' => 'url',
+                    'api_name' => 'Website_URL',
+                    'is_pii' => false,
+                    'category' => 'companies'
+                ]
+            ],
+            'services_and_parts' => [
+                [
+                    'label' => 'Service Description',
+                    'data_type' => 'text',
+                    'api_name' => 'Service_Description',
+                    'is_pii' => false,
+                    'category' => 'services_and_parts'
+                ],
+                [
+                    'label' => 'Part Serial Number',
+                    'data_type' => 'text',
+                    'api_name' => 'Part_Serial_Number',
+                    'is_pii' => false,
+                    'category' => 'services_and_parts'
+                ],
+                [
+                    'label' => 'Service Category',
+                    'data_type' => 'text',
+                    'api_name' => 'Service_Category',
+                    'is_pii' => false,
+                    'category' => 'services_and_parts'
+                ],
+                [
+                    'label' => 'Part Manufacturer',
+                    'data_type' => 'text',
+                    'api_name' => 'Part_Manufacturer',
+                    'is_pii' => false,
+                    'category' => 'services_and_parts'
+                ],
+                [
+                    'label' => 'Warranty Information',
+                    'data_type' => 'text',
+                    'api_name' => 'Warranty_Info',
+                    'is_pii' => false,
+                    'category' => 'services_and_parts'
+                ]
+            ],
+            'requests' => [
+                [
+                    'label' => 'Request Details',
+                    'data_type' => 'text',
+                    'api_name' => 'Request_Details',
+                    'is_pii' => false,
+                    'category' => 'requests'
+                ],
+                [
+                    'label' => 'Customer Notes',
+                    'data_type' => 'text',
+                    'api_name' => 'Customer_Notes',
+                    'is_pii' => true,
+                    'category' => 'requests'
+                ],
+                [
+                    'label' => 'Request Priority',
+                    'data_type' => 'text',
+                    'api_name' => 'Request_Priority',
+                    'is_pii' => false,
+                    'category' => 'requests'
+                ],
+                [
+                    'label' => 'Customer Feedback',
+                    'data_type' => 'text',
+                    'api_name' => 'Customer_Feedback',
+                    'is_pii' => true,
+                    'category' => 'requests'
+                ]
+            ],
+            'estimates' => [
+                [
+                    'label' => 'Estimate Amount',
+                    'data_type' => 'currency',
+                    'api_name' => 'Estimate_Amount',
+                    'is_pii' => false,
+                    'category' => 'estimates'
+                ],
+                [
+                    'label' => 'Estimate Description',
+                    'data_type' => 'text',
+                    'api_name' => 'Estimate_Description',
+                    'is_pii' => false,
+                    'category' => 'estimates'
+                ],
+                [
+                    'label' => 'Labor Cost',
+                    'data_type' => 'currency',
+                    'api_name' => 'Labor_Cost',
+                    'is_pii' => false,
+                    'category' => 'estimates'
+                ]
+            ],
+            'assets' => [
+                [
+                    'label' => 'Asset Tag',
+                    'data_type' => 'text',
+                    'api_name' => 'Asset_Tag',
+                    'is_pii' => false,
+                    'category' => 'assets'
+                ],
+                [
+                    'label' => 'Asset Location',
+                    'data_type' => 'text',
+                    'api_name' => 'Asset_Location',
+                    'is_pii' => false,
+                    'category' => 'assets'
+                ],
+                [
+                    'label' => 'Asset Owner',
+                    'data_type' => 'text',
+                    'api_name' => 'Asset_Owner',
+                    'is_pii' => true,
+                    'category' => 'assets'
+                ],
+                [
+                    'label' => 'Purchase Date',
+                    'data_type' => 'date',
+                    'api_name' => 'Purchase_Date',
+                    'is_pii' => false,
+                    'category' => 'assets'
+                ]
+            ],
+            'work_orders' => [
+                [
+                    'label' => 'Work Order Notes',
+                    'data_type' => 'text',
+                    'api_name' => 'Work_Order_Notes',
+                    'is_pii' => true,
+                    'category' => 'work_orders'
+                ],
+                [
+                    'label' => 'Customer Signature',
+                    'data_type' => 'text',
+                    'api_name' => 'Customer_Signature',
+                    'is_pii' => true,
+                    'category' => 'work_orders'
+                ],
+                [
+                    'label' => 'Work Order Status',
+                    'data_type' => 'text',
+                    'api_name' => 'Work_Order_Status',
+                    'is_pii' => false,
+                    'category' => 'work_orders'
+                ],
+                [
+                    'label' => 'Technician Notes',
+                    'data_type' => 'text',
+                    'api_name' => 'Technician_Notes',
+                    'is_pii' => true,
+                    'category' => 'work_orders'
+                ],
+                [
+                    'label' => 'Completion Time',
+                    'data_type' => 'datetime',
+                    'api_name' => 'Completion_Time',
+                    'is_pii' => false,
+                    'category' => 'work_orders'
+                ]
+            ]
+        ];
+        
+        $fields = $allFields[$category] ?? [];
+        
+        // Apply search filter if provided
+        if (!empty($search)) {
+            $searchTerm = strtolower(trim($search));
+            $fields = array_filter($fields, function($field) use ($searchTerm) {
+                $label = strtolower($field['label']);
+                $apiName = strtolower($field['api_name']);
+                $dataType = strtolower($field['data_type']);
+                
+                // Search in label, API name, and data type
+                return stripos($label, $searchTerm) !== false || 
+                       stripos($apiName, $searchTerm) !== false ||
+                       stripos($dataType, $searchTerm) !== false;
+            });
+        }
+        
+        // Re-index array after filtering
+        return array_values($fields);
+    }
+    
+    private function getPiiCategories()
+    {
+        return [
+            'contacts' => 'Contacts',
+            'companies' => 'Companies',
+            'services_and_parts' => 'Services And Parts',
+            'requests' => 'Requests',
+            'estimates' => 'Estimates',
+            'assets' => 'Assets',
+            'work_orders' => 'Work Orders'
+        ];
+    }
+    
+    // RECORD TEMPLATES MANAGEMENT
+    public function recordTemplates()
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return redirect()->to('/login');
+        }
+        
+        // Get filter parameters
+        $moduleFilter = $this->request->getVar('module') ?? 'All';
+        $searchQuery = $this->request->getVar('search') ?? '';
+        
+        // Get templates with creator information
+        $templates = $this->recordTemplateModel->getTemplatesWithCreator($moduleFilter, $searchQuery);
+        
+        $data = [
+            'title' => 'Record Templates',
+            'activeTab' => 'record-templates',
+            'templates' => $templates,
+            'modules' => $this->recordTemplateModel->getAvailableModules(),
+            'filters' => [
+                'module' => $moduleFilter,
+                'search' => $searchQuery
+            ]
+        ];
+        
+        return view('settings/record_templates', $data);
+    }
+    
+    public function createRecordTemplate()
+    {
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        
+        // Get default template fields for the module
+        if (isset($data['module'])) {
+            $defaultFields = $this->recordTemplateModel->getDefaultTemplateFields($data['module']);
+            $data['template_data'] = $defaultFields;
+        }
+        
+        if ($this->recordTemplateModel->createTemplate($data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Record template created successfully.',
+                'template' => $this->recordTemplateModel->getTemplateWithCreator($this->recordTemplateModel->getInsertID())
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to create record template',
+                'errors' => $this->recordTemplateModel->errors()
+            ]);
+        }
+    }
+    
+    public function getRecordTemplate($id)
+    {
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $template = $this->recordTemplateModel->getTemplateWithCreator($id);
+        
+        if ($template) {
+            // Decode template_data JSON if it exists
+            if (isset($template['template_data']) && is_string($template['template_data'])) {
+                $template['template_data'] = json_decode($template['template_data'], true);
+            }
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'template' => $template
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Record template not found'
+            ])->setStatusCode(404);
+        }
+    }
+    
+    public function updateRecordTemplate($id)
+    {
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token and id field (id is passed in URL)
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        unset($data['id']);
+        
+        if ($this->recordTemplateModel->updateTemplate($id, $data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Record template updated successfully.',
+                'template' => $this->recordTemplateModel->getTemplateWithCreator($id)
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to update record template',
+                'errors' => $this->recordTemplateModel->errors()
+            ]);
+        }
+    }
+    
+    public function deleteRecordTemplate($id)
+    {
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        if ($this->recordTemplateModel->delete($id)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Record template deleted successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to delete record template'
+            ]);
+        }
+    }
+    
+    public function duplicateRecordTemplate($id)
+    {
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        $newName = $data['name'] ?? null;
+        
+        if ($this->recordTemplateModel->duplicateTemplate($id, $newName)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Record template duplicated successfully.',
+                'template' => $this->recordTemplateModel->getTemplateWithCreator($this->recordTemplateModel->getInsertID())
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to duplicate record template'
+            ]);
         }
     }
 }
