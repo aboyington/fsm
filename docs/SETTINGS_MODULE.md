@@ -159,6 +159,31 @@ Business holiday configuration and calendar management.
 
 **Documentation:** See [SKILLS_HOLIDAY_MANAGEMENT.md](SKILLS_HOLIDAY_MANAGEMENT.md) for detailed documentation
 
+### 9. Profiles Management
+Comprehensive user profile and permission management system.
+
+**Features:**
+- Profile creation and management
+- Permission assignment by module (Settings, Users, Customers, Work Orders, etc.)
+- Action-based permissions (Read, Write, Delete)
+- Status management (Active/Inactive)
+- Default profile protection
+- Real-time permission configuration
+
+**Key Capabilities:**
+- Full CRUD operations for profiles
+- Module-based permission matrix
+- Visual permission interface with checkboxes
+- Default profiles (Administrator, Call Center Agent, Dispatcher, Field Agent, Limited Field Agent)
+- Role-based access control
+- Modal-based editing interface
+
+**Database Table:** `profiles`
+
+**Access:** Settings → Security Control → Profiles
+
+**Documentation:** See [PROFILES_MANAGEMENT.md](PROFILES_MANAGEMENT.md) for detailed documentation
+
 ## Technical Implementation
 
 ### Models
@@ -171,6 +196,7 @@ Business holiday configuration and calendar management.
 - `AuditLogModel` - Tracks user activities and system events
 - `SkillModel` - Manages skill definitions and categorization
 - `HolidayModel` - Handles holiday configuration and year-based management
+- `ProfileModel` - Manages user profiles and permissions
 
 ### Controllers
 - `Settings` - Main settings controller handling all settings routes
@@ -186,6 +212,7 @@ Business holiday configuration and calendar management.
 7. `2025-01-10-000001_create_audit_logs_table.php`
 8. `2025-01-11-000006_CreateSkillsTable.php`
 9. `2025-01-11-000007_CreateHolidaysTable.php`
+10. `2025-01-12-000008_CreateProfilesTable.php`
 
 ### API Endpoints
 
@@ -226,6 +253,13 @@ Business holiday configuration and calendar management.
 - `GET /settings/holiday/get/{year}` - Get holidays for a specific year
 - `POST /settings/holiday/update/{year}` - Update holidays for a specific year
 - `POST /settings/holiday/delete/{id}` - Delete a specific holiday
+
+#### Profiles
+- `GET /settings/profiles` - List all profiles with default profiles
+- `POST /settings/profiles/add` - Create new profile
+- `GET /settings/profiles/get/{id}` - Get profile details with permissions
+- `POST /settings/profiles/update/{id}` - Update profile information
+- `POST /settings/profiles/delete/{id}` - Delete profile (default profiles protected)
 
 ### Security
 - All endpoints require authentication
@@ -283,6 +317,32 @@ Business holiday configuration and calendar management.
    - Inactive Territories
    - All Territories
 6. Use search to find specific territories
+
+### Managing Profiles
+1. Navigate to Settings → Security Control → Profiles
+2. To add a new profile:
+   - Click "New Profile" button
+   - Enter profile name (required)
+   - Add description (optional)
+   - Select status (Active/Inactive)
+   - Configure permissions by module:
+     - Check desired permissions for each module (Read, Write, Delete)
+     - Permissions are grouped by functional areas (Settings, Users, Customers, etc.)
+   - Click "Add Profile"
+3. To edit a profile:
+   - Click the pencil icon in the Actions column
+   - Update profile information and permissions
+   - Click "Update Profile"
+4. To delete a profile:
+   - Click the trash icon in the Actions column (only available for non-default profiles)
+   - Confirm deletion
+   - Note: Default profiles cannot be deleted
+5. Default profiles available:
+   - Administrator (full permissions)
+   - Call Center Agent (customer service focus)
+   - Dispatcher (work order and scheduling focus)
+   - Field Agent (field operations focus)
+   - Limited Field Agent (restricted field operations)
 
 ## Default Configuration
 

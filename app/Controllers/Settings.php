@@ -1297,4 +1297,169 @@ public function getUserTimeline($userId)
             return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete user']);
         }
     }
+
+    // PROFILES MANAGEMENT
+    public function profiles()
+    {
+        $profileModel = new \App\Models\ProfileModel();
+        
+        $data = [
+            'title' => 'Profiles',
+            'activeTab' => 'profiles',
+            'profiles' => $profileModel->getProfilesWithUserCount()
+        ];
+        
+        return view('settings/profiles', $data);
+    }
+    
+    public function addProfile()
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $profileModel = new \App\Models\ProfileModel();
+        $data = $this->request->getPost();
+        
+        // Process permissions if provided
+        if (isset($data['permissions']) && is_array($data['permissions'])) {
+            $data['permissions'] = $data['permissions'];
+        } else {
+            $data['permissions'] = $profileModel->getDefaultPermissions();
+        }
+        
+        if ($profileModel->insert($data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Profile added successfully.',
+                'profile' => $profileModel->find($profileModel->getInsertID())
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to add profile',
+                'errors' => $profileModel->errors()
+            ]);
+        }
+    }
+    
+    public function getProfile($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $profileModel = new \App\Models\ProfileModel();
+        $profile = $profileModel->find($id);
+        
+        if ($profile) {
+            return $this->response->setJSON([
+                'success' => true,
+                'profile' => $profile
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Profile not found'
+            ])->setStatusCode(404);
+        }
+    }
+    
+    public function updateProfile($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $profileModel = new \App\Models\ProfileModel();
+        $data = $this->request->getPost();
+        
+        // Check if profile exists
+        $profile = $profileModel->find($id);
+        if (!$profile) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Profile not found'
+            ])->setStatusCode(404);
+        }
+        
+        // Process permissions if provided
+        if (isset($data['permissions']) && is_array($data['permissions'])) {
+            $data['permissions'] = $data['permissions'];
+        }
+        
+        // Remove id from data to prevent updating primary key
+        unset($data['id']);
+        
+        if ($profileModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Profile updated successfully.',
+                'profile' => $profileModel->find($id)
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to update profile',
+                'errors' => $profileModel->errors()
+            ]);
+        }
+    }
+    
+    public function deleteProfile($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $profileModel = new \App\Models\ProfileModel();
+        
+        // Check if profile exists
+        $profile = $profileModel->find($id);
+        if (!$profile) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Profile not found'
+            ])->setStatusCode(404);
+        }
+        
+        try {
+            if ($profileModel->delete($id)) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Profile deleted successfully.'
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to delete profile'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ])->setStatusCode(400);
+        }
+    }
 }

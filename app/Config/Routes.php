@@ -46,6 +46,11 @@ $routes->group('settings', function($routes) {
     $routes->post('users/skills/update/(:num)', 'Settings::updateUserSkill/$1');
     $routes->post('users/skills/remove', 'Settings::removeUserSkill');
     $routes->get('holiday', 'Settings::holiday', ['filter' => 'auth']);
+    $routes->get('profiles', 'Settings::profiles', ['filter' => 'auth']);
+    $routes->post('profiles/add', 'Settings::addProfile');
+    $routes->get('profiles/get/(:num)', 'Settings::getProfile/$1');
+    $routes->post('profiles/update/(:num)', 'Settings::updateProfile/$1');
+    $routes->post('profiles/delete/(:num)', 'Settings::deleteProfile/$1');
     $routes->get('billing-setup', 'Settings::billing', ['filter' => 'auth']);
     $routes->get('tax-settings', 'Settings::taxSettings', ['filter' => 'auth']);
     $routes->get('fiscal-year', 'Settings::fiscalYear', ['filter' => 'auth']);
