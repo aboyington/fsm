@@ -30,10 +30,16 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto d-flex align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-custom h5 mb-0" href="<?= base_url('dashboard') ?>">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="dashboardDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Dashboard
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="dashboardDropdown">
+                            <li><a class="dropdown-item" href="<?= base_url('dashboard') ?>">Overview</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('dashboard/request-management') ?>">Request Management</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('dashboard/service-appointment-management') ?>">Service Appointment Management</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('dashboard/technician-view') ?>">Technician View</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="customersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

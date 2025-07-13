@@ -12,10 +12,10 @@
                     <?= ucwords(str_replace('-', ' ', $current_view)) ?>
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item <?= $current_view === 'overview' ? 'active' : '' ?>" href="<?= base_url('dashboard?view=overview') ?>">Overview</a></li>
-                    <li><a class="dropdown-item <?= $current_view === 'request-management' ? 'active' : '' ?>" href="<?= base_url('dashboard?view=request-management') ?>">Request Management</a></li>
-                    <li><a class="dropdown-item <?= $current_view === 'service-appointment-management' ? 'active' : '' ?>" href="<?= base_url('dashboard?view=service-appointment-management') ?>">Service Appointment Management</a></li>
-                    <li><a class="dropdown-item <?= $current_view === 'technician-view' ? 'active' : '' ?>" href="<?= base_url('dashboard?view=technician-view') ?>">Technician View</a></li>
+                    <li><a class="dropdown-item <?= $current_view === 'overview' ? 'active' : '' ?>" href="<?= base_url('dashboard') ?>">Overview</a></li>
+                    <li><a class="dropdown-item <?= $current_view === 'request-management' ? 'active' : '' ?>" href="<?= base_url('dashboard/request-management') ?>">Request Management</a></li>
+                    <li><a class="dropdown-item <?= $current_view === 'service-appointment-management' ? 'active' : '' ?>" href="<?= base_url('dashboard/service-appointment-management') ?>">Service Appointment Management</a></li>
+                    <li><a class="dropdown-item <?= $current_view === 'technician-view' ? 'active' : '' ?>" href="<?= base_url('dashboard/technician-view') ?>">Technician View</a></li>
                 </ul>
             </div>
         </div>

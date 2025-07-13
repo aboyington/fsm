@@ -13,7 +13,12 @@ $routes->get('/', function() {
 $routes->get('login', 'AuthController::login');
 $routes->post('set-session', 'AuthController::setSession');
 $routes->get('logout', 'AuthController::logout');
+// Dashboard Routes
 $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
+$routes->get('dashboard/overview', 'DashboardController::overview', ['filter' => 'auth']);
+$routes->get('dashboard/request-management', 'DashboardController::requestManagement', ['filter' => 'auth']);
+$routes->get('dashboard/service-appointment-management', 'DashboardController::serviceAppointmentManagement', ['filter' => 'auth']);
+$routes->get('dashboard/technician-view', 'DashboardController::technicianView', ['filter' => 'auth']);
 
 // Settings Routes
 $routes->group('settings', function($routes) {

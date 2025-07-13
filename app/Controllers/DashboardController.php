@@ -6,20 +6,7 @@ class DashboardController extends BaseController
 {
     public function index()
     {
-        $view = $this->request->getGet('view') ?? 'overview';
-        
-        switch ($view) {
-            case 'overview':
-                return $this->overview();
-            case 'request-management':
-                return $this->requestManagement();
-            case 'service-appointment-management':
-                return $this->serviceAppointmentManagement();
-            case 'technician-view':
-                return $this->technicianView();
-            default:
-                return $this->overview();
-        }
+        return $this->overview();
     }
 
     public function overview()
