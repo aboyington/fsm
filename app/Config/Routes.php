@@ -13,7 +13,7 @@ $routes->get('/', function() {
 $routes->get('login', 'AuthController::login');
 $routes->post('set-session', 'AuthController::setSession');
 $routes->get('logout', 'AuthController::logout');
-$routes->get('dashboard', 'AuthController::dashboard', ['filter' => 'auth']);
+$routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
 
 // Settings Routes
 $routes->group('settings', function($routes) {

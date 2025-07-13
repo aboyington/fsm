@@ -45,6 +45,7 @@ Canvass Global requires a robust system to:
   - Calendar View
 - **Trips**: Field trip planning and tracking
 - **Time Sheet**: Time tracking for technicians
+- **Parts and Services**: Separate management for Parts and Service offerings
 - **Multi-currency**: Support for international operations
 - **Multi-day appointments**: Extended service scheduling
 - **Maintenance Plans**: Preventive maintenance scheduling

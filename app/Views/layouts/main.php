@@ -23,35 +23,79 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="<?= base_url('dashboard') ?>">
-                <i class="bi bi-tools"></i> FSM Platform
+                <i class="bi bi-tools" style="font-size: 1em;"></i> Udora FSM
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav me-auto d-flex align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('dashboard') ?>">
-                            <i class="bi bi-speedometer2"></i> Dashboard
+                        <a class="nav-link nav-link-custom h5 mb-0" href="<?= base_url('dashboard') ?>">
+                            Dashboard
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('customers') ?>">
-                            <i class="bi bi-people"></i> Customers
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="customersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Customers
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="customersDropdown">
+                            <li><a class="dropdown-item" href="<?= base_url('customers/contacts') ?>">Contacts</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('customers/companies') ?>">Companies</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('customers/assets') ?>">Assets</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="workOrderDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Work Order Management
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="workOrderDropdown">
+                            <li><a class="dropdown-item" href="<?= base_url('work-order-management/request') ?>">Request</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('work-order-management/estimates') ?>">Estimates</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('work-order-management/work-orders') ?>">Work Orders</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('work-order-management/service-appointments') ?>">Service Appointments</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('work-order-management/service-reports') ?>">Service Reports</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('work-order-management/scheduled-maintenances') ?>">Scheduled Maintenances</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('work-orders') ?>">
-                            <i class="bi bi-clipboard-check"></i> Work Orders
+                        <a class="nav-link nav-link-custom h5 mb-0" href="<?= base_url('dispatch') ?>">
+                            Dispatch
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('calendar') ?>">
-                            <i class="bi bi-calendar3"></i> Calendar
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="partsServiceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Parts And Service
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="partsServiceDropdown">
+                            <li><a class="dropdown-item" href="<?= base_url('parts-and-service/parts') ?>">Parts</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('parts-and-service/service') ?>">Service</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="workforceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Workforce
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="workforceDropdown">
+                            <li><a class="dropdown-item" href="<?= base_url('workforce/users') ?>">Users</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('workforce/crew') ?>">Crew</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('workforce/equipments') ?>">Equipments</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('workforce/trips') ?>">Trips</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('workforce/auto-log') ?>">Auto Log</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('workforce/time-off') ?>">Time Off</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="billingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Billing
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="billingDropdown">
+                            <li><a class="dropdown-item" href="<?= base_url('billing/invoices') ?>">Invoices</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('billing/payments') ?>">Payments</a></li>
+                        </ul>
                     </li>
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav d-flex align-items-center">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> <span id="currentUserName">User</span>

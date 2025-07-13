@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
-            <h1 class="h3">Dashboard</h1>
+            <h6 class="h4">Dashboard</h6>
             <p class="text-muted">Welcome back, <span id="userName">User</span>!</p>
         </div>
         <div class="col-auto">
@@ -55,7 +55,7 @@
     <!-- Recent Work Orders Table -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="card-title">Recent Work Orders</h5>
+            <h6 class="card-title">Recent Work Orders</h6>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -84,7 +84,7 @@
         <div class="col-md-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="card-title">Today's Schedule</h5>
+                    <h6 class="card-title">Today's Schedule</h6>
                 </div>
                 <div class="card-body">
                     <div id="todaysSchedule">
@@ -98,7 +98,7 @@
         <div class="col-md-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="card-title">Work Order Status Distribution</h5>
+                    <h6 class="card-title">Work Order Status Distribution</h6>
                 </div>
                 <div class="card-body">
                     <canvas id="statusChart" height="200"></canvas>
@@ -113,7 +113,7 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Create Work Order</h5>
+                <h6 class="modal-title">Create Work Order</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">

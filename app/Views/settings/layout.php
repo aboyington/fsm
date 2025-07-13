@@ -191,6 +191,18 @@
                         </div>
                     </div>
 
+                    <!-- Reports Section -->
+                    <div class="settings-section">
+                        <div class="settings-section-header" data-bs-toggle="collapse" data-bs-target="#reportsSection">
+                            <i class="bi bi-chevron-down"></i> Reports
+                        </div>
+                        <div id="reportsSection" class="collapse show">
+                            <a href="<?= base_url('reports') ?>" class="settings-link <?= $activeTab == 'reports' ? 'active' : '' ?>">
+                                Reports Dashboard
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- Developer Space Section -->
                     <div class="settings-section">
                         <div class="settings-section-header" data-bs-toggle="collapse" data-bs-target="#developerSection">
@@ -258,7 +270,6 @@
 
 .settings-section-header i {
     font-size: 0.75rem;
-    transition: transform 0.2s;
 }
 
 .settings-section-header[aria-expanded="true"] i {

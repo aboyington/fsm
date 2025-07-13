@@ -1,5 +1,71 @@
 /* FSM Platform Styles */
 
+/* Dashboard Style Enhancements */
+.card {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.card-body {
+    background-color: #ffffff;
+}
+
+.text-muted {
+    color: #212129 !important;
+}
+
+.stat-card .stat-value {
+    font-size: 2.5rem;
+    color: var(--dashboard-text-color);
+}
+
+.stat-card .stat-label {
+    font-size: 1rem;
+    color: var(--secondary-color);
+}
+
+.badge {
+    font-size: 0.85rem;
+}
+
+/* Unified Icon Font Sizes */
+.bi {
+    font-size: 1.25rem;
+}
+
+/* User profile icon - slightly larger for visibility */
+#userDropdown .bi-person-circle {
+    font-size: 1.5rem;
+}
+
+/* Small icons for buttons and actions */
+.btn .bi,
+.dropdown-item .bi,
+.table .bi,
+.settings-link .bi {
+    font-size: 1rem;
+}
+
+/* Very small icons for inline elements */
+.badge .bi,
+.form-control .bi {
+    font-size: 0.875rem;
+}
+
+/* Specific Views */
+#overview, #request-management, #service-appointment-management, #technician-view {
+    padding: 20px;
+}
+
 /* Calendar styling */
 .calendar-container {
     margin-top: 20px;
@@ -138,18 +204,22 @@
 
 :root {
     --primary-color: #0d6efd;
-    --secondary-color: #6c757d;
+    --secondary-color: #212129;
     --success-color: #198754;
     --danger-color: #dc3545;
     --warning-color: #ffc107;
     --info-color: #0dcaf0;
     --navbar-bg: #252D43;
+    --dashboard-text-color: #212129;
 }
 
 body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    color: #212129;
+    font-size: 1rem;
+    background-color: #ECF1F3;
 }
 
 main {
@@ -159,6 +229,8 @@ main {
 /* Navbar customization */
 .navbar {
     background-color: var(--navbar-bg) !important;
+    padding: 0.25rem 1rem;
+    min-height: 48px;
 }
 
 .navbar-brand {
@@ -171,6 +243,50 @@ main {
 
 .navbar-dark .navbar-nav .nav-link:hover {
     color: rgba(255, 255, 255, 1);
+}
+
+/* Custom navigation link styles */
+.nav-link-custom {
+    position: relative;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-link-custom:hover {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 1) !important;
+}
+
+/* Custom dropdown menu styling */
+.navbar-dark .dropdown-menu {
+    background-color: #252D43;
+    border: none;
+    border-radius: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-dark .dropdown-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-dark .dropdown-menu .dropdown-item:hover,
+.navbar-dark .dropdown-menu .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 1);
+}
+
+/* Ensure proper vertical alignment */
+.navbar-nav {
+    align-items: center;
+}
+
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
 }
 
 /* Card styling */
@@ -241,11 +357,10 @@ main {
 /* Dashboard stats */
 .stat-card {
     border-left: 4px solid var(--primary-color);
-    transition: transform 0.2s ease-in-out;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
+    /* hover effect removed */
 }
 
 .stat-card .stat-value {
@@ -301,6 +416,35 @@ main {
 .dashboard-header {
     margin-bottom: 2rem;
 }
+
+/* Dashboard color overrides */
+.text-primary {
+    color: var(--dashboard-text-color) !important;
+}
+
+.card-header h6.text-primary {
+    color: var(--dashboard-text-color) !important;
+}
+
+.card-title.text-primary {
+    color: var(--dashboard-text-color) !important;
+}
+
+.text-success {
+    color: var(--success-color) !important;
+}
+
+.text-info {
+    color: var(--info-color) !important;
+}
+
+.text-warning {
+    color: var(--warning-color) !important;
+}
+
+/* Dashboard stat cards - override blue colors */
+.stat-card:nth-child(1) { border-left-color: var(--dashboard-text-color); }
+.stat-card:nth-child(1) .stat-value { color: var(--dashboard-text-color); }
 
 /* Schedule widget */
 .schedule-item {

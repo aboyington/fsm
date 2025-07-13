@@ -16,6 +16,8 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 - **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues and solutions
 
 ### 📆 Module Documentation
+- **[Dashboard Overview](DASHBOARD_OVERVIEW.md)** - Dashboard architecture, KPIs, and user interface
+- **[Navigation Structure](NAVIGATION_STRUCTURE.md)** - Navigation organization and recent updates
 - **[Settings Module](SETTINGS_MODULE.md)** - Organization, currency, and system configuration
 - **[User Management](USER_MANAGEMENT.md)** - User administration and access control
 - **[Territory Management](TERRITORIES.md)** - Geographic service area management
@@ -49,6 +51,12 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 ## Recent Updates (January 2025)
 
 ### New Features
+- ✅ Dashboard architecture with unified KPIs and widgets
+- ✅ Enhanced navigation structure with optimized submenus
+- ✅ Workforce module with comprehensive submenu (Users, Crew, Equipments, Trips, Auto Log, Time Off)
+- ✅ Parts And Service module with focused submenu (Parts, Service)
+- ✅ Unified icon system with consistent sizing across all modules
+- ✅ Reports relocated to Settings page for better organization
 - ✅ Territory Management system implemented
 - ✅ Skills Management with categorization and proficiency tracking
 - ✅ Holiday Management with year-based configuration
@@ -64,6 +72,10 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 - ✅ Improved delete operation handling
 
 ### Documentation Updates
+- ✅ Created comprehensive Dashboard Overview documentation
+- ✅ Added Navigation Structure documentation with recent updates
+- ✅ Updated FSM PRD to reflect new navigation organization
+- ✅ Enhanced README with new module documentation links
 - ✅ Added comprehensive troubleshooting guide
 - ✅ Created detailed territory management documentation
 - ✅ Updated settings module documentation
@@ -76,6 +88,7 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 | Authentication | ✅ Complete | Integrated in User Management |
 | Settings | ✅ Complete | [SETTINGS_MODULE.md](SETTINGS_MODULE.md) |
 | Users | ✅ Complete | [USER_MANAGEMENT.md](USER_MANAGEMENT.md) |
+| Parts And Service | ✅ Complete | Integrated in FSM Documentation |
 | Territories | ✅ Complete | [TERRITORIES.md](TERRITORIES.md) |
 | Skills | ✅ Complete | [SKILLS_HOLIDAY_MANAGEMENT.md](SKILLS_HOLIDAY_MANAGEMENT.md) |
 | Holidays | ✅ Complete | [SKILLS_HOLIDAY_MANAGEMENT.md](SKILLS_HOLIDAY_MANAGEMENT.md) |

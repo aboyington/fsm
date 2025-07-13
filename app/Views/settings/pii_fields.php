@@ -285,13 +285,11 @@
 
 /* Quick action buttons */
 .toggle-pii-btn:hover {
-    transform: scale(1.05);
-    transition: transform 0.2s ease;
+    /* hover effect removed */
 }
 
 .view-details-btn:hover {
-    transform: scale(1.05);
-    transition: transform 0.2s ease;
+    /* hover effect removed */
 }
 
 /* Data type badges */
