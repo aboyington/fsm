@@ -12,13 +12,17 @@ The dashboard is designed with a responsive Bootstrap 5 layout that provides:
 - **Sidebar Navigation**: Context-sensitive navigation for sub-modules
 - **Footer**: System information and version details
 
-### Dashboard Components
+## Dashboard Components
 
 #### 1. Navigation Bar
 The top navigation provides structured access to all major modules:
 
 **Main Menu Structure:**
-- **Dashboard** (Home) - Main dashboard view
+- **Dashboard** (Dropdown) - Multiple dashboard views:
+  - Overview (default)
+  - Request Management
+  - Service Appointment Management
+  - Technician View
 - **Customers** (Dropdown)
   - Contacts
   - Companies

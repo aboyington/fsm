@@ -1,0 +1,26 @@
+{
+  "name": "fsm-field-service-management",
+  "version": "1.1.0",
+  "description": "Field Service Management Application by Anthony Boyington",
+  "main": "index.php",
+  "scripts": {
+    "version": "./scripts/version.sh",
+    "version:patch": "./scripts/version.sh patch",
+    "version:minor": "./scripts/version.sh minor", 
+    "version:major": "./scripts/version.sh major",
+    "version:current": "./scripts/version.sh current"
+  },
+  "author": "Anthony Boyington",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aboyington/fsm.git"
+  },
+  "keywords": [
+    "field-service-management",
+    "codeigniter",
+    "php",
+    "bootstrap",
+    "mysql"
+  ]
+}

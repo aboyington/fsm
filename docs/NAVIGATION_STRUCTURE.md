@@ -6,7 +6,8 @@ The navigation structure of the Field Service Management (FSM) platform is desig
 ## Current Navigation
 
 ### Main Navigation Bar
-- **Dashboard**: Home view of the system
+- **Dashboard**: Multiple dashboard views accessible via dropdown
+  - **Submenu**: Overview, Request Management, Service Appointment Management, Technician View
 - **Customers**: Management of customer relationships and data
   - **Submenu**: Contacts, Companies, Assets
 - **Work Order Management**: Organizing and handling work orders
