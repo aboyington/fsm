@@ -76,8 +76,8 @@ class DashboardController extends BaseController
             'cancelled_requests' => 0,
             'new_requests' => [],
             'new_estimates' => [],
-            'completed_requests' => [],
-            'cancelled_requests' => [],
+            'completed_requests_list' => [],
+            'cancelled_requests_list' => [],
             'approved_estimates' => [],
             'cancelled_estimates' => []
         ];
@@ -93,9 +93,9 @@ class DashboardController extends BaseController
             'new_work_orders' => [],
             'scheduled_appointments' => [],
             'dispatched_appointments' => [],
-            'in_progress_appointments' => [],
-            'completed_appointments' => [],
-            'cancelled_appointments' => [],
+            'in_progress_appointments_list' => [],
+            'completed_appointments_list' => [],
+            'cancelled_appointments_list' => [],
             'terminated_appointments' => []
         ];
     }
