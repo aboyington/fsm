@@ -8,7 +8,7 @@
         </div>
         <div class="col-auto">
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <?= ucwords(str_replace('-', ' ', $current_view)) ?>
                 </button>
                 <ul class="dropdown-menu">

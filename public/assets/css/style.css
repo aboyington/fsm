@@ -203,7 +203,7 @@
 }
 
 :root {
-    --primary-color: #0d6efd;
+    --primary-color: #198754;
     --secondary-color: #212129;
     --success-color: #198754;
     --danger-color: #dc3545;
@@ -260,7 +260,7 @@ main {
 
 /* Custom dropdown menu styling */
 .navbar-dark .dropdown-menu {
-    background-color: #252D43;
+    background-color: var(--navbar-bg);
     border: none;
     border-radius: 0;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -318,13 +318,64 @@ main {
 .form-control:focus,
 .form-select:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
 }
 
 /* Button styling */
 .btn {
     border-radius: 0.375rem;
     font-weight: 500;
+}
+
+/* Override Bootstrap btn-outline-primary colors */
+.btn-outline-primary {
+    color: #198754;
+    border-color: #198754;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-outline-primary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-outline-primary:disabled,
+.btn-outline-primary.disabled {
+    color: #198754;
+    background-color: transparent;
+    border-color: #198754;
+}
+
+/* Override Bootstrap dropdown menu active item colors to match success color */
+.dropdown-item.active,
+.dropdown-item:active {
+    color: #fff;
+    background-color: var(--success-color);
+    text-decoration: none;
+}
+
+.dropdown-item.active:hover,
+.dropdown-item.active:focus {
+    color: #fff;
+    background-color: var(--success-color);
+}
+
+/* Override any primary-colored dropdown items */
+.dropdown-menu .dropdown-item.active {
+    background-color: var(--success-color) !important;
+    color: #fff !important;
 }
 
 /* Status badges */
@@ -379,8 +430,8 @@ main {
 }
 
 /* Different colors for different stat cards */
-.stat-card:nth-child(1) { border-left-color: #0d6efd; }
-.stat-card:nth-child(1) .stat-value { color: #0d6efd; }
+.stat-card:nth-child(1) { border-left-color: #198754; }
+.stat-card:nth-child(1) .stat-value { color: #198754; }
 
 .stat-card:nth-child(2) { border-left-color: #198754; }
 .stat-card:nth-child(2) .stat-value { color: #198754; }
@@ -415,6 +466,31 @@ main {
 /* Dashboard specific */
 .dashboard-header {
     margin-bottom: 2rem;
+}
+
+/* Dashboard Dropdown Menu - Custom Color Theme */
+#dashboardDropdown {
+    color: #FFFFFFD9 !important;
+}
+
+#dashboardDropdown:hover {
+    color: #FFFFFF !important;
+    border-bottom-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.navbar-dark .navbar-nav .nav-item .dropdown-menu[aria-labelledby="dashboardDropdown"] {
+    background-color: #2c3e50;
+    border-top: 3px solid #28a745;
+}
+
+.navbar-dark .dropdown-menu[aria-labelledby="dashboardDropdown"] .dropdown-item {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.navbar-dark .dropdown-menu[aria-labelledby="dashboardDropdown"] .dropdown-item:hover,
+.navbar-dark .dropdown-menu[aria-labelledby="dashboardDropdown"] .dropdown-item:focus {
+    background-color: rgba(40, 167, 69, 0.15);
+    color: #28a745 !important;
 }
 
 /* Dashboard color overrides */
