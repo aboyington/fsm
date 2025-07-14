@@ -249,6 +249,50 @@ Comprehensive template system for standardizing record creation across different
 - Follows established naming conventions and form patterns
 - Implements consistent error handling and user feedback
 
+### 12. Account Registry Management
+Comprehensive client account and service code management system implementing the company's standardized account numbering scheme.
+
+**Features:**
+- **Client Management:** Complete client registry with contact information, status tracking, and unique client codes
+- **Service Registry:** Client-service relationship management with automatic account code generation
+- **Sequence Management:** Auto-incrementing sequences for different service types (Materials, Hardware, Parts, Services)
+- **Account Code Generation:** Automatic generation following the `<Prefix>-<Group>-<Client>` format
+- **Multi-Service Support:** Clients can have multiple services with separate account codes
+- **Real-time Filtering:** Advanced filtering by status, service type, and search across all data
+
+**Key Capabilities:**
+- **Tabbed Interface:** 
+  - Clients Tab: Manage master client information
+  - Service Registry Tab: Manage client-service relationships
+  - Sequences Tab: Monitor and adjust auto-incrementing sequences
+- **Automatic Code Generation:**
+  - Client abbreviations from company names
+  - Account codes following business rules (e.g., `ALA-001-ACME`)
+  - Sequential group IDs for service categorization
+- **Advanced Filtering and Search:**
+  - Status-based filtering (Active/Inactive/All)
+  - Service type filtering (Materials, Hardware, Parts, Services)
+  - Real-time search across client names, codes, and service details
+- **Data Integrity:**
+  - Unique client codes and account codes
+  - Foreign key relationships between clients and services
+  - Sequence management to prevent duplicates
+- **Business Intelligence:**
+  - Client statistics and counts
+  - Service distribution analytics
+  - Sequence usage tracking
+
+**Database Tables:**
+- `clients` - Master client information
+- `service_registry` - Client-service relationships with account codes
+- `account_sequences` - Auto-incrementing sequences by service type
+- `invoice_sequences` - Invoice and estimate numbering
+- `product_skus` - Product SKUs for inventory management
+
+**Access:** Settings → General → Account Registry
+
+**Documentation:** See [ACCOUNT_REGISTRY_IMPLEMENTATION.md](ACCOUNT_REGISTRY_IMPLEMENTATION.md) for detailed implementation documentation
+
 ## Technical Implementation
 
 ### Models
@@ -262,6 +306,9 @@ Comprehensive template system for standardizing record creation across different
 - `SkillModel` - Manages skill definitions and categorization
 - `HolidayModel` - Handles holiday configuration and year-based management
 - `ProfileModel` - Manages user profiles and permissions
+- `ClientModel` - Manages client registry with contact information and validation
+- `ServiceRegistryModel` - Handles client-service relationships and account code generation
+- `AccountSequenceModel` - Manages auto-incrementing sequences for different service types
 
 ### Controllers
 - `Settings` - Main settings controller handling all settings routes
@@ -278,6 +325,7 @@ Comprehensive template system for standardizing record creation across different
 8. `2025-01-11-000006_CreateSkillsTable.php`
 9. `2025-01-11-000007_CreateHolidaysTable.php`
 10. `2025-01-12-000008_CreateProfilesTable.php`
+11. `2025-01-14-000001_CreateAccountRegistryTables.php`
 
 ### API Endpoints
 
@@ -332,6 +380,29 @@ Comprehensive template system for standardizing record creation across different
 - `GET /settings/audit-log?tab=entity` - Display Entity Log tab with entity changes
 - `GET /settings/audit-log?date={filter}&user={id}&sub_type={module}&action={type}` - Filter audit logs
 - `GET /settings/audit-log?tab=entity&entity_type={type}&entity_action={action}` - Filter entity logs
+
+#### Account Registry
+- `GET /settings/account-registry` - Display account registry with tabbed interface
+- `GET /settings/account-registry?tab={clients|services|sequences}` - Switch between registry tabs
+- `GET /settings/account-registry?status={active|inactive|all}&search={query}` - Filter clients/services
+- `GET /settings/account-registry?service_type={materials|hardware|parts|services}` - Filter services by type
+
+##### Client Management
+- `POST /settings/clients/add` - Create new client
+- `GET /settings/clients/get/{id}` - Get client details with services
+- `POST /settings/clients/update/{id}` - Update client information
+- `POST /settings/clients/delete/{id}` - Delete client
+- `GET /settings/clients/dropdown` - Get active clients for dropdowns
+
+##### Service Registry
+- `POST /settings/services/add` - Create new service with automatic account code generation
+- `GET /settings/services/get/{id}` - Get service details with client information
+- `POST /settings/services/update/{id}` - Update service information
+- `POST /settings/services/delete/{id}` - Delete service
+
+##### Sequence Management
+- `GET /settings/sequences/get/{id}` - Get sequence details
+- `POST /settings/sequences/update/{id}` - Update sequence current value
 
 ### Security
 - All endpoints require authentication
@@ -449,6 +520,87 @@ Comprehensive template system for standardizing record creation across different
    - Monitor user activities in real-time
    - Track entity changes for data integrity
    - Review security events and access patterns
+
+### Managing Account Registry
+1. Navigate to Settings → General → Account Registry
+2. **Clients Tab (Default):**
+   - **Adding a New Client:**
+     - Click "New Client" button
+     - Enter client name (required) and unique client code
+     - Fill in contact information:
+       - Contact Person, Email, Phone
+       - Address and notes (optional)
+     - Select status (Active/Inactive)
+     - Click "Add Client"
+   - **Editing a Client:**
+     - Click the pencil icon in the Actions column
+     - Update client information in the modal
+     - Click "Update Client"
+   - **Deleting a Client:**
+     - Click the trash icon in the Actions column
+     - Confirm deletion (note: this will also delete all associated services)
+   - **Filtering Clients:**
+     - Use status dropdown: Active Clients, Inactive Clients, All Clients
+     - Use search box to find clients by name, code, or contact information
+
+3. **Service Registry Tab:**
+   - **Adding a New Service:**
+     - Click "New Service" button
+     - Enter service name and select client from dropdown
+     - Select service type: Materials, Hardware, Parts, or Services
+     - Add description (optional)
+     - Select status (Active/Inactive)
+     - Click "Add Service"
+     - System automatically generates account code (e.g., `SRV-001-ACME`)
+   - **Editing a Service:**
+     - Click the pencil icon in the Actions column
+     - Update service information (note: account code cannot be changed)
+     - Click "Update Service"
+   - **Deleting a Service:**
+     - Click the trash icon in the Actions column
+     - Confirm deletion
+   - **Filtering Services:**
+     - Use status dropdown: Active Services, Inactive Services, All Services
+     - Use service type dropdown: Materials, Hardware, Parts, Services, All Types
+     - Use search box to find services by name, account code, or client name
+
+4. **Sequences Tab:**
+   - **Viewing Sequences:**
+     - View all service type sequences with current and next values
+     - Monitor sequence usage and last update times
+   - **Adjusting Sequences:**
+     - Click the pencil icon to edit a sequence
+     - Update current value (use caution - this affects next account codes)
+     - Update description if needed
+     - Click "Update Sequence"
+   - **Understanding Sequence Usage:**
+     - Current Value: Last used sequence number
+     - Next Value: Number that will be assigned to next service
+     - Sequences are automatically incremented when services are created
+
+5. **Account Code Generation Rules:**
+   - **Format:** `<Prefix>-<Group>-<Client>` (e.g., `MAT-001-ACME`)
+   - **Prefixes:**
+     - MAT: Materials
+     - HRD: Hardware  
+     - PRT: Parts
+     - SRV: Services
+   - **Group ID:** Auto-incrementing 3-digit number (001, 002, 003...)
+   - **Client Abbreviation:** Automatically generated from client name
+     - Multi-word: First 2 letters of first 2 words ("Acme Corporation" → "ACME")
+     - Single word: First 4 letters ("TechCorp" → "TECH")
+   - **Example Account Codes:**
+     - `SRV-001-ACME` - First service for Acme Corporation
+     - `MAT-015-SMIT` - 15th material item for Smith Industries
+     - `HRD-003-TECH` - Third hardware item for TechCorp
+
+6. **Best Practices:**
+   - **Client Codes:** Use consistent, meaningful codes (e.g., ACME001, SMITH01)
+   - **Client Names:** Enter full legal business names for accurate abbreviations
+   - **Service Names:** Use descriptive names ("Camera System Installation" vs "Service 1")
+   - **Status Management:** Set clients/services to inactive rather than deleting to preserve history
+   - **Sequence Management:** Only adjust sequences when necessary (e.g., importing legacy data)
+   - **Regular Monitoring:** Check sequences tab periodically to ensure proper incrementing
 
 ## Default Configuration
 

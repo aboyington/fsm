@@ -1,82 +1,223 @@
-## Add Companies  
+# Companies Management
 
-Companies can be added in the following ways:  
+The Companies module allows you to manage business customers and their information within the FSM platform. Companies serve as the primary business entities that can have multiple contacts, assets, and service locations.
 
-1. Add companies individually in the **Companies** module. The details are described below.    
-2. [Import companies](https://help.zoho.com/portal/en/kb/fsm/data-administration/articles/importing-data-to-zoho-fsm) from external sources.      
-3. Import companies from [Invoice](https://help.zoho.com/portal/en/kb/fsm/billing/articles/module-configuration#Import_Customers).
+## Company Data Structure
 
-To add a company:  
+### Core Information
+- **Company Name**: Primary business name
+- **Legal Name**: Official legal business name
+- **Company Code**: Unique identifier for internal reference
+- **Business Type**: Type of business entity
+- **Industry**: Industry classification
+- **Website**: Company website URL
+- **Description**: Company description and notes
 
-![Info](https://static.zohocdn.com/zoho-desk-editor/static/images/info.png/)**Permission Required**: [Companies](https://help.zoho.com/portal/en/kb/fsm/set-up-workforce/articles/profiles-and-permissions#Basic_Permissions)
+### Contact Information
+- **Primary Email**: Main business email
+- **Primary Phone**: Main business phone number
+- **Secondary Phone**: Alternative contact number
+- **Fax**: Fax number (if applicable)
 
-1. Select **Companies** from the **Customers** menu and click **Create**.      
-2. Enter the **Company Name**.      
-3. Select a value for **Taxable**.  
-    **- Taxable**: A Company Tax should be selected if Taxable is chosen.  
-    **- Non-Taxable**: An [Exemption Reason](https://help.zoho.com/portal/en/kb/fsm/billing/articles/tax-setting#Tax_Exemption) should be selected if Non-Taxable is chosen.    
-    These values are configured in Zoho Invoice. Click [here](https://help.zoho.com/portal/en/kb/fsm/integrations/invoice-integration/articles/invoice-setup) for details of Zoho Invoice-FSM integration. These values can also be edited in the FSM application at **Setup** > **Integrations** > **Billing** > **Tax Setting**.
-    
-4. Select a value for **Currency**.      
-    You can configure these values at **Setup** > **General** > **Currency**.      
-5. Add any other necessary details and click **Save**.
+### Financial Information
+- **Tax ID**: Tax identification number
+- **Currency**: Default currency for transactions
+- **Payment Terms**: Standard payment terms
+- **Credit Limit**: Approved credit limit
+- **Taxable Status**: Tax exemption status
+- **Tax Rate**: Applicable tax rate
 
-## Add Company from Mobile App
+### Address Management
+- **Billing Address**: Primary billing location
+- **Shipping Address**: Default shipping location
+- **Multiple Service Addresses**: Various service locations
 
-To create a company:  
+### Business Details
+- **Established Date**: When the business was established
+- **Employee Count**: Number of employees
+- **Annual Revenue**: Estimated annual revenue
+- **Territory**: Assigned service territory
+- **Status**: Active/Inactive status
+- **Tags**: Custom tags for categorization
 
-1. Select **Companies**, in the left menu.  
-      
-    ![](https://help.zoho.com/galleryDocuments/edbsnf4184a59e81c3235bbcaa0df0ef1c521c3792b41d9d56f303e5e76ef5aaf3b306b36a7e99cc0766d8bc1ed00d0185be9?inline=true)  
-      
-    
-2. In the _Companies_ screen, tap the add [+] icon.  
-      
-    ![](https://help.zoho.com/galleryDocuments/edbsnf76bb464dad55e04e4e7fffd454f8b050fac7449b752a8b9c46fe5c7018945f12460a59d680ae9d61c6ba94bdf09e060?inline=true)  
-      
-    
-3. In the _Create Company_ page, enter the necessary details and click **Save**.  
-      
-    ![](https://help.zoho.com/galleryDocuments/edbsn20cbf2dccdae5d8c3a21f812f81c006a4ee859e21b8008c9691f00725fc22a26c0f6fc3a8b4bf3fb37a20e97f9b5c748?inline=true)  
-      
-    
-4. In the lookup fields, you can do an [advanced search](https://help.zoho.com/portal/en/kb/fsm/mobilize-your-workforce/articles/fsm-mobile-app#Advanced_Lookup_Search).      
-5. In the address fields, you can [add](https://help.zoho.com/portal/en/kb/fsm/mobilize-your-workforce/articles/fsm-mobile-app#Manage_Work_Order_Addresses) addresses.      
-6. The Currency and Exchange Rate will be displayed only if [multiple currencies](https://help.zoho.com/portal/en/kb/fsm/getting-started/articles/organization-setting#Manage_multiple_currencies) are enabled.
+## Adding Companies
 
-The created company can be edited. To edit a company:  
+Companies can be added in the following ways:
 
-1. Click the **Edit** [![](https://help.zoho.com/galleryDocuments/edbsne89b6c287aa3fa85d9051e14685e1490353b4753f64399f16734c9cba3f0ab27e649171bf21983a71c3312c57c0a7e42?inline=true)] icon on the top right side.  
-    
-2. Make the necessary changes and click **Save**.  
-      
-    ![](https://help.zoho.com/galleryDocuments/edbsn6ed2fa4b40b7e1d7362f632c7608ae1bfd30f41756c0246e17798a10c653e2b2a9fcd5a647efa97f43a80cf10a357854?inline=true)     ![](https://help.zoho.com/galleryDocuments/edbsn2c60614855492eb28e4f07b807deddcc55942068a0889e45d5409fbb27c2575965e5e08f21be9d7751799972bb1f80e8?inline=true)
+1. **Manual Entry**: Add companies individually through the Companies module
+2. **Data Import**: Import companies from external sources (CSV, Excel)
+3. **API Integration**: Sync companies from external systems
+4. **Mobile App**: Create companies using the mobile application
 
-You can also add addresses, and notes.  
+### To add a company manually:
 
-## Delete Company Address
+**Permission Required**: Companies module access with Create permission
 
-You can delete the addresses added to a company. To delete a company address:  
+1. Navigate to **Customers** → **Companies** and click **Create**
+2. Enter the required **Company Name**
+3. Fill in the core business information:
+   - Legal name and business type
+   - Industry classification
+   - Contact information (email, phone)
+4. Configure financial settings:
+   - Select **Currency** for transactions
+   - Set **Payment Terms** and **Credit Limit**
+   - Configure **Taxable** status:
+     - **Taxable**: Select appropriate tax rate
+     - **Non-Taxable**: Choose exemption reason
+5. Add address information:
+   - Billing address (required)
+   - Shipping address (if different)
+   - Service locations as needed
+6. Set additional details:
+   - Assign to **Territory**
+   - Add relevant **Tags**
+   - Set company **Status**
+7. Click **Save** to create the company
 
-1. Select **Companies** from the **Customers** menu and select the company record whose address you want to delete.      
-2. Select the **Addresses** tab.  
-    
-3. Hover over the address and click the **Delete** [![](https://help.zoho.com/galleryDocuments/edbsn6e655e79f80b489f82db44fabccdd271d0824f59958fc23010a7d2c6e57da9afd42ac6c1a600165c3baa298c09ef29d8?inline=true)] icon.      
-4. Click **Yes, Delete** in the confirmation message to proceed.
+## Company Address Management
 
-![](https://help.zoho.com/galleryDocuments/edbsnbbfe1e4e843bc5d4be55dd9a30cc9bd1fbeb87e49c0e0857ebf651912f99ce59a60a93030ad09c959cd91678fc71bb0e?inline=true)  
+### Adding Addresses
+Companies can have multiple addresses for different purposes:
+- **Billing Address**: For invoicing
+- **Shipping Address**: For parts and equipment delivery
+- **Service Addresses**: Multiple locations where services are provided
 
-![Info](https://img.zohostatic.com/zde/static/images/info.png)
+### Address Types
+1. **Primary Billing**: Main billing location
+2. **Primary Shipping**: Default delivery location
+3. **Service Location**: Various service sites
+4. **Branch Office**: Additional company locations
 
-**Note**:  
+### Managing Addresses
+1. From the company details page, select the **Addresses** tab
+2. Click **Add Address** to create new addresses
+3. Specify address type and complete location details
+4. Use the geocoding feature to set accurate coordinates
+5. Set default addresses for billing and shipping
 
-1. Deleting an address will not affect any existing records (work orders, service appointments, etc) where this address is used.      
-2. You can delete a company address only if you have the **Delete** permission for the Contact, and Company modules.
+### Deleting Company Addresses
 
-### Delete Company Address From Mobile App
+**Note**: Deleting an address will not affect existing records (work orders, service appointments, etc.) where this address is used.
 
-To delete a company address:  
-1. Open the record and tap the **Addresses** tab.      
-2. Tap **more options** [ ![](https://help.zoho.com/galleryDocuments/edbsn6f5f2f7e96028bb2b8395ac0b92c30f568992aa1b880f52e84f8cbe603d409d5eb639c72859a249e723d056d08a5b6eb?inline=true) ] in the address entry and select **Delete**.  
-      
-    ![](https://help.zoho.com/galleryDocuments/edbsnc47e6f32f5667050198dedbd76f729aef690190c1f1cc46906effcdef732ab47d52640637b176adddcacc2931ab84a9f?inline=true)
+**Permission Required**: Delete permission for Companies module
+
+1. Navigate to **Companies** and select the company
+2. Go to the **Addresses** tab
+3. Hover over the address and click the **Delete** icon
+4. Confirm deletion in the popup message
+
+## Company Relationships
+
+### Linked Contacts
+- Companies can have multiple associated contacts
+- Each contact represents a person within the organization
+- Contacts inherit company settings unless overridden
+
+### Associated Assets
+- Track equipment and assets owned by the company
+- Link assets to specific company locations
+- Maintain service history per asset
+
+### Territory Assignment
+- Companies are assigned to service territories
+- Territory determines service availability and routing
+- Multiple territories can service a single company with multiple locations
+
+## Company Status Management
+
+### Status Types
+- **Active**: Company is actively serviced
+- **Inactive**: Company is not currently active
+- **Prospect**: Potential customer
+- **Lead**: Sales lead requiring follow-up
+
+### Status Workflow
+1. **Lead** → **Prospect** → **Active**
+2. **Active** ↔ **Inactive** (as needed)
+
+## Mobile App Usage
+
+### Creating Companies on Mobile
+1. Open the FSM mobile app
+2. Navigate to **Companies** in the main menu
+3. Tap the **+** (add) icon
+4. Complete the company information form
+5. Use device GPS for accurate address geocoding
+6. Save the company record
+
+### Editing Companies on Mobile
+1. Select the company from the list
+2. Tap the **Edit** icon
+3. Make necessary changes
+4. Save the updates
+
+## Search and Filtering
+
+### Available Filters
+- **Company Name**: Search by name or partial name
+- **Industry**: Filter by business industry
+- **Territory**: Filter by assigned territory
+- **Status**: Filter by company status
+- **Tags**: Filter by assigned tags
+- **Date Range**: Filter by creation or last modified date
+
+### Advanced Search Options
+- **Multiple Criteria**: Combine multiple filters
+- **Saved Searches**: Save frequently used search criteria
+- **Quick Filters**: Predefined common filters
+
+## Integration Features
+
+### Billing Integration
+- Automatic sync with billing systems
+- Invoice generation using company details
+- Payment tracking and credit management
+
+### Work Order Integration
+- Companies appear in work order customer selection
+- Service history accessible from company profile
+- Automatic territory and contact population
+
+### Reporting Integration
+- Company performance metrics
+- Revenue tracking per company
+- Service frequency analysis
+
+## Best Practices
+
+### Data Entry
+1. **Consistent Naming**: Use standardized company name formats
+2. **Complete Profiles**: Fill all relevant fields for better service
+3. **Regular Updates**: Keep contact information current
+4. **Proper Categorization**: Use appropriate industry and tags
+
+### Address Management
+1. **Accurate Geocoding**: Ensure precise location coordinates
+2. **Address Standardization**: Use consistent address formats
+3. **Service Location Planning**: Plan service addresses strategically
+
+### Territory Assignment
+1. **Geographic Logic**: Assign based on service area coverage
+2. **Workload Balance**: Distribute companies evenly across territories
+3. **Special Requirements**: Consider company-specific service needs
+
+## Security and Permissions
+
+### Access Control
+- **View**: See company information
+- **Create**: Add new companies
+- **Edit**: Modify existing company data
+- **Delete**: Remove company records
+- **Export**: Export company data
+
+### Data Protection
+- Company information is encrypted at rest
+- Audit trail tracks all changes
+- GDPR compliance for data handling
+
+---
+
+*Last Updated*: January 2025  
+*Version*: 2.0  
+*Module*: Companies Management

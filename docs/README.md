@@ -25,6 +25,7 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 - **[Skills & Holiday Management](SKILLS_HOLIDAY_MANAGEMENT.md)** - Skill tracking and holiday configuration
 - **[Profiles Management](PROFILES_MANAGEMENT.md)** - User profiles and permission management
 - **[Audit Log Management](AUDIT_LOG_MANAGEMENT.md)** - System activity tracking and compliance
+- **[Account Registry Implementation](ACCOUNT_REGISTRY_IMPLEMENTATION.md)** - Client account and service code management
 - **[Version Management](VERSION_MANAGEMENT.md)** - Automated version control and release management
 
 ### 🔧 Technical Details

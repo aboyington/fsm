@@ -75,6 +75,26 @@ $routes->group('settings', function($routes) {
     $routes->post('record-templates/delete/(:num)', 'Settings::deleteRecordTemplate/$1');
     $routes->post('record-templates/duplicate/(:num)', 'Settings::duplicateRecordTemplate/$1');
     
+    // Account Registry routes
+    $routes->get('account-registry', 'Settings::accountRegistry', ['filter' => 'auth']);
+    
+    // Client management routes
+    $routes->post('clients/add', 'Settings::addClient');
+    $routes->get('clients/get/(:num)', 'Settings::getClient/$1');
+    $routes->post('clients/update/(:num)', 'Settings::updateClient/$1');
+    $routes->post('clients/delete/(:num)', 'Settings::deleteClient/$1');
+    $routes->get('clients/dropdown', 'Settings::getClientsForDropdown');
+    
+    // Service Registry routes
+    $routes->post('services/add', 'Settings::addService');
+    $routes->get('services/get/(:num)', 'Settings::getService/$1');
+    $routes->post('services/update/(:num)', 'Settings::updateService/$1');
+    $routes->post('services/delete/(:num)', 'Settings::deleteService/$1');
+    
+    // Sequence management routes
+    $routes->get('sequences/get/(:num)', 'Settings::getSequence/$1');
+    $routes->post('sequences/update/(:num)', 'Settings::updateSequence/$1');
+    
     // Currency routes
     $routes->post('currency/store', 'Settings::storeCurrency');
     $routes->post('currency/update/(:num)', 'Settings::updateCurrency/$1');
@@ -87,6 +107,37 @@ $routes->group('currency', ['filter' => 'auth'], function($routes) {
     $routes->post('store', 'CurrencyController::store');
     $routes->post('update/(:num)', 'CurrencyController::update/$1');
     $routes->get('get/(:num)', 'CurrencyController::getCurrency/$1');
+});
+
+// Customer Routes
+$routes->group('customers', ['filter' => 'auth'], function($routes) {
+    // Companies routes
+    $routes->get('companies', 'CompaniesController::index');
+    $routes->post('companies/create', 'CompaniesController::create');
+    $routes->get('companies/get/(:num)', 'CompaniesController::get/$1');
+    $routes->post('companies/update/(:num)', 'CompaniesController::update/$1');
+    $routes->post('companies/delete/(:num)', 'CompaniesController::delete/$1');
+    $routes->get('companies/search', 'CompaniesController::search');
+    
+    // Contacts routes
+    $routes->get('contacts', 'ContactsController::index');
+    $routes->get('contacts/create', 'ContactsController::create');
+    $routes->post('contacts/create', 'ContactsController::create');
+    $routes->get('contacts/get/(:num)', 'ContactsController::get/$1');
+    $routes->post('contacts/update/(:num)', 'ContactsController::update/$1');
+    $routes->post('contacts/delete/(:num)', 'ContactsController::delete/$1');
+    $routes->get('contacts/search', 'ContactsController::search');
+    $routes->post('contacts/setPrimary/(:num)', 'ContactsController::setPrimary/$1');
+    $routes->get('contacts/company/(:num)', 'ContactsController::getByCompany/$1');
+    
+    // Assets routes
+    $routes->get('assets', 'AssetsController::index');
+    $routes->post('assets/create', 'AssetsController::create');
+    $routes->get('assets/get/(:num)', 'AssetsController::get/$1');
+    $routes->post('assets/update/(:num)', 'AssetsController::update/$1');
+    $routes->post('assets/delete/(:num)', 'AssetsController::delete/$1');
+    $routes->get('assets/search', 'AssetsController::search');
+    $routes->get('assets/contacts/company/(:num)', 'AssetsController::getContactsByCompany/$1');
 });
 
 // API Routes

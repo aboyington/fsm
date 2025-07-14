@@ -1,39 +1,99 @@
+# Contacts Management
 
----
-## Add Contact Details  
+The Contacts module manages individual people within customer organizations. Contacts represent the primary points of communication for service requests, work orders, and customer relationships within the FSM platform.
 
-Contacts can be added in the following ways:  
+## Contact Data Structure
 
-1. Add contacts individually in the **Contacts** module. The details are described below.      
-2. [Import contacts](https://help.zoho.com/portal/en/kb/fsm/data-administration/articles/importing-data-to-zoho-fsm) from external sources.      
-3. Import contacts from [Invoice](https://help.zoho.com/portal/en/kb/fsm/billing/articles/module-configuration#Import_Customers).
+### Personal Information
+- **First Name**: Contact's given name
+- **Last Name**: Contact's family name (required)
+- **Title**: Professional title or job role
+- **Department**: Department within the organization
+- **Salutation**: Formal greeting preference
+- **Suffix**: Name suffix (Jr., Sr., III, etc.)
 
-To add a contact:
+### Contact Information
+- **Primary Email**: Main email address (required, must be unique)
+- **Secondary Email**: Alternative email address
+- **Primary Phone**: Main phone number
+- **Secondary Phone**: Alternative phone number
+- **Mobile Phone**: Mobile/cell phone number
+- **Fax**: Fax number (if applicable)
+- **Preferred Contact Method**: Email, Phone, or Mobile
 
-![Info](https://static.zohocdn.com/zoho-desk-editor/static/images/info.png/)**Permission Required**: [Contacts](https://help.zoho.com/portal/en/kb/fsm/set-up-workforce/articles/profiles-and-permissions#Basic_Permissions)
+### Professional Information
+- **Company**: Associated company/organization
+- **Job Title**: Specific role within the company
+- **Department**: Organizational department
+- **Manager**: Reporting manager contact
+- **Assistant**: Administrative assistant contact
+- **Direct Reports**: Number of people reporting to this contact
 
-1. Select **Contacts** from the **Customers** menu and click **Create**.      
-2. Enter the **Last Name**.      
-3. Enter an **Email** address.      
-4. Associate the contact with a **[Company](https://help.zoho.com/portal/en/kb/fsm/customer-management/articles/manage-companies)**.
-5. Add [Address](https://help.zoho.com/portal/en/kb/fsm/customer-management/articles/add-fsm-contact#Add_Contact_Address).      
-6. Select a value for **Taxable**:  
-    **- Taxable**: A Company Tax should be selected if Taxable is chosen.  
-    **- Non-Taxable**: An [Exemption Reason](https://help.zoho.com/portal/en/kb/fsm/billing/articles/tax-setting#Tax_Exemption) should be selected if Non-Taxable is chosen.
-    
-    These values are configured in Zoho Invoice. Click [here](https://help.zoho.com/portal/en/kb/fsm/integrations/invoice-integration/articles/invoice-setup) for details of Zoho Invoice-FSM integration. These values can also be edited in the FSM application at **Setup** > **Integrations** > **Billing** > **Tax Setting**.    
-7. Select a **Currency**.      
-    The Currency and Exchange Rate will be displayed only if [multiple currencies](https://help.zoho.com/portal/en/kb/fsm/getting-started/articles/organization-setting#Manage_multiple_currencies) are enabled.   
-8. Add any other necessary contact details and click **Save**.  
-    
+### Address Information
+- **Primary Address**: Main contact address
+- **Billing Address**: Billing-specific address
+- **Service Addresses**: Multiple service locations
+- **Mailing Address**: Correspondence address
 
-![](https://help.zoho.com/galleryDocuments/edbsn4ad2eb7fecfebed5c66064873364c2560b841ecd22a984a9e97b8d72a53e1838af3a945107d9c9cc0753d1cca25b7c5f?inline=true)  
+### Additional Details
+- **Date of Birth**: Contact's birth date
+- **Anniversary**: Work anniversary or other significant date
+- **Lead Source**: How the contact was acquired
+- **Social Media**: LinkedIn, Twitter, and other social profiles
+- **Notes**: Internal notes and comments
+- **Tags**: Custom categorization tags
+- **Language**: Preferred communication language
+- **Timezone**: Contact's timezone
 
-  
+### Financial Information
+- **Currency**: Preferred transaction currency
+- **Payment Terms**: Specific payment arrangements
+- **Credit Limit**: Individual credit limit (if applicable)
+- **Taxable Status**: Tax exemption status
 
-![Info](https://img.zohostatic.com/zde/static/images/info.png)
+## Adding Contacts
 
-The contacts associated with a company should have unique email addresses.  
+Contacts can be added through multiple methods:
+
+1. **Manual Entry**: Add contacts individually through the Contacts module
+2. **Data Import**: Import contacts from external sources (CSV, Excel, vCard)
+3. **API Integration**: Sync contacts from CRM or other systems
+4. **Mobile App**: Create contacts using the mobile application
+5. **Company Association**: Add contacts while creating companies
+
+### To add a contact manually:
+
+**Permission Required**: Contacts module access with Create permission
+
+1. Navigate to **Customers** → **Contacts** and click **Create**
+2. Enter the required **Last Name**
+3. Provide a unique **Email** address
+4. Associate with a **Company** (recommended)
+5. Complete personal information:
+   - First name and title
+   - Job title and department
+   - Phone numbers and contact preferences
+6. Add address information:
+   - Primary address for the contact
+   - Service addresses if different from primary
+   - Billing address if different from company billing
+7. Configure financial settings:
+   - **Currency** for transactions
+   - **Taxable** status:
+     - **Taxable**: Select appropriate tax rate
+     - **Non-Taxable**: Choose exemption reason
+   - Payment terms (if different from company)
+8. Set additional details:
+   - Lead source and tags
+   - Language and timezone preferences
+   - Social media profiles
+9. Add internal **Notes** as needed
+10. Click **Save** to create the contact
+
+**Important Notes:**
+- Email addresses must be unique across all contacts
+- Contacts associated with the same company should have unique email addresses
+- At least one communication method (email or phone) is required
 
 ## Add Contact Address  
 
@@ -174,3 +234,183 @@ The created contact can be edited. To edit a contact:
     ![](https://help.zoho.com/galleryDocuments/edbsn4a001a9e62ec108c4f2d577940e8576cbb8d662ce4ece62880444062e1cb9ed9cf5e2495c58b4e92e73d490304097669?inline=true)     ![](https://help.zoho.com/galleryDocuments/edbsn0ed4f6004a3af49d5c93a88858cb0bbab9a6859f519f734182bd68d60e0242dda4ea44e4f2c628267e5ac082b2b1ca62?inline=true)
 
 You can also add addresses, and notes.
+
+## Contact Relationships
+
+### Company Association
+- Contacts are typically associated with a company
+- Inherit company settings (currency, tax status, territory)
+- Can override company settings for specific contacts
+- Multiple contacts can belong to the same company
+
+### Contact Hierarchy
+- **Manager/Subordinate**: Define reporting relationships
+- **Assistant Relationships**: Link contacts with their assistants
+- **Primary Contact**: Designate main contact for a company
+- **Emergency Contact**: Secondary contact for urgent matters
+
+### Asset Ownership
+- Contacts can be designated as asset owners
+- Track assets assigned to specific individuals
+- Maintain asset service history per contact
+
+## Contact Status Management
+
+### Status Types
+- **Active**: Contact is currently engaged
+- **Inactive**: Contact is not currently active
+- **Lead**: Potential customer contact
+- **Prospect**: Qualified sales lead
+- **Customer**: Active service customer
+- **Vendor**: Supplier or vendor contact
+
+### Contact Categories
+- **Decision Maker**: Has authority to approve services
+- **Technical Contact**: Handles technical communications
+- **Billing Contact**: Manages financial transactions
+- **Emergency Contact**: Available for urgent situations
+- **Service Contact**: Coordinates service activities
+
+## Communication Preferences
+
+### Contact Methods
+- **Primary Method**: Preferred communication channel
+- **Backup Method**: Alternative contact method
+- **Emergency Contact**: For urgent communications
+- **Time Preferences**: Best times to contact
+
+### Language and Localization
+- **Preferred Language**: Communication language
+- **Timezone**: Contact's local timezone
+- **Date Format**: Preferred date display format
+- **Currency**: Preferred transaction currency
+
+### Notification Settings
+- **Work Order Updates**: Service status notifications
+- **Appointment Reminders**: Scheduled service reminders
+- **Billing Notifications**: Invoice and payment alerts
+- **Marketing Communications**: Promotional materials
+
+## Advanced Contact Management
+
+### Contact Merge and Deduplication
+- **Duplicate Detection**: Automatic identification of potential duplicates
+- **Merge Process**: Combine duplicate contact records
+- **Data Preservation**: Maintain historical records during merge
+- **Relationship Updates**: Update all related records after merge
+
+### Contact Import/Export
+- **Bulk Import**: Import contacts from CSV, Excel, or vCard files
+- **Data Validation**: Verify email uniqueness and required fields
+- **Error Handling**: Report and resolve import errors
+- **Export Options**: Export contact data in multiple formats
+
+### Contact History and Timeline
+- **Interaction History**: Complete communication log
+- **Service History**: All work orders and appointments
+- **Billing History**: Invoice and payment records
+- **Timeline View**: Chronological activity display
+
+## Search and Filtering
+
+### Basic Search
+- **Name Search**: Search by first or last name
+- **Email Search**: Find by email address
+- **Phone Search**: Search by phone number
+- **Company Search**: Find contacts by company name
+
+### Advanced Filters
+- **Multiple Criteria**: Combine multiple search parameters
+- **Date Ranges**: Filter by creation or modification dates
+- **Status Filters**: Filter by contact status or category
+- **Tag Filters**: Search by assigned tags
+- **Territory Filters**: Filter by assigned territories
+- **Custom Field Filters**: Search using custom field values
+
+### Saved Searches
+- **Personal Searches**: Save frequently used search criteria
+- **Shared Searches**: Share search criteria with team members
+- **Smart Lists**: Dynamic lists based on contact criteria
+- **Export Integration**: Export search results directly
+
+## Integration Features
+
+### CRM Integration
+- **Contact Sync**: Bidirectional sync with external CRM systems
+- **Lead Management**: Import leads from marketing systems
+- **Activity Sync**: Synchronize communication activities
+- **Opportunity Tracking**: Link contacts to sales opportunities
+
+### Email Integration
+- **Email Client Integration**: Link with Outlook, Gmail, etc.
+- **Email Tracking**: Track email opens and responses
+- **Template Management**: Use email templates for communications
+- **Automated Emails**: Trigger emails based on contact actions
+
+### Mobile App Features
+- **Offline Access**: Access contact information without internet
+- **GPS Integration**: Get directions to contact addresses
+- **Contact Sync**: Sync with device contact list
+- **Quick Actions**: Call, email, or text directly from app
+
+## Reporting and Analytics
+
+### Contact Reports
+- **Contact List Reports**: Detailed contact listings
+- **Activity Reports**: Communication frequency analysis
+- **Territory Reports**: Contacts by geographic area
+- **Company Association Reports**: Contacts per company
+
+### Performance Metrics
+- **Contact Engagement**: Communication frequency and response rates
+- **Service Utilization**: Service frequency per contact
+- **Revenue per Contact**: Financial performance tracking
+- **Contact Lifecycle**: Time from lead to customer conversion
+
+## Security and Compliance
+
+### Data Protection
+- **Encryption**: Contact data encrypted at rest and in transit
+- **Access Control**: Role-based access to contact information
+- **Audit Trail**: Complete activity logging for compliance
+- **Data Retention**: Configurable data retention policies
+
+### Privacy Compliance
+- **GDPR Compliance**: Support for European privacy regulations
+- **Consent Management**: Track communication consent
+- **Data Portability**: Export contact data on request
+- **Right to Deletion**: Secure contact data deletion
+
+### Permission Levels
+- **View**: See basic contact information
+- **Edit**: Modify contact details
+- **Delete**: Remove contact records
+- **Export**: Extract contact data
+- **Merge**: Combine duplicate contacts
+- **Import**: Add bulk contact data
+
+## Best Practices
+
+### Data Quality
+1. **Consistent Data Entry**: Use standardized formats for names and addresses
+2. **Regular Updates**: Keep contact information current
+3. **Duplicate Prevention**: Check for existing contacts before creating new ones
+4. **Complete Profiles**: Fill all relevant fields for better service
+
+### Communication Management
+1. **Preference Tracking**: Respect contact preferences for communication
+2. **Frequency Management**: Avoid over-communication
+3. **Personalization**: Use contact information for personalized service
+4. **Response Tracking**: Monitor and follow up on communications
+
+### Relationship Building
+1. **Regular Touch Points**: Maintain consistent communication
+2. **Value-Added Communications**: Provide useful information
+3. **Personal Notes**: Record personal details for relationship building
+4. **Service Excellence**: Deliver exceptional service experiences
+
+---
+
+*Last Updated*: January 2025  
+*Version*: 2.0  
+*Module*: Contacts Management

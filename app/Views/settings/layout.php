@@ -26,6 +26,9 @@
                             <a href="<?= base_url('settings/currency') ?>" class="settings-link <?= $activeTab == 'currency' ? 'active' : '' ?>">
                                 Currency
                             </a>
+                            <a href="<?= base_url('settings/account-registry') ?>" class="settings-link <?= $activeTab == 'account-registry' ? 'active' : '' ?>">
+                                Account Registry
+                            </a>
                         </div>
                     </div>
 

@@ -1,0 +1,42 @@
+[
+  {
+    "Name": "AA-001-ACME",
+    "SubAccount": true,
+    "ParentAccount": "AA",
+    "AccountType": "Income",
+    "DetailType": "SalesOfProductIncome",
+    "Description": "Direct alarm system client"
+  },
+  {
+    "Name": "AA-002-NWFU",
+    "SubAccount": true,
+    "ParentAccount": "AA",
+    "AccountType": "Income",
+    "DetailType": "SalesOfProductIncome",
+    "Description": "New direct client"
+  },
+  {
+    "Name": "CS-001-ACME",
+    "SubAccount": true,
+    "ParentAccount": "CS",
+    "AccountType": "Income",
+    "DetailType": "SalesOfProductIncome",
+    "Description": "Installed and maintained"
+  },
+  {
+    "Name": "SS-001-SMIT",
+    "SubAccount": true,
+    "ParentAccount": "SS",
+    "AccountType": "Income",
+    "DetailType": "SalesOfProductIncome",
+    "Description": "Onsite network support"
+  },
+  {
+    "Name": "XS-001-SMIT",
+    "SubAccount": true,
+    "ParentAccount": "XS",
+    "AccountType": "Income",
+    "DetailType": "SalesOfProductIncome",
+    "Description": "Work done on behalf"
+  }
+]

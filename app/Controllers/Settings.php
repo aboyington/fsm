@@ -12,6 +12,9 @@ use App\Models\SkillModel;
 use App\Models\UserSkillModel;
 use App\Models\HolidayModel;
 use App\Models\RecordTemplateModel;
+use App\Models\ClientModel;
+use App\Models\ServiceRegistryModel;
+use App\Models\AccountSequenceModel;
 
 class Settings extends BaseController
 {
@@ -25,6 +28,9 @@ class Settings extends BaseController
     protected $userSkillModel;
     protected $holidayModel;
     protected $recordTemplateModel;
+    protected $clientModel;
+    protected $serviceRegistryModel;
+    protected $accountSequenceModel;
     
     public function __construct()
     {
@@ -38,6 +44,9 @@ class Settings extends BaseController
         $this->userSkillModel = new UserSkillModel();
         $this->holidayModel = new HolidayModel();
         $this->recordTemplateModel = new RecordTemplateModel();
+        $this->clientModel = new ClientModel();
+        $this->serviceRegistryModel = new ServiceRegistryModel();
+        $this->accountSequenceModel = new AccountSequenceModel();
     }
     
     public function index()
@@ -2535,5 +2544,402 @@ public function getUserTimeline($userId)
                 'message' => 'Failed to duplicate record template'
             ]);
         }
+    }
+    
+    // ACCOUNT REGISTRY MANAGEMENT
+    public function accountRegistry()
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return redirect()->to('/login');
+        }
+        
+        // Initialize account sequences if not already done
+        $this->accountSequenceModel->initializeDefaults();
+        
+        // Get filter parameters
+        $tab = $this->request->getVar('tab') ?? 'clients';
+        $status = $this->request->getVar('status') ?? 'active';
+        $search = $this->request->getVar('search') ?? '';
+        $serviceType = $this->request->getVar('service_type') ?? 'all';
+        
+        // Get data based on active tab
+        $clients = [];
+        $services = [];
+        $sequences = [];
+        $clientStats = [];
+        $serviceStats = [];
+        
+        if ($tab === 'clients') {
+            $clients = $this->clientModel->getClients($status, $search);
+            $clientStats = $this->clientModel->getClientStats();
+        } elseif ($tab === 'services') {
+            $services = $this->serviceRegistryModel->getServicesWithClients($status, $search, $serviceType);
+            $serviceStats = $this->serviceRegistryModel->getServiceStats();
+        } elseif ($tab === 'sequences') {
+            $sequences = $this->accountSequenceModel->getSequencesWithStats();
+        }
+        
+        $data = [
+            'title' => 'Account Registry',
+            'activeTab' => 'account-registry',
+            'tab' => $tab,
+            'clients' => $clients,
+            'services' => $services,
+            'sequences' => $sequences,
+            'serviceTypes' => $this->serviceRegistryModel->getServiceTypes(),
+            'clientStats' => $clientStats,
+            'serviceStats' => $serviceStats,
+            'filters' => [
+                'status' => $status,
+                'search' => $search,
+                'service_type' => $serviceType
+            ]
+        ];
+        
+        return view('settings/account_registry', $data);
+    }
+    
+    // CLIENT MANAGEMENT
+    public function addClient()
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        
+        // Set created_by from session
+        $currentUser = session()->get('user');
+        if ($currentUser && isset($currentUser['id'])) {
+            $data['created_by'] = $currentUser['id'];
+        }
+        
+        if ($this->clientModel->save($data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Client added successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to add client',
+                'errors' => $this->clientModel->errors()
+            ]);
+        }
+    }
+    
+    public function getClient($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $client = $this->clientModel->getClientWithServices($id);
+        
+        if ($client) {
+            return $this->response->setJSON([
+                'success' => true,
+                'client' => $client
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Client not found'
+            ])->setStatusCode(404);
+        }
+    }
+    
+    public function updateClient($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token and id field
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        unset($data['id']);
+        
+        if ($this->clientModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Client updated successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to update client',
+                'errors' => $this->clientModel->errors()
+            ]);
+        }
+    }
+    
+    public function deleteClient($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        if ($this->clientModel->delete($id)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Client deleted successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to delete client'
+            ]);
+        }
+    }
+    
+    // SERVICE REGISTRY MANAGEMENT
+    public function addService()
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        
+        // Get client info for abbreviation
+        $client = $this->clientModel->find($data['client_id']);
+        if (!$client) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Client not found'
+            ])->setStatusCode(404);
+        }
+        
+        // Generate client abbreviation and account code
+        $clientAbbreviation = $this->clientModel->generateClientAbbreviation($client['client_name']);
+        $accountCode = $this->serviceRegistryModel->generateAccountCode($data['service_type'], $clientAbbreviation);
+        
+        $data['client_abbreviation'] = $clientAbbreviation;
+        $data['account_code'] = $accountCode;
+        $data['group_id'] = str_pad($this->accountSequenceModel->getNextSequence($data['service_type']), 3, '0', STR_PAD_LEFT);
+        
+        // Set created_by from session
+        $currentUser = session()->get('user');
+        if ($currentUser && isset($currentUser['id'])) {
+            $data['created_by'] = $currentUser['id'];
+        }
+        
+        if ($this->serviceRegistryModel->save($data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Service added successfully.',
+                'account_code' => $accountCode
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to add service',
+                'errors' => $this->serviceRegistryModel->errors()
+            ]);
+        }
+    }
+    
+    public function getService($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $service = $this->serviceRegistryModel->getServiceWithClient($id);
+        
+        if ($service) {
+            return $this->response->setJSON([
+                'success' => true,
+                'service' => $service
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Service not found'
+            ])->setStatusCode(404);
+        }
+    }
+    
+    public function updateService($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token and id field
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        unset($data['id']);
+        
+        if ($this->serviceRegistryModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Service updated successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to update service',
+                'errors' => $this->serviceRegistryModel->errors()
+            ]);
+        }
+    }
+    
+    public function deleteService($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        if ($this->serviceRegistryModel->deleteService($id)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Service deleted successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to delete service'
+            ]);
+        }
+    }
+    
+    // SEQUENCE MANAGEMENT
+    public function updateSequence($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $data = $this->request->getPost();
+        
+        // Remove CSRF token and id field
+        unset($data['csrf_test_name']);
+        unset($data['csrf_token']);
+        unset($data['csrf_ghash']);
+        unset($data['id']);
+        
+        if ($this->accountSequenceModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Sequence updated successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to update sequence',
+                'errors' => $this->accountSequenceModel->errors()
+            ]);
+        }
+    }
+    
+    public function getSequence($id)
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $sequence = $this->accountSequenceModel->find($id);
+        
+        if ($sequence) {
+            return $this->response->setJSON([
+                'success' => true,
+                'sequence' => $sequence
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Sequence not found'
+            ])->setStatusCode(404);
+        }
+    }
+    
+    public function getClientsForDropdown()
+    {
+        header('Content-Type: application/json');
+        
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $clients = $this->clientModel->where('status', 'active')
+                                    ->orderBy('client_name', 'ASC')
+                                    ->findAll();
+        
+        return $this->response->setJSON([
+            'success' => true,
+            'clients' => $clients
+        ]);
     }
 }
