@@ -143,6 +143,9 @@
                             <i class="bi bi-chevron-down"></i> Customization
                         </div>
                         <div id="customizationSection" class="collapse show">
+                            <a href="<?= base_url('settings/categories') ?>" class="settings-link <?= $activeTab == 'categories' ? 'active' : '' ?>">
+                                Categories
+                            </a>
                             <a href="<?= base_url('settings/modules-fields') ?>" class="settings-link <?= $activeTab == 'modules-fields' ? 'active' : '' ?>">
                                 Modules and Fields
                             </a>

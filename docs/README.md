@@ -120,7 +120,7 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 | Dashboard | ✅ Complete | [DASHBOARD_OVERVIEW.md](DASHBOARD_OVERVIEW.md) / [DASHBOARD_IMPLEMENTATION.md](DASHBOARD_IMPLEMENTATION.md) |
 | Settings | ✅ Complete | [SETTINGS_MODULE.md](SETTINGS_MODULE.md) |
 | Users | ✅ Complete | [USER_MANAGEMENT.md](USER_MANAGEMENT.md) |
-| Parts And Service | ✅ Complete | Integrated in FSM Documentation |
+| Parts & Service | ✅ Complete | [PARTS_AND_SERVICES.md](PARTS_AND_SERVICES.md) |
 | Territories | ✅ Complete | [TERRITORIES.md](TERRITORIES.md) |
 | Skills | ✅ Complete | [SKILLS_HOLIDAY_MANAGEMENT.md](SKILLS_HOLIDAY_MANAGEMENT.md) |
 | Holidays | ✅ Complete | [SKILLS_HOLIDAY_MANAGEMENT.md](SKILLS_HOLIDAY_MANAGEMENT.md) |

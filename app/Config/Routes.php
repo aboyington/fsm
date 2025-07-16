@@ -99,6 +99,15 @@ $routes->group('settings', function($routes) {
     $routes->post('currency/store', 'Settings::storeCurrency');
     $routes->post('currency/update/(:num)', 'Settings::updateCurrency/$1');
     $routes->get('currency/get/(:num)', 'Settings::getCurrency/$1');
+    
+    // Categories routes
+    $routes->get('categories', 'Settings::categories', ['filter' => 'auth']);
+    $routes->post('categories/add', 'Settings::addCategory');
+    $routes->get('categories/get/(:num)', 'Settings::getCategory/$1', ['filter' => 'auth']);
+    $routes->get('categories/test', 'Settings::testCategory'); // Test route
+    $routes->post('categories/update/(:num)', 'Settings::updateCategory/$1', ['filter' => 'auth']);
+    $routes->post('categories/delete/(:num)', 'Settings::deleteCategory/$1');
+    $routes->get('categories/options', 'Settings::getCategoryOptions');
 });
 
 // Currency Routes
@@ -194,6 +203,18 @@ $routes->group('work-order-management', ['filter' => 'auth'], function($routes) 
 
     // Placeholder routes for other work order management modules
     $routes->get('scheduled-maintenances', 'ScheduledMaintenancesController::index');
+});
+
+// Parts & Services Routes
+$routes->group('parts-services', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'PartsServices::index');
+    $routes->get('data', 'PartsServices::getData');
+    $routes->post('create', 'PartsServices::create');
+    $routes->get('show/(:num)', 'PartsServices::show/$1');
+    $routes->post('update/(:num)', 'PartsServices::update/$1');
+    $routes->delete('delete/(:num)', 'PartsServices::delete/$1');
+    $routes->get('stats', 'PartsServices::getStats');
+    $routes->get('insights', 'PartsServices::getPopularityInsights');
 });
 
 // API Routes

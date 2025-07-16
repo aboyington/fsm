@@ -15,6 +15,7 @@ use App\Models\RecordTemplateModel;
 use App\Models\ClientModel;
 use App\Models\ServiceRegistryModel;
 use App\Models\AccountSequenceModel;
+use App\Models\CategoryModel;
 
 class Settings extends BaseController
 {
@@ -31,6 +32,7 @@ class Settings extends BaseController
     protected $clientModel;
     protected $serviceRegistryModel;
     protected $accountSequenceModel;
+    protected $categoryModel;
     
     public function __construct()
     {
@@ -47,6 +49,7 @@ class Settings extends BaseController
         $this->clientModel = new ClientModel();
         $this->serviceRegistryModel = new ServiceRegistryModel();
         $this->accountSequenceModel = new AccountSequenceModel();
+        $this->categoryModel = new CategoryModel();
     }
     
     public function index()
@@ -1255,10 +1258,251 @@ public function getUserTimeline($userId)
         $currency = $currencyModel->find($id);
         
         if ($currency) {
-            return $this->response->setJSON(['success' => true, 'currency' => $currency]);
+        return $this->response->setJSON(['success' => true, 'currency' => $currency]);
         } else {
             return $this->response->setJSON(['success' => false, 'message' => 'Currency not found'])->setStatusCode(404);
         }
+    }
+    
+    // CATEGORY MANAGEMENT METHODS
+    public function categories()
+    {
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return redirect()->to('/login');
+        }
+        
+        $status = $this->request->getVar('status') ?? 'active';
+        $search = $this->request->getVar('search') ?? '';
+        
+        // Initialize default categories if none exist
+        $this->categoryModel->initializeDefaultCategories();
+        
+        // Get categories with creator information
+        $categories = $this->categoryModel->getCategoriesWithCreator($status, $search);
+        
+        $data = [
+            'title' => 'Categories',
+            'activeTab' => 'categories',
+            'categories' => $categories,
+            'status' => $status,
+            'search' => $search,
+            'categoryStats' => $this->categoryModel->getCategoryStats()
+        ];
+        
+        return view('settings/categories', $data);
+    }
+    
+    public function addCategory()
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // For now, accept any method if POST data exists
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        $categoryData = $this->request->getPost();
+        
+        // Remove CSRF token
+        unset($categoryData['csrf_test_name']);
+        unset($categoryData['csrf_token']);
+        unset($categoryData['csrf_ghash']);
+        
+        // Set created_by from session
+        $currentUser = session()->get('user');
+        if ($currentUser && isset($currentUser['id'])) {
+            $categoryData['created_by'] = $currentUser['id'];
+        } else {
+            // If no user ID in session, default to 1 (admin)
+            $categoryData['created_by'] = 1;
+        }
+        
+        // Set default status if not provided
+        if (!isset($categoryData['is_active'])) {
+            $categoryData['is_active'] = 1;
+        }
+        
+        if ($this->categoryModel->save($categoryData)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Category added successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to add category', 'errors' => $this->categoryModel->errors()]);
+        }
+    }
+    
+    public function getCategory($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $category = $this->categoryModel->find($id);
+        
+        if ($category) {
+            return $this->response->setJSON([
+                'success' => true,
+                'category' => $category
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Category not found'
+            ])->setStatusCode(404);
+        }
+    }
+    
+    public function testCategory()
+    {
+        header('Content-Type: application/json');
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Test endpoint working'
+        ]);
+    }
+    
+    public function updateCategory($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // For now, accept any method if POST data exists
+        if (empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No data received. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        $categoryData = $this->request->getPost();
+        
+        // Remove CSRF token
+        unset($categoryData['csrf_test_name']);
+        unset($categoryData['csrf_token']);
+        unset($categoryData['csrf_ghash']);
+        
+        // Manual validation for name uniqueness (excluding current record)
+        if (!empty($categoryData['name'])) {
+            $existingCategory = $this->categoryModel
+                ->where('name', $categoryData['name'])
+                ->where('id !=', $id)
+                ->first();
+            
+            if ($existingCategory) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update category',
+                    'errors' => ['name' => 'Category name already exists.']
+                ]);
+            }
+        }
+        
+        // Set updated_by from session
+        $currentUser = session()->get('user');
+        if ($currentUser && isset($currentUser['id'])) {
+            $categoryData['updated_by'] = $currentUser['id'];
+        }
+        
+        if ($this->categoryModel->update($id, $categoryData)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Category updated successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update category', 'errors' => $this->categoryModel->errors()]);
+        }
+    }
+    
+    public function deleteCategory($id)
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Check multiple ways to detect POST request
+        $method = $this->request->getMethod();
+        $serverMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        
+        // For now, accept any method if POST data exists (including empty POST for delete operations)
+        if ($method !== 'post' && $serverMethod !== 'POST' && empty($this->request->getPost()) && empty($_POST)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request method. Method: ' . $method . ' / ' . $serverMethod
+            ])->setStatusCode(400);
+        }
+        
+        // Check if category is being used in parts or services
+        if ($this->categoryModel->isCategoryInUse($id)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Cannot delete category: It is currently being used by parts or services.'
+            ])->setStatusCode(400);
+        }
+        
+        if ($this->categoryModel->delete($id)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Category deleted successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete category']);
+        }
+    }
+    
+    public function getCategoryOptions()
+    {
+        // Force JSON response to prevent debug toolbar injection
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        $options = $this->categoryModel->getCategoryOptions();
+        
+        return $this->response->setJSON([
+            'success' => true,
+            'options' => $options
+        ]);
     }
     
     // User Skills Management Methods

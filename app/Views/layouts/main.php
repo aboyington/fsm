@@ -69,14 +69,10 @@
                             Dispatch
                         </a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="partsServiceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Parts And Service
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom h5 mb-0" href="<?= base_url('parts-services') ?>">
+                            Parts & Services
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="partsServiceDropdown">
-                            <li><a class="dropdown-item" href="<?= base_url('parts-and-service/parts') ?>">Parts</a></li>
-                            <li><a class="dropdown-item" href="<?= base_url('parts-and-service/service') ?>">Service</a></li>
-                        </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom h5 mb-0 dropdown-toggle" href="#" id="workforceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -132,7 +128,7 @@
                     <span class="text-muted">FSM by Anthony Boyington &copy; 2025 - Integrated with Canvass Global</span>
                 </div>
                 <div class="col-md-4 text-center text-md-end">
-                    <span class="text-muted">v2.1.0</span>
+                    <span class="text-muted">v2.2.0</span>
                 </div>
             </div>
         </div>

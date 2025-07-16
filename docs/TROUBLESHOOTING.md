@@ -5,7 +5,34 @@ This document provides solutions to common issues encountered in the FSM platfor
 
 ## Recent Fixes (January 2025)
 
-### 1. HTTP Method Detection Issues
+### 1. PHP Fatal Error - Cannot redeclare function
+**Problem:** Application crashes with "Fatal error: Cannot redeclare function esc()" when accessing certain pages.
+
+**Symptoms:**
+- White screen of death (WSOD) when loading pages
+- Fatal error message about function redeclaration
+- Application completely non-functional
+
+**Root Cause:** The `esc()` function was being declared multiple times, likely due to duplicate includes or function definitions in different files.
+
+**Solution Applied:**
+Added function existence check before declaring the function:
+```php
+// Before declaring the function, check if it already exists
+if (!function_exists('esc')) {
+    function esc($data, $context = 'html', $encoding = null) {
+        // Function implementation
+    }
+}
+```
+
+**Prevention:**
+- Always use `function_exists()` checks for utility functions
+- Avoid duplicate function declarations across files
+- Use namespaces or classes for better organization
+- Consider using CodeIgniter's built-in helper functions instead of custom ones
+
+### 2. HTTP Method Detection Issues
 **Problem:** CodeIgniter 4 was incorrectly detecting HTTP methods, causing 400 Bad Request errors for POST operations in territories and users modules.
 
 **Symptoms:**
@@ -40,7 +67,7 @@ if (empty($this->request->getPost()) && empty($_POST)) {
 - `Settings::deleteTerritory()`
 - `Settings::updateUser()`
 
-### 2. Delete Operation Flexibility
+### 3. Delete Operation Flexibility
 **Problem:** Delete operations were failing due to strict POST method checking, even though they might not include body data.
 
 **Solution Applied:**
