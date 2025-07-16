@@ -123,7 +123,7 @@
                     <div class="row mb-4">
                         <div class="col-md-12 mb-3">
                             <label for="summary" class="form-label">Summary <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="summary" required placeholder="Enter work order summary">
+                            <textarea class="form-control" id="summary" name="summary" rows="3" required placeholder="Enter work order summary"></textarea>
                         </div>
                         <div class="col-md-6">
                             <label for="priority" class="form-label">Priority</label>

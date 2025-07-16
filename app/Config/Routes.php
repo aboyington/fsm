@@ -140,6 +140,62 @@ $routes->group('customers', ['filter' => 'auth'], function($routes) {
     $routes->get('assets/contacts/company/(:num)', 'AssetsController::getContactsByCompany/$1');
 });
 
+// Work Order Management Routes
+$routes->group('work-order-management', ['filter' => 'auth'], function($routes) {
+    // Request routes
+    $routes->get('request', 'RequestsController::index');
+    $routes->post('request/create', 'RequestsController::create');
+    $routes->get('request/get/(:num)', 'RequestsController::get/$1');
+    $routes->post('request/update/(:num)', 'RequestsController::update/$1');
+    $routes->post('request/delete/(:num)', 'RequestsController::delete/$1');
+    $routes->get('request/search', 'RequestsController::search');
+    $routes->post('request/status/(:num)', 'RequestsController::updateStatus/$1');
+    $routes->get('request/company/(:num)', 'RequestsController::getByCompany/$1');
+    
+    // Estimates routes
+    $routes->get('estimates', 'EstimatesController::index');
+    $routes->post('estimates/create', 'EstimatesController::create');
+    $routes->get('estimates/get/(:num)', 'EstimatesController::get/$1');
+    $routes->post('estimates/update/(:num)', 'EstimatesController::update/$1');
+    $routes->post('estimates/delete/(:num)', 'EstimatesController::delete/$1');
+    $routes->get('estimates/search', 'EstimatesController::search');
+    $routes->post('estimates/status/(:num)', 'EstimatesController::updateStatus/$1');
+    $routes->get('estimates/company/(:num)', 'EstimatesController::getByCompany/$1');
+    
+    // Work Orders routes
+    $routes->get('work-orders', 'WorkOrdersController::index');
+    $routes->post('work-orders/create', 'WorkOrdersController::create');
+    $routes->get('work-orders/get/(:num)', 'WorkOrdersController::get/$1');
+    $routes->post('work-orders/update/(:num)', 'WorkOrdersController::update/$1');
+    $routes->post('work-orders/delete/(:num)', 'WorkOrdersController::delete/$1');
+    $routes->get('work-orders/search', 'WorkOrdersController::search');
+    $routes->post('work-orders/status/(:num)', 'WorkOrdersController::updateStatus/$1');
+    $routes->get('work-orders/company/(:num)', 'WorkOrdersController::getByCompany/$1');
+    
+    // Service Appointments routes
+    $routes->get('service-appointments', 'ServiceAppointmentsController::index');
+    $routes->post('service-appointments/create', 'ServiceAppointmentsController::create');
+    $routes->get('service-appointments/get/(:num)', 'ServiceAppointmentsController::get/$1');
+    $routes->post('service-appointments/update/(:num)', 'ServiceAppointmentsController::update/$1');
+    $routes->post('service-appointments/delete/(:num)', 'ServiceAppointmentsController::delete/$1');
+    $routes->get('service-appointments/search', 'ServiceAppointmentsController::search');
+    $routes->post('service-appointments/status/(:num)', 'ServiceAppointmentsController::updateStatus/$1');
+    $routes->get('service-appointments/work-order/(:num)', 'ServiceAppointmentsController::getByWorkOrder/$1');
+    $routes->get('service-appointments/technician/(:num)', 'ServiceAppointmentsController::getByTechnician/$1');
+
+    // Service Reports routes
+    $routes->get('service-reports', 'ServiceReportsController::index');
+    $routes->post('service-reports/create', 'ServiceReportsController::create');
+    $routes->get('service-reports/get/(:num)', 'ServiceReportsController::get/$1');
+    $routes->post('service-reports/update/(:num)', 'ServiceReportsController::update/$1');
+    $routes->post('service-reports/delete/(:num)', 'ServiceReportsController::delete/$1');
+    $routes->get('service-reports/search', 'ServiceReportsController::search');
+    $routes->post('service-reports/status/(:num)', 'ServiceReportsController::updateStatus/$1');
+
+    // Placeholder routes for other work order management modules
+    $routes->get('scheduled-maintenances', 'ScheduledMaintenancesController::index');
+});
+
 // API Routes
 $routes->group('api', function($routes) {
     // Auth routes (no auth required)

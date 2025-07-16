@@ -19,7 +19,7 @@ function logout() {
 }
 
 // Utility functions
-function showAlert(message, type = 'info', container = null) {
+function showAlert(type, message, container = null) {
     const alertHtml = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${message}
@@ -36,6 +36,30 @@ function showAlert(message, type = 'info', container = null) {
         tempDiv.innerHTML = alertHtml;
         alertContainer.prepend(tempDiv.firstElementChild);
     }
+}
+
+// Form error display function
+function displayFormErrors(errors) {
+    // Clear existing errors
+    const errorElements = document.querySelectorAll('.text-danger');
+    errorElements.forEach(element => element.remove());
+    
+    const errorInputs = document.querySelectorAll('.is-invalid');
+    errorInputs.forEach(input => input.classList.remove('is-invalid'));
+    
+    // Display new errors
+    Object.keys(errors).forEach(fieldName => {
+        const field = document.getElementById(fieldName) || document.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+            field.classList.add('is-invalid');
+            
+            // Add error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'text-danger small mt-1';
+            errorDiv.textContent = errors[fieldName];
+            field.parentNode.appendChild(errorDiv);
+        }
+    });
 }
 
 function formatDate(dateString) {

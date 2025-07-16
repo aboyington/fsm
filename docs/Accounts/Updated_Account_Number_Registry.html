@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Number Registry</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; background: #f9f9f9; color: #333; }
+        h1, h2, h3 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f1f1f1; }
+        code { background: #eef; padding: 2px 4px; border-radius: 3px; }
+        hr { margin: 40px 0; }
+    </style>
+</head>
+<body>
+    <h1>Account Number Registry for Business Services</h1>
+    <p>This document outlines the internal account codes assigned to various operational areas of the company. The account number format has been updated for simplicity, automation, and scalability. Each <strong>client</strong> now receives a single unified account number, and services/products are tracked through SKUs and invoice line items.</p>
+
+    <hr>
+
+    <h2>Account Code Structure (New Format)</h2>
+    <pre><code>&lt;3-Char Category Prefix&gt;-&lt;3-Digit Group or Year ID&gt;-&lt;4-Digit Sequential Code or Abbreviation&gt;</code></pre>
+
+    <h3>Legend of 3-Character Prefixes</h3>
+    <table>
+        <tr><th>Prefix</th><th>Category</th></tr>
+        <tr><td>ACC</td><td>Client Account Numbers</td></tr>
+        <tr><td>MAT</td><td>Materials (SKU)</td></tr>
+        <tr><td>HRD</td><td>Hardware (SKU)</td></tr>
+        <tr><td>PRT</td><td>Parts (SKU)</td></tr>
+        <tr><td>SRV</td><td>Services (SKU)</td></tr>
+        <tr><td>INV</td><td>Invoice Document</td></tr>
+        <tr><td>EST</td><td>Estimate Document</td></tr>
+    </table>
+
+    <h2>Sample Registry</h2>
+    <table>
+        <tr><th>Code Type</th><th>Code Example</th><th>Description</th></tr>
+        <tr><td>Client Account</td><td>ACC-001-ACME</td><td>ACME Limited (client)</td></tr>
+        <tr><td>Client Account</td><td>ACC-002-NWFU</td><td>New York Furs (client)</td></tr>
+        <tr><td>Client Account</td><td>ACC-003-SMIT</td><td>Smith I.T. (client)</td></tr>
+        <tr><td>Invoice</td><td>INV-025-0001</td><td>Invoice #1 issued in 2025</td></tr>
+        <tr><td>Estimate</td><td>EST-025-0001</td><td>Estimate #1 issued in 2025</td></tr>
+        <tr><td>Material SKU</td><td>MAT-0001</td><td>Material item (cables, wire, etc.)</td></tr>
+        <tr><td>Hardware SKU</td><td>HRD-0002</td><td>Hardware item (mounts, DVRs, brackets)</td></tr>
+        <tr><td>Part SKU</td><td>PRT-0003</td><td>Part item (sensors, fittings, etc.)</td></tr>
+        <tr><td>Service SKU</td><td>SRV-CAM-0001</td><td>Camera system service/maintenance</td></tr>
+        <tr><td>Service SKU</td><td>SRV-GEN-0001</td><td>General service/labour</td></tr>
+    </table>
+
+    <h2>Handling Clients with Multiple Services</h2>
+    <p>Each client has a <strong>single account number</strong>, and all services/products delivered to them are tracked using <strong>invoices, estimates, and SKUs</strong>.</p>
+
+    <table>
+        <tr><th>Client Name</th><th>Account Code</th><th>Invoice</th><th>Line Items</th></tr>
+        <tr><td>ACME Limited</td><td>ACC-001-ACME</td><td>INV-025-0001</td><td>HRD-0002, PRT-0001, SRV-CAM-0001</td></tr>
+        <tr><td>New York Furs</td><td>ACC-002-NWFU</td><td>INV-025-0002</td><td>SRV-ALA-0001, HRD-0003</td></tr>
+    </table>
+
+    <h2>Automation & Integration Recommendations</h2>
+    <ul>
+        <li><strong>Automated ID Generation:</strong> Maintain a numeric sequence per code type.</li>
+        <li><strong>Client Registry:</strong> Maintain a central list using ACC-xxx-CLIENT format.</li>
+        <li><strong>QuickBooks Integration:</strong> 
+            <ul>
+                <li>Use client accounts (ACC codes) as customer records.</li>
+                <li>Use service/product SKUs as invoice line items.</li>
+                <li>Assign income accounts to product/service items.</li>
+                <li>Use classes/tags for projects or departments if needed.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Template for Future Use</h2>
+    <table>
+        <tr><th>Code Type</th><th>Code Example</th><th>Description</th></tr>
+        <tr><td>Client Account</td><td>ACC-XXX-CLIENT</td><td>Unique client code</td></tr>
+        <tr><td>Invoice</td><td>INV-025-XXXX</td><td>Invoice for year 2025</td></tr>
+        <tr><td>Estimate</td><td>EST-025-XXXX</td><td>Estimate for year 2025</td></tr>
+        <tr><td>SKU - Material</td><td>MAT-XXXX</td><td>Material item</td></tr>
+        <tr><td>SKU - Hardware</td><td>HRD-XXXX</td><td>Hardware item</td></tr>
+        <tr><td>SKU - Parts</td><td>PRT-XXXX</td><td>Replacement part</td></tr>
+        <tr><td>SKU - Service</td><td>SRV-XXX-XXXX</td><td>Service/maintenance visit</td></tr>
+    </table>
+
+    <p>This unified pattern simplifies growth, billing, and system integration.</p>
+</body>
+</html>

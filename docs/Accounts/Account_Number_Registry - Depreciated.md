@@ -1,4 +1,6 @@
 
+# Depreciated
+
 # Account Number Registry for Business Services
 
 This document outlines the internal account codes assigned to various operational areas of the company. The account number format has been updated for simplicity, automation, and scalability. Each account number now uses a standardized 3-part structure: `<Prefix>-<Year/ID>-<Code>` (e.g., `INV-025-0001`).
