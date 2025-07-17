@@ -243,327 +243,87 @@
                     <?= csrf_field() ?>
                     <input type="hidden" id="edit_user_id" name="id">
                     
-                    <ul class="nav nav-tabs mb-3" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview-tab" type="button">Overview</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#timeline-tab" type="button">Timeline</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#calendar-tab" type="button">Calendar</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#appointments-tab" type="button">Service appointments</button>
-                        </li>
-                        <li class="nav-item dropdown" role="presentation">
-                            <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="tab" data-bs-target="#timesheets-tab">Time Sheets</a></li>
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="tab" data-bs-target="#territories-tab">Territories</a></li>
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="tab" data-bs-target="#crew-tab">Crew</a></li>
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="tab" data-bs-target="#skills-tab">Skills</a></li>
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="tab" data-bs-target="#trips-tab">Trips</a></li>
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="tab" data-bs-target="#related-list-tab">Related List</a></li>
-                            </ul>
-                        </li>
-                    </ul>
+                    <h6 class="mb-3">User Information</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="edit_first_name" name="first_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="edit_last_name" name="last_name" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_employee_id" class="form-label">Employee Id</label>
+                            <input type="text" class="form-control" id="edit_employee_id" name="employee_id">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="edit_phone" name="phone">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_mobile" class="form-label">Mobile</label>
+                            <input type="tel" class="form-control" id="edit_mobile" name="mobile">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_language" class="form-label">Language</label>
+                            <select class="form-select" id="edit_language" name="language">
+                                <option value="en-US">English - United States</option>
+                                <option value="fr-CA">French - Canada</option>
+                                <option value="es-MX">Spanish - Mexico</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-text mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="enable_rtl_info" disabled>
+                            <label class="form-check-label text-muted" for="enable_rtl_info">
+                                <i class="bi bi-info-circle"></i> Note: Some features are supported only in English language. We are working on it, and full support will be available in the upcoming updates.
+                            </label>
+                        </div>
+                    </div>
                     
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="overview-tab">
-                            <h6 class="mb-3">User Information</h6>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="edit_first_name" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="edit_first_name" name="first_name" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="edit_last_name" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="edit_last_name" name="last_name" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="edit_email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="edit_email" name="email" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="edit_employee_id" class="form-label">Employee Id</label>
-                                    <input type="text" class="form-control" id="edit_employee_id" name="employee_id">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="edit_phone" class="form-label">Phone</label>
-                                    <input type="tel" class="form-control" id="edit_phone" name="phone">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="edit_mobile" class="form-label">Mobile</label>
-                                    <input type="tel" class="form-control" id="edit_mobile" name="mobile">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-12">
-                                    <label for="edit_language" class="form-label">Language</label>
-                                    <select class="form-select" id="edit_language" name="language">
-                                        <option value="en-US">English - United States</option>
-                                        <option value="fr-CA">French - Canada</option>
-                                        <option value="es-MX">Spanish - Mexico</option>
-                                    </select>
-                                    <div class="form-text mt-1">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="enable_rtl_info" disabled>
-                                            <label class="form-check-label text-muted" for="enable_rtl_info">
-                                                Note: Some features are supported only in English language. We are working on it, and full support will be available in the upcoming updates.
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="edit_role" class="form-label">Profile</label>
-                                    <select class="form-select" id="edit_role" name="role" required>
-                                        <option value="admin">Administrator</option>
-                                        <option value="call_center_agent">Call Center Agent</option>
-                                        <option value="dispatcher">Dispatcher</option>
-                                        <option value="field_agent">Field Agent</option>
-                                        <option value="limited_field_agent">Limited Field Agent</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="edit_status" class="form-label">Status</label>
-                                    <select class="form-select" id="edit_status" name="status" required>
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                        <option value="suspended">Suspended</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <h6 class="mb-3 mt-4">Address Information</h6>
-                            <div class="row mb-3">
-                                <div class="col-md-12">
-                                    <label for="edit_street" class="form-label">Street</label>
-                                    <input type="text" class="form-control" id="edit_street" name="street">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="edit_city" class="form-label">City</label>
-                                    <input type="text" class="form-control" id="edit_city" name="city">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="edit_state" class="form-label">State</label>
-                                    <input type="text" class="form-control" id="edit_state" name="state">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="edit_country" class="form-label">Country</label>
-                                    <input type="text" class="form-control" id="edit_country" name="country">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="edit_zip_code" class="form-label">Zip Code</label>
-                                    <input type="text" class="form-control" id="edit_zip_code" name="zip_code">
-                                </div>
-                            </div>
-                            
-                            <h6 class="mb-3 mt-4">Territories</h6>
-                            <div class="mb-3">
-                                <input type="text" class="form-control" placeholder="Select territories">
-                            </div>
-                            
-                            <h6 class="mb-3 mt-4">Shift Details</h6>
-                            <p class="text-muted">No Shifts Found</p>
-                            
-                            <h6 class="mb-3 mt-4">Crew</h6>
-                            <p class="text-muted">No Crew Found</p>
-                            
-                            <h6 class="mb-3 mt-4">Skills</h6>
-                            <div id="overviewSkillsContent">
-                                <p class="text-muted">Loading skills...</p>
-                            </div>
+                    <h6 class="mb-3 mt-4">Address Information</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="edit_street" class="form-label">Street</label>
+                            <input type="text" class="form-control" id="edit_street" name="street">
                         </div>
-                        
-                        <div class="tab-pane fade" id="timeline-tab">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <p class="text-muted mb-0">All the actions and events related to this Service Resource are recorded in a chronological order.</p>
-                                <select class="form-select" style="width: auto;" id="timeline-filter">
-                                    <option value="all">All Time</option>
-                                    <option value="today">Today</option>
-                                    <option value="yesterday">Yesterday</option>
-                                    <option value="last_week">Last Week</option>
-                                    <option value="last_month">Last Month</option>
-                                    <option value="last_year">Last Year</option>
-                                </select>
-                            </div>
-                            
-                            <div id="timeline-content">
-                                <!-- Timeline items will be loaded here -->
-                                <div class="timeline-loading text-center py-4">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="edit_city" name="city">
                         </div>
-                        
-                        <div class="tab-pane fade" id="calendar-tab">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-arrow-clockwise"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-gear"></i>
-                                    </button>
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-filter"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 280px;">
-                                            <h6 class="dropdown-header px-0">Calendar Settings</h6>
-                                            <div class="dropdown-divider"></div>
-                                            <div class="form-check form-switch mb-2">
-                                                <input class="form-check-input" type="checkbox" id="maintainScroll" checked>
-                                                <label class="form-check-label" for="maintainScroll">
-                                                    Maintain Scroll across dates
-                                                </label>
-                                            </div>
-                                            <div class="form-check form-switch mb-2">
-                                                <input class="form-check-input" type="checkbox" id="showAllEvents" checked>
-                                                <label class="form-check-label" for="showAllEvents">
-                                                    Show all events of a day
-                                                </label>
-                                            </div>
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="showOnlyActive">
-                                                <label class="form-check-label" for="showOnlyActive">
-                                                    Show only active appointments
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="calendar-prev">
-                                        <i class="bi bi-chevron-left"></i>
-                                    </button>
-                                    <h5 class="mb-0" id="calendar-month-year">July, 2025</h5>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="calendar-next">
-                                        <i class="bi bi-chevron-right"></i>
-                                    </button>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <select class="form-select form-select-sm" id="calendar-view-type" style="width: auto;">
-                                        <option value="live">Live</option>
-                                        <option value="past">Past</option>
-                                    </select>
-                                    <select class="form-select form-select-sm" id="calendar-view-mode" style="width: auto;">
-                                        <option value="month">Month</option>
-                                        <option value="week">Week</option>
-                                        <option value="day">Day</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="calendar-container" id="calendar-container">
-                                <!-- Calendar content will be rendered here based on view mode -->
-                            </div>
+                        <div class="col-md-6">
+                            <label for="edit_state" class="form-label">State</label>
+                            <input type="text" class="form-control" id="edit_state" name="state">
                         </div>
-                        
-                        <div class="tab-pane fade" id="appointments-tab">
-                            <p>Service appointments content will go here</p>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="edit_country" name="country">
                         </div>
-                        
-                        <div class="tab-pane fade" id="timesheets-tab">
-                            <div class="text-center py-5">
-                                <p class="text-muted mb-0">No Records Found</p>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-pane fade" id="territories-tab">
-                            <div class="mb-3">
-                                <label class="form-label">Assigned Territories</label>
-                                <div class="text-muted">No territories assigned to this user</div>
-                            </div>
-                            <button class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-plus"></i> Assign Territory
-                            </button>
-                        </div>
-                        
-                        <div class="tab-pane fade" id="crew-tab">
-                            <div class="mb-3">
-                                <label class="form-label">Crew Assignments</label>
-                                <div class="text-muted">User is not part of any crew</div>
-                            </div>
-                            <button class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-plus"></i> Add to Crew
-                            </button>
-                        </div>
-                        
-                        <div class="tab-pane fade" id="skills-tab">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0">Skills</h6>
-                                <button class="btn btn-sm btn-success" id="assignSkillBtn">
-                                    <i class="bi bi-plus"></i> Assign
-                                </button>
-                            </div>
-                            
-                            <div id="userSkillsContent">
-                                <div class="text-center py-3">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="text-muted mt-2">Loading skills...</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-pane fade" id="trips-tab">
-                            <div class="text-center py-5">
-                                <p class="text-muted mb-0">No Records Found</p>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-pane fade" id="related-list-tab">
-                            <div class="list-group">
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-1">Work Orders</h6>
-                                        <span class="badge bg-secondary">0</span>
-                                    </div>
-                                    <p class="mb-0 text-muted small">No related work orders found</p>
-                                </div>
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-1">Service Reports</h6>
-                                        <span class="badge bg-secondary">0</span>
-                                    </div>
-                                    <p class="mb-0 text-muted small">No related service reports found</p>
-                                </div>
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-1">Time Entries</h6>
-                                        <span class="badge bg-secondary">0</span>
-                                    </div>
-                                    <p class="mb-0 text-muted small">No related time entries found</p>
-                                </div>
-                            </div>
+                        <div class="col-md-6">
+                            <label for="edit_zip_code" class="form-label">Zip Code</label>
+                            <input type="text" class="form-control" id="edit_zip_code" name="zip_code">
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveUserChanges">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editUserForm" class="btn btn-primary">Save Changes</button>
             </div>
         </div>
     </div>
 </div>
+
 
 <?= $this->endSection() ?>
 
@@ -820,26 +580,36 @@ $('#calendar-container').html(`
     }
 
     // Edit user button click
-    $('.edit-user').on('click', function() {
+    $('.edit-user').on('click', function(e) {
+        e.preventDefault();
         const userId = $(this).data('id');
         
+        console.log('Edit button clicked for user ID:', userId);
+        
+        // Check if userId exists
+        if (!userId) {
+            console.error('No user ID found');
+            alert('Error: No user ID found');
+            return;
+        }
+        
         // Fetch user data via AJAX
-            $.ajax({
-                url: '<?= base_url('settings/getUser') ?>/' + userId,
-                type: 'GET',
+        $.ajax({
+            url: '<?= base_url('settings/getUser') ?>/' + userId,
+            type: 'GET',
             success: function(response) {
+                console.log('AJAX response:', response);
                 if (response.success) {
                     const user = response.user;
+                    console.log('User data:', user);
+                    
                     $('#edit_user_id').val(user.id);
-                    $('#edit_first_name').val(user.first_name);
-                    $('#edit_last_name').val(user.last_name);
-                    $('#edit_email').val(user.email);
+                    $('#edit_first_name').val(user.first_name || '');
+                    $('#edit_last_name').val(user.last_name || '');
                     $('#edit_employee_id').val(user.employee_id || '');
                     $('#edit_phone').val(user.phone || '');
                     $('#edit_mobile').val(user.mobile || '');
                     $('#edit_language').val(user.language || 'en-US');
-                    $('#edit_role').val(user.role);
-                    $('#edit_status').val(user.status);
                     
                     // Populate address fields
                     $('#edit_street').val(user.street || '');
@@ -848,12 +618,27 @@ $('#calendar-container').html(`
                     $('#edit_country').val(user.country || '');
                     $('#edit_zip_code').val(user.zip_code || '');
                     
+                    // Show the modal
+                    $('#editUserModal').modal('show');
+                    
                     // Load timeline data when modal opens
                     loadUserTimeline(user.id);
                     
                     // Load skills for overview tab
                     loadOverviewSkills(user.id);
+                } else {
+                    console.error('Error in response:', response);
+                    alert('Error: ' + (response.message || 'Failed to load user data'));
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText,
+                    error: error
+                });
+                alert('Error loading user data: ' + error);
             }
         });
     });

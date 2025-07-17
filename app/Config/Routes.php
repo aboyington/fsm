@@ -205,6 +205,52 @@ $routes->group('work-order-management', ['filter' => 'auth'], function($routes) 
     $routes->get('scheduled-maintenances', 'ScheduledMaintenancesController::index');
 });
 
+// Workforce Management Routes
+$routes->group('workforce', ['filter' => 'auth'], function($routes) {
+    // Users routes
+    $routes->get('users', 'WorkforceController::users');
+    $routes->post('users/create', 'WorkforceController::createUser');
+    $routes->get('users/get/(:num)', 'WorkforceController::getUser/$1');
+    $routes->post('users/update/(:num)', 'WorkforceController::updateUser/$1');
+    $routes->post('users/delete/(:num)', 'WorkforceController::deleteUser/$1');
+    $routes->get('users/search', 'WorkforceController::searchUsers');
+    
+    // Crew routes
+    $routes->get('crew', 'WorkforceController::crew');
+    $routes->post('crew/create', 'WorkforceController::createCrew');
+    $routes->get('crew/get/(:num)', 'WorkforceController::getCrew/$1');
+    $routes->post('crew/update/(:num)', 'WorkforceController::updateCrew/$1');
+    $routes->post('crew/delete/(:num)', 'WorkforceController::deleteCrew/$1');
+    
+    // Equipment routes
+    $routes->get('equipments', 'WorkforceController::equipments');
+    $routes->post('equipments/create', 'WorkforceController::createEquipment');
+    $routes->get('equipments/get/(:num)', 'WorkforceController::getEquipment/$1');
+    $routes->post('equipments/update/(:num)', 'WorkforceController::updateEquipment/$1');
+    $routes->post('equipments/delete/(:num)', 'WorkforceController::deleteEquipment/$1');
+    
+    // Trips routes
+    $routes->get('trips', 'WorkforceController::trips');
+    $routes->post('trips/create', 'WorkforceController::createTrip');
+    $routes->get('trips/get/(:num)', 'WorkforceController::getTrip/$1');
+    $routes->post('trips/update/(:num)', 'WorkforceController::updateTrip/$1');
+    $routes->post('trips/delete/(:num)', 'WorkforceController::deleteTrip/$1');
+    
+    // Auto Log routes
+    $routes->get('auto-log', 'WorkforceController::autoLog');
+    $routes->post('auto-log/create', 'WorkforceController::createAutoLog');
+    $routes->get('auto-log/get/(:num)', 'WorkforceController::getAutoLog/$1');
+    $routes->post('auto-log/update/(:num)', 'WorkforceController::updateAutoLog/$1');
+    $routes->post('auto-log/delete/(:num)', 'WorkforceController::deleteAutoLog/$1');
+    
+    // Time Off routes
+    $routes->get('time-off', 'WorkforceController::timeOff');
+    $routes->post('time-off/create', 'WorkforceController::createTimeOff');
+    $routes->get('time-off/get/(:num)', 'WorkforceController::getTimeOff/$1');
+    $routes->post('time-off/update/(:num)', 'WorkforceController::updateTimeOff/$1');
+    $routes->post('time-off/delete/(:num)', 'WorkforceController::deleteTimeOff/$1');
+});
+
 // Parts & Services Routes
 $routes->group('parts-services', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'PartsServices::index');

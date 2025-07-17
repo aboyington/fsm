@@ -35,6 +35,15 @@ class AuthController extends BaseController
 
     public function logout()
     {
+        // Get the current session token
+        $token = session()->get('auth_token');
+        
+        if ($token) {
+            // Remove the specific session from user_sessions table
+            $userSessionModel = new \App\Models\UserSessionModel();
+            $userSessionModel->removeSession($token);
+        }
+        
         // Clear the session
         session()->destroy();
         return redirect()->to('/login')->with('message', 'You have been logged out successfully.');

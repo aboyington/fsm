@@ -75,12 +75,20 @@ class UserModel extends Model
                      ->first();
 
         if ($user && password_verify($password, $user['password'])) {
-            // Generate new session token
-            $token = bin2hex(random_bytes(32));
+            // Update last login time
             $this->update($user['id'], [
-                'session_token' => $token,
                 'last_login' => date('Y-m-d H:i:s')
             ]);
+            
+            // Create new session using UserSessionModel
+            $userSessionModel = new \App\Models\UserSessionModel();
+            $request = service('request');
+            
+            $token = $userSessionModel->createSession(
+                $user['id'],
+                $request->getIPAddress(),
+                $request->getUserAgent()
+            );
             
             $user['session_token'] = $token;
             unset($user['password']); // Don't return password
@@ -95,24 +103,24 @@ class UserModel extends Model
      */
     public function validateToken($token)
     {
-        $user = $this->where('session_token', $token)
-                     ->where('status', 'active')
-                     ->first();
-
-        if ($user) {
-            unset($user['password']); // Don't return password
-            return $user;
-        }
-
-        return false;
+        $userSessionModel = new \App\Models\UserSessionModel();
+        return $userSessionModel->getUserByToken($token);
     }
 
     /**
-     * Logout user (clear session token)
+     * Logout user (remove specific session)
      */
-    public function logout($userId)
+    public function logout($userId, $token = null)
     {
-        return $this->update($userId, ['session_token' => null]);
+        $userSessionModel = new \App\Models\UserSessionModel();
+        
+        if ($token) {
+            // Remove specific session
+            return $userSessionModel->removeSession($token);
+        } else {
+            // Remove all sessions for user (logout from all devices)
+            return $userSessionModel->removeAllUserSessions($userId);
+        }
     }
 
     /**

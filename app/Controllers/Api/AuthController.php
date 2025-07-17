@@ -52,8 +52,22 @@ class AuthController extends BaseController
         $user = $this->request->user ?? null;
         
         if ($user) {
+            // Get the token from the request
+            $token = null;
+            $authHeader = $this->request->getHeaderLine('Authorization');
+            if ($authHeader) {
+                $matches = [];
+                if (preg_match('/Bearer\s+(.+)/', $authHeader, $matches)) {
+                    $token = $matches[1];
+                }
+            }
+            
+            if (!$token) {
+                $token = $this->request->getHeaderLine('X-API-Token');
+            }
+            
             $userModel = new UserModel();
-            $userModel->logout($user['id']);
+            $userModel->logout($user['id'], $token);
         }
 
         return $this->respond([
