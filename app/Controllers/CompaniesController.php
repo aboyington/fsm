@@ -6,6 +6,7 @@ use App\Models\ClientModel;
 use App\Models\ServiceRegistryModel;
 use App\Models\AccountSequenceModel;
 use App\Models\TerritoryModel;
+use App\Models\ContactModel;
 
 class CompaniesController extends BaseController
 {
@@ -13,6 +14,7 @@ class CompaniesController extends BaseController
     protected $serviceModel;
     protected $sequenceModel;
     protected $territoryModel;
+    protected $contactModel;
 
     public function __construct()
     {
@@ -20,6 +22,7 @@ class CompaniesController extends BaseController
         $this->serviceModel = new ServiceRegistryModel();
         $this->sequenceModel = new AccountSequenceModel();
         $this->territoryModel = new TerritoryModel();
+        $this->contactModel = new ContactModel();
     }
 
     public function index()
@@ -72,6 +75,31 @@ class CompaniesController extends BaseController
         return view('companies/create');
     }
 
+    public function view($id)
+    {
+        $company = $this->clientModel->find($id);
+        
+        if (!$company) {
+            return redirect()->to('/customers/companies')->with('error', 'Company not found');
+        }
+        
+        // Get company contacts
+        $contacts = $this->contactModel->getContactsByCompany($id);
+        
+        // Remove sensitive data if any
+        // (No sensitive data in companies table currently)
+        
+        $data = [
+            'title' => $company['client_name'] . ' - Company Details',
+            'company' => $company,
+            'contacts' => $contacts,
+            'assets' => [], // TODO: Get company assets
+            'activities' => [] // TODO: Get company activities
+        ];
+        
+        return view('companies/view', $data);
+    }
+    
     public function get($id)
     {
         $company = $this->clientModel->find($id);

@@ -1,7 +1,9 @@
 <?php foreach ($contacts as $contact): ?>
 <tr>
     <td>
-        <h6 class="mb-1"><?= esc($contact['first_name'] . ' ' . $contact['last_name']) ?></h6>
+        <a href="<?= base_url('customers/contacts/view/' . $contact['id']) ?>" class="text-decoration-none">
+            <h6 class="mb-1"><?= esc($contact['first_name'] . ' ' . $contact['last_name']) ?></h6>
+        </a>
     </td>
     <td>
         <?php if (!empty($contact['company_id'])): ?>
@@ -68,6 +70,9 @@
                 <i class="bi bi-star"></i>
             </button>
             <?php endif; ?>
+            <a href="<?= base_url('customers/contacts/view/' . $contact['id']) ?>" class="btn btn-sm btn-outline-primary" title="View">
+                <i class="bi bi-eye"></i>
+            </a>
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="editContact(<?= $contact['id'] ?>)" title="Edit">
                 <i class="bi bi-pencil"></i>
             </button>

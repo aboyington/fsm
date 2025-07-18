@@ -75,7 +75,42 @@ Companies can be added in the following ways:
    - Set company **Status**
 7. Click **Save** to create the company
 
-## Company Address Management
+## Enhanced Company Detail View (v2.5.0)
+
+### Overview
+The Company Detail View has been enhanced with a comprehensive sidebar and tabbed interface for better information organization and user experience.
+
+### Enhanced Sidebar Features
+- **Company Header**: Avatar, name, status, and quick actions
+- **Details Section**: Core company information and contact details
+- **Address Information**: Service and billing address display
+- **Tax Information**: Tax configuration and compliance
+- **Invoice Information**: Billing system integration status
+- **Owner Information**: Ownership and audit trail
+
+### Tabbed Content Interface
+The main content area features 8 organized tabs:
+1. **Timeline**: Historical activity feed
+2. **Dashboard**: Analytics and metrics
+3. **Contacts**: Associated contacts with direct links
+4. **Addresses**: Multiple address management
+5. **Notes**: Company notes and comments
+6. **Attachments**: File management
+7. **Billing**: Financial information
+8. **Related List**: Related records
+
+### Contact Integration
+- **Contact List**: View all contacts associated with the company
+- **Direct Navigation**: Click contact names to view detailed contact information
+- **Status Indicators**: Visual status badges for each contact
+- **Primary Contact**: Designated primary contact highlighting
+
+### Navigation Flow
+- **Company → Contact**: Click contact names in the contacts tab
+- **Bidirectional Links**: Seamless navigation between related entities
+- **Context Preservation**: Maintains user workflow and navigation state
+
+### Company Address Management
 
 ### Adding Addresses
 Companies can have multiple addresses for different purposes:

@@ -163,7 +163,9 @@
                         <?php foreach ($companies as $company): ?>
                         <tr>
                             <td>
-                                <h6 class="mb-1"><?= esc($company['client_name']) ?></h6>
+                                <a href="<?= base_url('customers/companies/view/' . $company['id']) ?>" class="text-decoration-none">
+                                    <h6 class="mb-1"><?= esc($company['client_name']) ?></h6>
+                                </a>
                             </td>
                             <td><?= esc($company['account_number'] ?? '-') ?></td>
                             <td><?= esc($company['contact_person'] ?? '-') ?></td>
@@ -190,6 +192,9 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
+                                    <a href="<?= base_url('customers/companies/view/' . $company['id']) ?>" class="btn btn-sm btn-outline-primary" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
                                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="editCompany(<?= $company['id'] ?>)" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </button>
@@ -509,7 +514,9 @@ function updateCompaniesTable(companies) {
     tbody.innerHTML = companies.map(company => `
         <tr>
             <td>
-                <h6 class="mb-1">${escapeHtml(company.client_name)}</h6>
+                <a href="<?= base_url('customers/companies/view') ?>/${company.id}" class="text-decoration-none">
+                    <h6 class="mb-1">${escapeHtml(company.client_name)}</h6>
+                </a>
             </td>
             <td>${company.account_number || '-'}</td>
             <td>${company.contact_person || '-'}</td>
@@ -529,6 +536,9 @@ function updateCompaniesTable(companies) {
             </td>
             <td class="text-center">
                 <div class="btn-group" role="group">
+                    <a href="<?= base_url('customers/companies/view') ?>/${company.id}" class="btn btn-sm btn-outline-primary" title="View">
+                        <i class="bi bi-eye"></i>
+                    </a>
                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="editCompany(${company.id})" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </button>

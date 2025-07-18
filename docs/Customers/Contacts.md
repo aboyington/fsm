@@ -241,6 +241,46 @@ The created contact can be edited. To edit a contact:
 
 You can also add addresses, and notes.
 
+## Enhanced Contact Detail View (v2.5.0)
+
+### Overview
+The Contact Detail View has been enhanced with a comprehensive sidebar and tabbed interface for better information organization and user experience.
+
+### Enhanced Sidebar Features
+- **Contact Header**: Avatar with initials, name, status, and quick actions
+- **Details Section**: Core contact information (email, phone, mobile)
+- **Company Information**: Associated company details with direct links
+- **Address Information**: Service and billing address display
+- **Tax Information**: Tax configuration and compliance
+- **Invoice Information**: Billing system integration status
+- **Owner Information**: Ownership and audit trail
+
+### Tabbed Content Interface
+The main content area features 7 organized tabs:
+1. **Timeline**: Historical activity feed (default active)
+2. **Dashboard**: Analytics and metrics
+3. **Addresses**: Multiple address management
+4. **Notes**: Contact notes and comments
+5. **Attachments**: File management
+6. **Related List**: Related records
+7. **Billing**: Financial information
+
+### Company Integration
+- **Company Links**: Click company name to view detailed company information
+- **Bidirectional Navigation**: Seamless navigation between contacts and companies
+- **Context Preservation**: Maintains user workflow and navigation state
+
+### Timeline Features
+- **Activity Tracking**: Complete chronological history
+- **Filter Controls**: Activity type and time range filtering
+- **Real-time Updates**: Live activity feed updates
+- **Audit Trail**: Complete change history with timestamps
+
+### Navigation Flow
+- **Contact → Company**: Click company name in the company section
+- **Bidirectional Links**: Seamless navigation between related entities
+- **Context Preservation**: Maintains user workflow and navigation state
+
 ## Contact Relationships
 
 ### Company Association

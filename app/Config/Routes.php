@@ -122,6 +122,7 @@ $routes->group('currency', ['filter' => 'auth'], function($routes) {
 $routes->group('customers', ['filter' => 'auth'], function($routes) {
     // Companies routes
     $routes->get('companies', 'CompaniesController::index');
+    $routes->get('companies/view/(:num)', 'CompaniesController::view/$1');
     $routes->post('companies/create', 'CompaniesController::create');
     $routes->get('companies/get/(:num)', 'CompaniesController::get/$1');
     $routes->post('companies/update/(:num)', 'CompaniesController::update/$1');
@@ -133,6 +134,7 @@ $routes->group('customers', ['filter' => 'auth'], function($routes) {
     
     // Contacts routes
     $routes->get('contacts', 'ContactsController::index');
+    $routes->get('contacts/view/(:num)', 'ContactsController::view/$1');
     $routes->get('contacts/create', 'ContactsController::create');
     $routes->post('contacts/create', 'ContactsController::create');
     $routes->get('contacts/get/(:num)', 'ContactsController::get/$1');

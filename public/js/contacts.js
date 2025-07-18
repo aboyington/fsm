@@ -256,7 +256,9 @@ function updateContactsTable(contacts) {
         return `
             <tr>
                 <td>
-                    <h6 class="mb-1">${escapeHtml(fullName)}</h6>
+                    <a href="${baseUrl}/customers/contacts/view/${contact.id}" class="text-decoration-none">
+                        <h6 class="mb-1">${escapeHtml(fullName)}</h6>
+                    </a>
                 </td>
                 <td>${accountNumber}</td>
                 <td>${companyBadge}</td>
@@ -271,6 +273,9 @@ function updateContactsTable(contacts) {
                 <td class="text-center">
                     <div class="btn-group" role="group">
                         ${primaryButton}
+                        <a href="${baseUrl}/customers/contacts/view/${contact.id}" class="btn btn-sm btn-outline-primary" title="View">
+                            <i class="bi bi-eye"></i>
+                        </a>
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="editContact(${contact.id})" title="Edit">
                             <i class="bi bi-pencil"></i>
                         </button>

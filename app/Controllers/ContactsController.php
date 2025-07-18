@@ -80,6 +80,27 @@ class ContactsController extends BaseController
         return view('contacts/create', ['companies' => $companies]);
     }
 
+    public function view($id)
+    {
+        $contact = $this->contactModel->getContactWithCompany($id);
+        
+        if (!$contact) {
+            return redirect()->to('/customers/contacts')->with('error', 'Contact not found');
+        }
+        
+        // Remove sensitive data if any
+        // (No sensitive data in contacts table currently)
+        
+        $data = [
+            'title' => $contact['first_name'] . ' ' . $contact['last_name'] . ' - Contact Details',
+            'contact' => $contact,
+            'assets' => [], // TODO: Get contact assets
+            'activities' => [] // TODO: Get contact activities
+        ];
+        
+        return view('contacts/view', $data);
+    }
+    
     public function get($id)
     {
         $contact = $this->contactModel->getContactWithCompany($id);
