@@ -15,9 +15,40 @@ class WorkforceController extends BaseController
 
     public function users()
     {
+        $status = $this->request->getGet('status') ?: 'active';
+        
+        // Set the title based on status
+        $titles = [
+            'active' => 'Active Users',
+            'inactive' => 'Inactive Users',
+            'invited' => 'Invited Users',
+            'deleted' => 'Deleted Users',
+            'all' => 'All Users'
+        ];
+        
+        $title = $titles[$status] ?? 'Active Users';
+        
+        // Fetch users based on status with created_by user name
+        $builder = $this->userModel->db->table('users u')
+            ->select('u.*, COALESCE(creator.first_name, "System") as created_by_name')
+            ->join('users creator', 'creator.id = u.created_by', 'left');
+        
+        if ($status !== 'all') {
+            $builder->where('u.status', $status);
+        }
+        
+        $users = $builder->get()->getResultArray();
+        
+        // Remove sensitive data
+        foreach ($users as &$user) {
+            unset($user['password']);
+            unset($user['session_token']);
+        }
+        
         $data = [
-            'title' => 'Active Users',
-            'users' => $this->userModel->findAll() // Fetch all users
+            'title' => $title,
+            'users' => $users,
+            'current_status' => $status
         ];
 
         return view('workforce/users', $data);
@@ -38,6 +69,8 @@ class WorkforceController extends BaseController
             'first_name' => 'required|max_length[100]',
             'last_name' => 'required|max_length[100]',
             'email' => 'required|valid_email|is_unique[users.email]',
+            'password' => 'required|min_length[6]',
+            'confirm_password' => 'required|matches[password]',
             'role' => 'required|in_list[admin,dispatcher,field_agent,call_center_agent,manager,technician,limited_field_agent]',
             'employee_id' => 'permit_empty|max_length[50]',
             'phone' => 'permit_empty|max_length[20]',
@@ -53,16 +86,21 @@ class WorkforceController extends BaseController
             ]);
         }
 
+        $email = $this->request->getPost('email');
+        $password = $this->request->getPost('password');
+        
         $data = [
             'first_name' => $this->request->getPost('first_name'),
             'last_name' => $this->request->getPost('last_name'),
-            'email' => $this->request->getPost('email'),
+            'email' => $email,
+            'username' => $email, // Use email as username
+            'password' => password_hash($password, PASSWORD_DEFAULT),
             'role' => $this->request->getPost('role'),
             'employee_id' => $this->request->getPost('employee_id'),
             'phone' => $this->request->getPost('phone'),
             'mobile' => $this->request->getPost('mobile'),
             'language' => $this->request->getPost('language') ?: 'en-US',
-            'status' => 'active',
+            'status' => $this->request->getPost('status') ?: 'active',
             'created_by' => session('user_id') ?? 1
         ];
 
@@ -144,12 +182,20 @@ class WorkforceController extends BaseController
             'phone' => 'permit_empty|max_length[20]',
             'mobile' => 'permit_empty|max_length[20]',
             'language' => 'permit_empty|max_length[10]',
+            'status' => 'required|in_list[active,inactive,suspended]',
             'street' => 'permit_empty|max_length[255]',
             'city' => 'permit_empty|max_length[100]',
             'state' => 'permit_empty|max_length[100]',
             'country' => 'permit_empty|max_length[100]',
             'zip_code' => 'permit_empty|max_length[20]'
         ];
+        
+        // Add password validation only if password is provided
+        $password = $this->request->getPost('password');
+        if (!empty($password)) {
+            $rules['password'] = 'min_length[6]';
+            $rules['confirm_password'] = 'matches[password]';
+        }
 
         if (!$this->validate($rules)) {
             return $this->response->setJSON([
@@ -177,12 +223,18 @@ class WorkforceController extends BaseController
             'phone' => $this->request->getPost('phone'),
             'mobile' => $this->request->getPost('mobile'),
             'language' => $this->request->getPost('language') ?: 'en-US',
+            'status' => $this->request->getPost('status') ?: 'active',
             'street' => $this->request->getPost('street'),
             'city' => $this->request->getPost('city'),
             'state' => $this->request->getPost('state'),
             'country' => $this->request->getPost('country'),
             'zip_code' => $this->request->getPost('zip_code')
         ];
+        
+        // Only update password if it's provided
+        if (!empty($password)) {
+            $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+        }
 
         try {
             $result = $this->userModel->update($id, $data);
@@ -255,22 +307,29 @@ class WorkforceController extends BaseController
         $status = $this->request->getGet('status') ?: 'active';
 
         try {
-            $builder = $this->userModel->where('status', $status);
+            // Use query builder to include created_by_name
+            $builder = $this->userModel->db->table('users u')
+                ->select('u.*, COALESCE(creator.first_name, "System") as created_by_name')
+                ->join('users creator', 'creator.id = u.created_by', 'left');
+            
+            if ($status !== 'all') {
+                $builder->where('u.status', $status);
+            }
             
             if (!empty($searchTerm)) {
                 $builder->groupStart()
-                    ->like('first_name', $searchTerm)
-                    ->orLike('last_name', $searchTerm)
-                    ->orLike('email', $searchTerm)
-                    ->orLike('employee_id', $searchTerm)
+                    ->like('u.first_name', $searchTerm)
+                    ->orLike('u.last_name', $searchTerm)
+                    ->orLike('u.email', $searchTerm)
+                    ->orLike('u.employee_id', $searchTerm)
                     ->groupEnd();
             }
             
             if (!empty($role)) {
-                $builder->where('role', $role);
+                $builder->where('u.role', $role);
             }
             
-            $users = $builder->findAll();
+            $users = $builder->get()->getResultArray();
             
             // Remove sensitive data
             foreach ($users as &$user) {
