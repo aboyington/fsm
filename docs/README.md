@@ -28,6 +28,11 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 - **[Account Registry Implementation](ACCOUNT_REGISTRY_IMPLEMENTATION.md)** - Client account and service code management
 - **[Version Management](VERSION_MANAGEMENT.md)** - Automated version control and release management
 
+### 👥 Workforce Management
+- **[Workforce Overview](Workforce/Overview.md)** - Complete workforce management system overview
+- **[User Management](Workforce/Users.md)** - User administration and management
+- **[User Profile System](Workforce/User_Profile.md)** - Comprehensive user profile documentation
+
 ### 🔧 Work Order Management
 - **[Work Order Management Overview](Work%20Order%20Management/Overview.md)** - Complete system overview and architecture
 - **[Requests](Work%20Order%20Management/Requests.md)** - Customer request management
@@ -84,6 +89,15 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 - ✅ **Dashboard Navigation**: Dropdown menu integration with all views
 - ✅ Enhanced navigation structure with optimized submenus
 - ✅ Workforce module with comprehensive submenu (Users, Crew, Equipments, Trips, Auto Log, Time Off)
+- ✅ User Profile System with comprehensive tabbed interface:
+  - Timeline activity tracking
+  - Calendar integration
+  - Service appointments management
+  - Time sheets and work hour tracking
+  - Territory and crew assignments
+  - Skills and certifications management
+  - Trip and travel tracking
+  - Clean tab design with primary color highlighting
 - ✅ Parts And Service module with focused submenu (Parts, Service)
 - ✅ Unified icon system with consistent sizing across all modules
 - ✅ Reports relocated to Settings page for better organization

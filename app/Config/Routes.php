@@ -209,11 +209,12 @@ $routes->group('work-order-management', ['filter' => 'auth'], function($routes) 
 $routes->group('workforce', ['filter' => 'auth'], function($routes) {
     // Users routes
     $routes->get('users', 'WorkforceController::users');
+    $routes->get('users/profile/(:num)', 'WorkforceController::userProfile/$1');
+    $routes->get('users/search', 'WorkforceController::searchUsers');
     $routes->post('users/create', 'WorkforceController::createUser');
     $routes->get('users/get/(:num)', 'WorkforceController::getUser/$1');
     $routes->post('users/update/(:num)', 'WorkforceController::updateUser/$1');
     $routes->post('users/delete/(:num)', 'WorkforceController::deleteUser/$1');
-    $routes->get('users/search', 'WorkforceController::searchUsers');
     
     // Crew routes
     $routes->get('crew', 'WorkforceController::crew');

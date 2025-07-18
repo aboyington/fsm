@@ -348,4 +348,27 @@ class WorkforceController extends BaseController
             ]);
         }
     }
+
+    public function userProfile($id)
+    {
+        // Simple test first - return basic data
+        $user = $this->userModel->find($id);
+        
+        if (!$user) {
+            return redirect()->to('/workforce/users')->with('error', 'User not found');
+        }
+        
+        // Remove sensitive data
+        unset($user['password']);
+        unset($user['session_token']);
+        
+        $data = [
+            'user' => $user,
+            'skills' => [],
+            'territories' => [],
+            'activities' => []
+        ];
+        
+        return view('workforce/user_profile', $data);
+    }
 }

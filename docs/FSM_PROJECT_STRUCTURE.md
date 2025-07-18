@@ -21,6 +21,14 @@ This document outlines the complete structure for the Field Service Management (
 
 ### 3. Workforce Management
 - Users, Equipment, Crews, Skills
+- Comprehensive User Profile System:
+  - Timeline activity tracking
+  - Calendar and scheduling integration
+  - Service appointments management
+  - Time sheets and work hour tracking
+  - Territory and crew assignments
+  - Skills and certifications management
+  - Trip and travel tracking
 - Service Territories & Business Hours
 - Holiday & Time Off Management
 - Live Location Tracking

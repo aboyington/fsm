@@ -18,9 +18,19 @@ The User Management system provides comprehensive user administration capabiliti
 #### User Interface
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - **Modal Forms**: Clean, professional modal dialogs for user operations
+- **User Profile Page**: Comprehensive profile system with tabbed interface
+  - Individual user profiles at `/workforce/users/profile/{id}`
+  - Timeline tab for activity tracking
+  - Calendar integration for scheduling
+  - Service appointments management
+  - Time sheets and work hour tracking
+  - Territory and crew assignments
+  - Skills and certifications management
+  - Trip and travel tracking
 - **Form Validation**: Client-side and server-side validation
 - **Loading States**: Visual feedback during form submissions
 - **Error Handling**: Comprehensive error messages and recovery
+- **Clean Tab Design**: Removed distracting colors, primary color for active tabs only
 
 #### Data Management
 - **Database Integration**: Full SQLite database connectivity
@@ -37,6 +47,25 @@ The User Management system provides comprehensive user administration capabiliti
   - Shows user avatars (initials-based)
   - Displays key information: Name, Employee ID, Email, Role, Created Date
   - Action buttons for View, Edit, and Delete operations
+  - View button links to comprehensive user profile page
+
+### User Profile Page
+- **Location**: `/workforce/users/profile/{id}`
+- **Features**:
+  - Comprehensive user information display
+  - Two-column layout: user info panel and tabbed content
+  - Eight functional tabs:
+    1. **Timeline**: Activity history and event tracking
+    2. **Calendar**: Schedule and appointment management
+    3. **Service Appointments**: Service-related appointments
+    4. **Time Sheets**: Work hour tracking and summaries
+    5. **Territories**: Geographic area assignments
+    6. **Crew**: Team memberships and assignments
+    7. **Skills**: Skill inventory and certifications
+    8. **Trips**: Travel and mileage tracking
+  - Clean tab design with primary color highlighting for active tabs
+  - Responsive layout optimized for all devices
+  - Direct profile editing capabilities
 
 ### Filter Panel
 - **First Name Filter**: Search by first name
@@ -97,6 +126,7 @@ Located at: `/app/Controllers/WorkforceController.php`
 
 **Key Methods**:
 - `users()`: Display user list page
+- `userProfile($id)`: Display individual user profile page
 - `createUser()`: Handle user creation
 - `getUser($id)`: Fetch user data for editing
 - `updateUser($id)`: Update user information
@@ -168,6 +198,7 @@ CREATE TABLE users (
 
 #### User Management Endpoints
 - `GET /workforce/users` - Display user list page
+- `GET /workforce/users/profile/{id}` - Display user profile page
 - `POST /workforce/users/create` - Create new user
 - `GET /workforce/users/get/{id}` - Get user data
 - `POST /workforce/users/update/{id}` - Update user
@@ -299,6 +330,21 @@ All endpoints use JSON for API communication:
   - Active Users (default)
   - Inactive Users
   - All Users
+
+### Viewing User Profiles
+1. Navigate to `/workforce/users`
+2. Click on a user's name or the "View" button
+3. User profile page opens with Timeline tab active
+4. Navigate between tabs to view different information:
+   - **Timeline**: Recent activities and events
+   - **Calendar**: Scheduled appointments and events
+   - **Service Appointments**: Service-related bookings
+   - **Time Sheets**: Work hours and time tracking
+   - **Territories**: Assigned geographic areas
+   - **Crew**: Team memberships and assignments
+   - **Skills**: Certifications and skill levels
+   - **Trips**: Travel history and mileage
+5. Use "Edit Profile" button to modify user information
 
 ## Troubleshooting
 

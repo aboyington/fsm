@@ -17,6 +17,14 @@ The navigation structure of the Field Service Management (FSM) platform is desig
   - **Submenu**: Parts, Service
 - **Workforce**: Management of workforce resources
   - **Submenu**: Users, Crew, Equipments, Trips, Auto Log, Time Off
+  - **User Profiles**: Individual user profile pages with comprehensive tabbed interface
+    - Timeline activity tracking
+    - Calendar and scheduling
+    - Service appointments
+    - Time sheets and work hours
+    - Territory and crew assignments
+    - Skills and certifications
+    - Trip and travel records
 - **Billing**: Handle invoicing and payments
   - **Submenu**: Invoices, Payments
 

@@ -65,6 +65,16 @@ Canvass Global requires a robust system to:
 
 ### 3. Workforce Management
 - **Users**: Field technician profiles and management
+- **User Profile System**: Comprehensive individual user profiles featuring:
+  - Timeline activity tracking and event history
+  - Calendar integration for scheduling and appointments
+  - Service appointments management and tracking
+  - Time sheets with work hour tracking and summaries
+  - Territory assignments and geographic responsibilities
+  - Crew memberships and team assignments
+  - Skills inventory and certifications management
+  - Trip tracking and travel/mileage records
+  - Clean tabbed interface with primary color highlighting
 - **Equipments**: Equipment assignment and tracking
 - **Crew**: Team formation and management
 - **Skills**: Skill tracking and assignment
