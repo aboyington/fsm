@@ -12,6 +12,13 @@
         </div>
     </td>
     <td>
+        <?php if (!empty($contact['company_id'])): ?>
+            <span class="text-muted">Company Account</span>
+        <?php else: ?>
+            <?= esc($contact['account_number'] ?? '-') ?>
+        <?php endif; ?>
+    </td>
+    <td>
         <?php if (!empty($contact['company_name'])): ?>
             <span class="badge bg-light text-dark"><?= esc($contact['company_name']) ?></span>
         <?php else: ?>

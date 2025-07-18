@@ -14,7 +14,7 @@ class ClientModel extends Model
     protected $protectFields = true;
     protected $allowedFields = [
         'client_name', 'contact_person', 'email', 'website', 'company_type', 'territory_id', 'phone', 'address', 
-        'city', 'state', 'zip_code', 'country', 'status', 'notes', 'created_by'
+        'city', 'state', 'zip_code', 'country', 'status', 'notes', 'created_by', 'account_number', 'account_abbreviation'
     ];
 
     // Dates
@@ -26,7 +26,7 @@ class ClientModel extends Model
 
     // Validation
     protected $validationRules = [
-        'client_name' => 'required|max_length[255]|is_unique[clients.client_name,id,{id}]',
+        'client_name' => 'required|max_length[255]|is_unique[clients.client_name]',
         'contact_person' => 'permit_empty|max_length[255]',
         'email' => 'permit_empty|valid_email|max_length[255]',
         'website' => 'permit_empty|valid_url|max_length[255]',
@@ -39,7 +39,9 @@ class ClientModel extends Model
         'zip_code' => 'permit_empty|max_length[20]',
         'country' => 'permit_empty|max_length[100]',
         'status' => 'permit_empty|in_list[active,inactive]',
-        'notes' => 'permit_empty'
+        'notes' => 'permit_empty',
+        'account_number' => 'permit_empty|max_length[20]|is_unique[clients.account_number]',
+        'account_abbreviation' => 'permit_empty|max_length[4]'
     ];
 
     protected $validationMessages = [
@@ -75,6 +77,7 @@ class ClientModel extends Model
     protected function beforeInsert(array $data)
     {
         $data = $this->passwordHash($data);
+        $data = $this->generateAccountNumber($data);
         return $data;
     }
 
@@ -131,12 +134,36 @@ class ClientModel extends Model
     }
 
     /**
+     * Generate account number for new client
+     */
+    protected function generateAccountNumber(array $data)
+    {
+        // Only generate if account_number is not already set
+        if (!isset($data['data']['account_number']) || empty($data['data']['account_number'])) {
+            $accountSequenceModel = new \App\Models\AccountSequenceModel();
+            
+            // Generate abbreviation if not provided
+            if (!isset($data['data']['account_abbreviation']) || empty($data['data']['account_abbreviation'])) {
+                $data['data']['account_abbreviation'] = $this->generateClientAbbreviation($data['data']['client_name']);
+            }
+            
+            // Get next sequence number for ACC prefix
+            $nextSequence = $accountSequenceModel->getNextSequence('ACC');
+            
+            // Generate account number: ACC-001-ACME
+            $data['data']['account_number'] = sprintf('ACC-%03d-%s', $nextSequence, $data['data']['account_abbreviation']);
+        }
+        
+        return $data;
+    }
+    
+    /**
      * Generate client abbreviation from name
      */
     public function generateClientAbbreviation($clientName)
     {
         // Remove common words and get first 4 letters of significant words
-        $commonWords = ['THE', 'AND', 'OR', 'BUT', 'IN', 'ON', 'AT', 'TO', 'FOR', 'OF', 'WITH', 'BY', 'FROM', 'UP', 'ABOUT', 'INTO', 'THROUGH', 'DURING', 'BEFORE', 'AFTER', 'ABOVE', 'BELOW', 'BETWEEN', 'AMONG', 'WITHIN', 'WITHOUT', 'AGAINST', 'TOWARD', 'UPON', 'COMPANY', 'CORP', 'LLC', 'LTD', 'INC'];
+        $commonWords = ['THE', 'AND', 'OR', 'BUT', 'IN', 'ON', 'AT', 'TO', 'FOR', 'OF', 'WITH', 'BY', 'FROM', 'UP', 'ABOUT', 'INTO', 'THROUGH', 'DURING', 'BEFORE', 'AFTER', 'ABOVE', 'BELOW', 'BETWEEN', 'AMONG', 'WITHIN', 'WITHOUT', 'AGAINST', 'TOWARD', 'UPON', 'COMPANY', 'CORP', 'LLC', 'LTD', 'INC', 'LIMITED', 'CORPORATION', 'INCORPORATED'];
         
         $words = explode(' ', strtoupper($clientName));
         $abbreviation = '';
@@ -151,7 +178,21 @@ class ClientModel extends Model
             }
         }
         
-        return substr($abbreviation, 0, 4);
+        // If we don't have enough characters, pad with first letters of all words
+        if (strlen($abbreviation) < 4) {
+            $abbreviation = '';
+            foreach ($words as $word) {
+                $word = preg_replace('/[^A-Z0-9]/', '', $word);
+                if (strlen($word) > 0) {
+                    $abbreviation .= substr($word, 0, 1);
+                    if (strlen($abbreviation) >= 4) {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return substr(strtoupper($abbreviation), 0, 4);
     }
 
     /**

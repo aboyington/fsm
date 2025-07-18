@@ -27,28 +27,46 @@ This document outlines the internal account codes assigned to various operationa
 
 ## Sample Registry
 
-| Code Type      | Code Example     | Description                              |
-|----------------|------------------|------------------------------------------|
-| Client Account | ACC-001-ACME     | ACME Limited (client)                    |
-| Client Account | ACC-002-NWFU     | New York Furs (client)                   |
-| Client Account | ACC-003-SMIT     | Smith I.T. (client)                      |
-| Invoice        | INV-025-0001     | Invoice #1 issued in 2025                |
-| Invoice        | INV-025-0002     | Invoice #2 issued in 2025                |
-| Estimate       | EST-025-0001     | Estimate #1 issued in 2025               |
-| Estimate       | EST-025-0002     | Estimate #2 issued in 2025               |
-| Material SKU   | MAT-0001         | Material item (cables, wire, etc.)       |
-| Hardware SKU   | HRD-0002         | Hardware item (mounts, DVRs, brackets)   |
-| Part SKU       | PRT-0003         | Part item (sensors, fittings, etc.)      |
-| Service SKU    | SRV-CAM-0001     | Camera system service/maintenance visit  |
-| Service SKU    | SRV-ALA-0001     | Alarm system repair/maintenance visit    |
-| Service SKU    | SRV-ITS-0001     | IT support or troubleshooting visit      |
-| Service SKU    | SRV-GEN-0001     | General service/labour (multi-purpose)   |
+| Code Type      | Code Example | Description                             |
+| -------------- | ------------ | --------------------------------------- |
+| Client Account | ACC-001-ACME | ACME Limited (client)                   |
+| Client Account | ACC-002-NWFU | New York Furs (client)                  |
+| Client Account | ACC-003-SMIT | Smith I.T. (client)                     |
+| Invoice        | INV-025-0001 | Invoice #1 issued in 2025               |
+| Invoice        | INV-025-0002 | Invoice #2 issued in 2025               |
+| Estimate       | EST-025-0001 | Estimate #1 issued in 2025              |
+| Estimate       | EST-025-0002 | Estimate #2 issued in 2025              |
+| Material SKU   | MAT-0001     | Material item (cables, wire, etc.)      |
+| Hardware SKU   | HRD-0002     | Hardware item (mounts, DVRs, brackets)  |
+| Part SKU       | PRT-0003     | Part item (sensors, fittings, etc.)     |
+| Service SKU    | SRV-CAM-0001 | Camera system service/maintenance visit |
+| Service SKU    | SRV-ALA-0001 | Alarm system repair/maintenance visit   |
+| Service SKU    | SRV-ITS-0001 | IT support or troubleshooting visit     |
+| Service SKU    | SRV-GEN-0001 | General service/labour (multi-purpose)  |
 
 ---
 
+## Account Number Assignment
+
+### Company Accounts
+Each company receives a **single account number** when created, and all services/products delivered to them are tracked using **invoices, estimates, and SKUs**.
+
+### Individual Contact Accounts
+Individual contacts (those not associated with a company) automatically receive unique account numbers:
+- **Format**: ACC-XXX-YYYY (e.g., ACC-001-JOHN, ACC-002-JANE)
+- **Auto-generation**: Account numbers are automatically assigned when standalone contacts are created
+- **Uniqueness**: Each individual contact gets a unique account identifier
+- **Display**: Contact listings show "Company Account" for company-associated contacts, actual account numbers for standalone contacts
+
+### Retroactive Assignment
+Existing standalone contacts can be assigned account numbers using the batch generation script:
+- **Script**: `scripts/generate_contact_account_numbers.php`
+- **Safe operation**: Only assigns numbers to contacts without existing account numbers
+- **Progress tracking**: Shows completion progress and statistics
+
 ## Handling Clients with Multiple Services
 
-Each client has a **single account number**, and all services/products delivered to them are tracked using **invoices, estimates, and SKUs**.
+Each client (company or individual contact) has a **single account number**, and all services/products delivered to them are tracked using **invoices, estimates, and SKUs**.
 
 ### Example
 

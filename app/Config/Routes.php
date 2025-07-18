@@ -127,6 +127,9 @@ $routes->group('customers', ['filter' => 'auth'], function($routes) {
     $routes->post('companies/update/(:num)', 'CompaniesController::update/$1');
     $routes->post('companies/delete/(:num)', 'CompaniesController::delete/$1');
     $routes->get('companies/search', 'CompaniesController::search');
+    $routes->post('companies/export', 'CompaniesController::export');
+    $routes->post('companies/import', 'CompaniesController::import');
+    $routes->get('companies/template', 'CompaniesController::template');
     
     // Contacts routes
     $routes->get('contacts', 'ContactsController::index');
@@ -138,6 +141,9 @@ $routes->group('customers', ['filter' => 'auth'], function($routes) {
     $routes->get('contacts/search', 'ContactsController::search');
     $routes->post('contacts/setPrimary/(:num)', 'ContactsController::setPrimary/$1');
     $routes->get('contacts/company/(:num)', 'ContactsController::getByCompany/$1');
+    $routes->post('contacts/export', 'ContactsController::export');
+    $routes->post('contacts/import', 'ContactsController::import');
+    $routes->get('contacts/template', 'ContactsController::template');
     
     // Assets routes
     $routes->get('assets', 'AssetsController::index');

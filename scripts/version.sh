@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Version Update Script for FSM - Field Service Management
-# Usage: ./scripts/version.sh [patch|minor|major|current]
+# Usage: ./scripts/version.sh [patch|minor|major|current] [alpha|beta|rc]
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,14 +15,20 @@ if [ $# -eq 0 ]; then
     echo -e "${RED}❌ Error: Version type required${NC}"
     echo ""
     echo "Usage:"
-    echo "  ./scripts/version.sh patch    # Bug fixes (1.1.0 → 1.1.1)"
-    echo "  ./scripts/version.sh minor    # New features (1.1.0 → 1.2.0)"
-    echo "  ./scripts/version.sh major    # Breaking changes (1.1.0 → 2.0.0)"
-    echo "  ./scripts/version.sh current  # Show current version"
+    echo "  ./scripts/version.sh patch           # Bug fixes (1.1.0 → 1.1.1)"
+    echo "  ./scripts/version.sh minor           # New features (1.1.0 → 1.2.0)"
+    echo "  ./scripts/version.sh major           # Breaking changes (1.1.0 → 2.0.0)"
+    echo "  ./scripts/version.sh current         # Show current version"
+    echo ""
+    echo "Pre-release versions:"
+    echo "  ./scripts/version.sh minor alpha     # Alpha release (1.1.0 → 1.2.0-alpha)"
+    echo "  ./scripts/version.sh minor beta      # Beta release (1.1.0 → 1.2.0-beta)"
+    echo "  ./scripts/version.sh minor rc        # Release candidate (1.1.0 → 1.2.0-rc)"
     exit 1
 fi
 
 TYPE=$1
+PRERELEASE=$2
 
 # Get current version from package.json
 get_current_version() {
@@ -33,12 +39,31 @@ get_current_version() {
     fi
 }
 
+# Extract base version (remove pre-release suffix)
+get_base_version() {
+    local version=$1
+    echo "$version" | sed 's/-.*//'
+}
+
+# Validate pre-release type
+validate_prerelease() {
+    local prerelease=$1
+    if [ -n "$prerelease" ] && [ "$prerelease" != "alpha" ] && [ "$prerelease" != "beta" ] && [ "$prerelease" != "rc" ]; then
+        echo -e "${RED}❌ Invalid pre-release type: $prerelease${NC}"
+        echo "Valid options: alpha, beta, rc"
+        exit 1
+    fi
+}
+
 # Increment version based on type
 increment_version() {
     local version=$1
     local type=$2
+    local prerelease=$3
     
-    IFS='.' read -r major minor patch <<< "$version"
+    # Extract base version (remove any pre-release suffix)
+    local base_version=$(get_base_version "$version")
+    IFS='.' read -r major minor patch <<< "$base_version"
     
     case $type in
         "major")
@@ -59,7 +84,14 @@ increment_version() {
             ;;
     esac
     
-    echo "$major.$minor.$patch"
+    local new_version="$major.$minor.$patch"
+    
+    # Add pre-release suffix if specified
+    if [ -n "$prerelease" ]; then
+        new_version="$new_version-$prerelease"
+    fi
+    
+    echo "$new_version"
 }
 
 # Update file with new version
@@ -92,10 +124,19 @@ main() {
         exit 0
     fi
     
-    new_version=$(increment_version "$current_version" "$TYPE")
+    # Validate pre-release type if provided
+    if [ -n "$PRERELEASE" ]; then
+        validate_prerelease "$PRERELEASE"
+    fi
+    
+    new_version=$(increment_version "$current_version" "$TYPE" "$PRERELEASE")
     timestamp=$(date +%Y-%m-%d)
     
-    echo -e "${BLUE}🔄 Updating FSM version: $current_version → $new_version ($TYPE)${NC}"
+    if [ -n "$PRERELEASE" ]; then
+        echo -e "${BLUE}🔄 Updating FSM version: $current_version → $new_version ($TYPE $PRERELEASE)${NC}"
+    else
+        echo -e "${BLUE}🔄 Updating FSM version: $current_version → $new_version ($TYPE)${NC}"
+    fi
     echo ""
     
     # Update package.json
@@ -119,7 +160,11 @@ main() {
     fi
     
     echo ""
-    echo -e "${GREEN}🎉 Successfully updated FSM to version $new_version${NC}"
+    if [ -n "$PRERELEASE" ]; then
+        echo -e "${GREEN}🎉 Successfully updated FSM to version $new_version ($PRERELEASE release)${NC}"
+    else
+        echo -e "${GREEN}🎉 Successfully updated FSM to version $new_version${NC}"
+    fi
     echo ""
     echo -e "${BLUE}📝 Files updated:${NC}"
     echo "   • package.json"
@@ -135,7 +180,14 @@ main() {
     echo "   • Test the application"
     echo "   • Clear browser cache if needed"
     echo "   • Commit changes to git"
-    echo "   • Push to GitHub"
+    if [ -n "$PRERELEASE" ]; then
+        echo "   • Create git tag: git tag v$new_version"
+        echo "   • Push tag to GitHub: git push origin v$new_version"
+        echo -e "${YELLOW}⚠️  Pre-release warning: This is $PRERELEASE software${NC}"
+    else
+        echo "   • Create git tag: git tag v$new_version"
+        echo "   • Push to GitHub: git push origin v$new_version"
+    fi
 }
 
 # Change to project root directory

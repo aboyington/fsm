@@ -1,0 +1,4 @@
+client_name,contact_person,email,phone,website,company_type,address,city,state,zip_code,country,status,notes
+ABC Security Systems,John Smith,john@abcsecurity.com,555-0123,https://www.abcsecurity.com,Customer,123 Main Street,Toronto,Ontario,M5V 3A1,Canada,active,Premier security solutions provider
+Tech Solutions Inc,Jane Doe,jane@techsolutions.com,555-0789,https://www.techsolutions.com,Partner,456 Business Ave,Vancouver,British Columbia,V6B 2M9,Canada,active,Technology integration specialists
+XYZ Corporation,Mike Johnson,mike@xyzcorp.com,555-0456,https://www.xyzcorp.com,Prospect,789 Enterprise Blvd,Calgary,Alberta,T2P 1J9,Canada,active,Emerging business opportunity

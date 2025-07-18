@@ -110,6 +110,9 @@ CREATE TABLE contacts (
     assistant_id INTEGER,
     direct_reports INTEGER DEFAULT 0,
     
+    -- Account Information
+    account_number VARCHAR(50),
+    
     -- Address Information
     primary_address_id INTEGER,
     billing_address_id INTEGER,
@@ -157,6 +160,7 @@ CREATE TABLE contacts (
 - `idx_contacts_name` on `last_name, first_name`
 - `idx_contacts_company` on `company_id`
 - `idx_contacts_status` on `status`
+- `idx_contacts_account_number` on `account_number`
 
 ### Assets Table
 

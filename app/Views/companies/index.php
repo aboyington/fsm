@@ -149,6 +149,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Company Name</th>
+                            <th>Account Number</th>
                             <th>Contact Person</th>
                             <th>Email</th>
                             <th>Phone</th>
@@ -172,6 +173,7 @@
                                     </div>
                                 </div>
                             </td>
+                            <td><?= esc($company['account_number'] ?? '-') ?></td>
                             <td><?= esc($company['contact_person'] ?? '-') ?></td>
                             <td><?= esc($company['email'] ?? '-') ?></td>
                             <td><?= esc($company['phone'] ?? '-') ?></td>
@@ -493,7 +495,7 @@ function updateCompaniesTable(companies) {
     const tbody = document.getElementById('companiesTableBody');
     
     if (companies.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No companies found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No companies found</td></tr>';
         return;
     }
     

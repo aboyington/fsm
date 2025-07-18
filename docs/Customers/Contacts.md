@@ -12,6 +12,12 @@ The Contacts module manages individual people within customer organizations. Con
 - **Salutation**: Formal greeting preference
 - **Suffix**: Name suffix (Jr., Sr., III, etc.)
 
+### Account Information
+- **Account Number**: Unique identifier for client accounts
+  - **Company Contacts**: Use their company's account number
+  - **Individual Contacts**: Automatically assigned unique account number (format: ACC-XXX-YYYY)
+  - **Display**: Shows "Company Account" for company-associated contacts, actual account number for standalone contacts
+
 ### Contact Information
 - **Primary Email**: Main email address (required, must be unique)
 - **Secondary Email**: Alternative email address
@@ -292,6 +298,31 @@ You can also add addresses, and notes.
 - **Marketing Communications**: Promotional materials
 
 ## Advanced Contact Management
+
+### Account Number Management (v2.4.0)
+
+#### Automatic Account Number Assignment
+- **Individual Contacts**: Contacts without company association automatically receive unique account numbers
+- **Format**: ACC-XXX-YYYY (e.g., ACC-001-JOHN, ACC-002-JANE)
+- **Generation**: Account numbers are auto-generated on contact creation
+- **Uniqueness**: Each standalone contact gets a unique account identifier
+
+#### Account Number Display
+- **Company Contacts**: Display "Company Account" in the account number column
+- **Individual Contacts**: Display the actual account number (ACC-XXX-YYYY)
+- **Missing Numbers**: Display "-" for contacts without account numbers
+
+#### Retroactive Account Number Assignment
+- **Existing Contacts**: Use the batch generation script to assign account numbers to existing standalone contacts
+- **Script Location**: `scripts/generate_contact_account_numbers.php`
+- **Safe Operation**: Only assigns numbers to contacts without existing account numbers
+- **Progress Tracking**: Displays progress and completion statistics
+
+#### Account Number Integration
+- **Search**: Account numbers are searchable in the contacts list
+- **Filtering**: Filter contacts by account number patterns
+- **Export**: Account numbers included in contact export data
+- **Reporting**: Account numbers available in contact reports
 
 ### Contact Merge and Deduplication
 - **Duplicate Detection**: Automatic identification of potential duplicates

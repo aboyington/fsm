@@ -207,17 +207,22 @@ function updateContactsTable(contacts) {
     const tbody = document.getElementById('contactsTableBody');
     
     if (contacts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No contacts found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">No contacts found</td></tr>';
         return;
     }
     
     tbody.innerHTML = contacts.map(contact => {
         const fullName = `${contact.first_name} ${contact.last_name}`;
+        
+        const accountNumber = contact.company_id ? 
+            '<span class="text-muted">Company Account</span>' : 
+            (contact.account_number || '-');
+        
         const companyBadge = contact.company_name ? 
             `<span class="badge bg-light text-dark">${escapeHtml(contact.company_name)}</span>` : 
             '<span class="text-muted">-</span>';
         
-        const emailLink = contact.email ? 
+        const emailLink = contact.email ?
             `<a href="mailto:${escapeHtml(contact.email)}" class="text-decoration-none">${escapeHtml(contact.email)}</a>` : 
             '-';
         
@@ -260,6 +265,7 @@ function updateContactsTable(contacts) {
                         </div>
                     </div>
                 </td>
+                <td>${accountNumber}</td>
                 <td>${companyBadge}</td>
                 <td>${contact.job_title || '-'}</td>
                 <td>${emailLink}</td>
@@ -350,40 +356,22 @@ document.getElementById('createContactModal').addEventListener('hidden.bs.modal'
     document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
 });
 
-// Set base URL (should be available globally)
-const baseUrl = window.location.origin;
+// Set base URL (use global if available, fallback to origin)
+const baseUrl = window.FSM_BASE_URL || window.location.origin;
 
 // Export Functions
 function exportContacts() {
     showAlert('info', 'Preparing contacts export...');
     
-    fetch(`${baseUrl}/customers/contacts/export`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Export failed');
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `contacts_export_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        showAlert('success', 'Contacts exported successfully!');
-    })
-    .catch(error => {
-        console.error('Export error:', error);
-        showAlert('danger', 'Failed to export contacts.');
-    });
+    // Create a temporary form to trigger the export
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `${baseUrl}/customers/contacts/export`;
+    form.style.display = 'none';
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 }
 
 // Import Functions
@@ -396,29 +384,29 @@ function showImportModal() {
                         <h5 class="modal-title" id="importContactsModalLabel">Import Contacts</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <form id="importContactsForm" enctype="multipart/form-data">
+                    <form id="importContactsForm" enctype="multipart/form-data">
+                        <div class="modal-body">
                             <div class="mb-3">
                                 <label for="importFile" class="form-label">Choose CSV File</label>
-                                <input type="file" class="form-control" id="importFile" name="importFile" accept=".csv" required>
+                                <input type="file" class="form-control" id="importFile" name="import_file" accept=".csv" required>
                                 <div class="form-text">
                                     Upload a CSV file with contact data. <a href="#" onclick="downloadTemplate()">Download template</a> for the required format.
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="skipDuplicates" name="skipDuplicates" checked>
-                                    <label class="form-check-label" for="skipDuplicates">
-                                        Skip duplicate contacts (based on email)
+                                    <input class="form-check-input" type="checkbox" id="updateExisting" name="update_existing" value="1">
+                                    <label class="form-check-label" for="updateExisting">
+                                        Update existing contacts (match by email or name)
                                     </label>
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="importContacts()">Import Contacts</button>
-                    </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Import Contacts</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -436,58 +424,54 @@ function showImportModal() {
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('importContactsModal'));
     modal.show();
-}
-
-function importContacts() {
-    const fileInput = document.getElementById('importFile');
-    const skipDuplicates = document.getElementById('skipDuplicates').checked;
     
-    if (!fileInput.files.length) {
-        showAlert('warning', 'Please select a CSV file to import.');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('importFile', fileInput.files[0]);
-    formData.append('skipDuplicates', skipDuplicates ? '1' : '0');
-    
-    showAlert('info', 'Importing contacts...');
-    
-    fetch(`${baseUrl}/customers/contacts/import`, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('importContactsModal'));
-        modal.hide();
+    // Handle form submission
+    document.getElementById('importContactsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        if (data.success) {
-            showAlert('success', `Successfully imported ${data.imported} contacts. ${data.skipped ? `Skipped ${data.skipped} duplicates.` : ''}`);
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        } else {
-            showAlert('danger', data.message || 'Failed to import contacts.');
-        }
-    })
-    .catch(error => {
-        console.error('Import error:', error);
-        showAlert('danger', 'Failed to import contacts.');
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('button[type="submit"]');
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Importing...';
+        
+        fetch(`${baseUrl}/customers/contacts/import`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                modal.hide();
+                showAlert('success', data.message);
+                if (data.details && data.details.errors && data.details.errors.length > 0) {
+                    // Show detailed error information
+                    const errorDetails = data.details.errors.slice(0, 5).join('\n');
+                    const moreErrors = data.details.errors.length > 5 ? `\n... and ${data.details.errors.length - 5} more errors.` : '';
+                    showAlert('warning', `Import completed with some issues:\n${errorDetails}${moreErrors}`);
+                }
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'An error occurred during import.');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Import Contacts';
+        });
     });
 }
 
 // Template Download
 function downloadTemplate() {
-    const csvContent = 'first_name,last_name,email,phone,mobile,job_title,company_name,address,city,state,zip_code,country,status,notes\n';
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'contacts_template.csv';
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    showAlert('success', 'Template downloaded successfully!');
+    showAlert('info', 'Contacts template download started.');
+    
+    // Use window.location to trigger download (this preserves session cookies)
+    window.location.href = `${baseUrl}/customers/contacts/template`;
 }

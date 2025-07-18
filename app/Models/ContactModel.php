@@ -29,7 +29,9 @@ class ContactModel extends Model
         'notes',
         'status',
         'is_primary',
-        'created_by'
+        'created_by',
+        'account_number',
+        'account_abbreviation'
     ];
 
     // Dates
@@ -42,7 +44,7 @@ class ContactModel extends Model
     protected $validationRules = [
         'first_name' => 'required|max_length[100]',
         'last_name' => 'required|max_length[100]',
-        'email' => 'permit_empty|valid_email|max_length[255]',
+        'email' => 'permit_empty|valid_email|max_length[255]|is_unique[contacts.email,id,{id}]',
         'phone' => 'permit_empty|max_length[50]',
         'mobile' => 'permit_empty|max_length[50]',
         'job_title' => 'permit_empty|max_length[100]',
@@ -77,14 +79,99 @@ class ContactModel extends Model
 
     // Callbacks
     protected $allowCallbacks = true;
-    protected $beforeInsert = [];
+    protected $beforeInsert = ['beforeInsert'];
     protected $afterInsert = [];
-    protected $beforeUpdate = [];
+    protected $beforeUpdate = ['beforeUpdate'];
     protected $afterUpdate = [];
     protected $beforeFind = [];
     protected $afterFind = [];
     protected $beforeDelete = [];
     protected $afterDelete = [];
+
+    protected function beforeInsert(array $data)
+    {
+        $data = $this->setCreatedBy($data);
+        $data = $this->generateAccountNumber($data);
+        return $data;
+    }
+
+    protected function beforeUpdate(array $data)
+    {
+        $data = $this->setCreatedBy($data);
+        return $data;
+    }
+
+    protected function setCreatedBy(array $data)
+    {
+        if (!isset($data['data']['created_by'])) {
+            $data['data']['created_by'] = session()->get('user_id');
+        }
+        return $data;
+    }
+
+    /**
+     * Generate account number for new contact (only if not associated with a company)
+     */
+    protected function generateAccountNumber(array $data)
+    {
+        // Only generate account number if:
+        // 1. No account_number is already set
+        // 2. Contact is NOT associated with a company (company_id is null/empty)
+        if ((!isset($data['data']['account_number']) || empty($data['data']['account_number'])) &&
+            (!isset($data['data']['company_id']) || empty($data['data']['company_id']))) {
+            
+            $accountSequenceModel = new \App\Models\AccountSequenceModel();
+            
+            // Generate abbreviation from first and last name
+            $fullName = $data['data']['first_name'] . ' ' . $data['data']['last_name'];
+            $abbreviation = $this->generateContactAbbreviation($fullName);
+            
+            // Get next sequence number for ACC prefix
+            $nextSequence = $accountSequenceModel->getNextSequence('ACC');
+            
+            // Generate account number: ACC-011-JOHN (continuing from company sequence)
+            $data['data']['account_number'] = sprintf('ACC-%03d-%s', $nextSequence, $abbreviation);
+            $data['data']['account_abbreviation'] = $abbreviation;
+        }
+        
+        return $data;
+    }
+    
+    /**
+     * Generate contact abbreviation from first and last name
+     */
+    public function generateContactAbbreviation($fullName)
+    {
+        $words = explode(' ', strtoupper($fullName));
+        $abbreviation = '';
+        
+        // Take first 2 chars from first name and first 2 chars from last name
+        if (count($words) >= 2) {
+            $firstName = preg_replace('/[^A-Z0-9]/', '', $words[0]);
+            $lastName = preg_replace('/[^A-Z0-9]/', '', $words[1]);
+            
+            $abbreviation = substr($firstName, 0, 2) . substr($lastName, 0, 2);
+        } else {
+            // If only one name, take first 4 characters
+            $singleName = preg_replace('/[^A-Z0-9]/', '', $words[0]);
+            $abbreviation = substr($singleName, 0, 4);
+        }
+        
+        // Ensure we have at least 4 characters, pad with first letters if needed
+        if (strlen($abbreviation) < 4) {
+            foreach ($words as $word) {
+                $word = preg_replace('/[^A-Z0-9]/', '', $word);
+                if (strlen($word) > 0) {
+                    $abbreviation .= substr($word, 0, 1);
+                    if (strlen($abbreviation) >= 4) {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return substr(strtoupper($abbreviation), 0, 4);
+    }
 
     /**
      * Get all contacts with company information

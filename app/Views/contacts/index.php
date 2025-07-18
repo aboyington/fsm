@@ -112,6 +112,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Name</th>
+                            <th>Account Number</th>
                             <th>Company</th>
                             <th>Job Title</th>
                             <th>Email</th>
@@ -137,6 +138,10 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script>
+    // Set base URL for external JS file
+    window.FSM_BASE_URL = '<?= base_url() ?>';
+</script>
 <script src="<?= base_url('js/contacts.js') ?>"></script>
 <?= $this->endSection() ?>
 

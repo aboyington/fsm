@@ -1,6 +1,6 @@
 # FSM Development Roadmap & Starting Point
 
-## Current Status (Version 2.3.0)
+## Current Status (Version 2.4.0)
 
 ### ✅ Completed Features
 
