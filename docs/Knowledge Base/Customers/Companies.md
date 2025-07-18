@@ -202,6 +202,33 @@ Companies can have multiple addresses for different purposes:
 2. **Workload Balance**: Distribute companies evenly across territories
 3. **Special Requirements**: Consider company-specific service needs
 
+## Company Import/Export (v2.4.0)
+
+### New Features
+- **Bulk Import**: Import companies from CSV files with comprehensive validation
+- **Data Export**: Export all company data to CSV format for backup or migration
+- **Template Download**: Download CSV templates for proper data formatting
+- **Update Existing**: Option to update existing companies during import (match by name)
+- **Easy Access**: Import/export options available via More dropdown in Companies page
+
+### How to Use
+1. Navigate to **Customers** → **Companies**
+2. Click the **More** dropdown button (next to Add Company)
+3. Select from available options:
+   - **Export Companies**: Download all companies to CSV
+   - **Import Companies**: Upload CSV file to add/update companies
+   - **Download Companies Template**: Get CSV template for proper formatting
+
+### CSV Format
+**Required Fields**: `client_name` (Company name)
+**Optional Fields**: `contact_person`, `email`, `phone`, `website`, `address`, `city`, `state`, `zip_code`, `country`, `status`, `notes`
+
+### Data Validation
+- Company names should be unique for better organization
+- Email addresses must be valid format if provided
+- Status must be either 'active' or 'inactive'
+- Detailed error reporting for any validation issues
+
 ## Security and Permissions
 
 ### Access Control
@@ -210,6 +237,7 @@ Companies can have multiple addresses for different purposes:
 - **Edit**: Modify existing company data
 - **Delete**: Remove company records
 - **Export**: Export company data
+- **Import**: Import company data from CSV files
 
 ### Data Protection
 - Company information is encrypted at rest
