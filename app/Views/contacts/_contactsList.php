@@ -1,15 +1,7 @@
 <?php foreach ($contacts as $contact): ?>
 <tr>
     <td>
-        <div class="d-flex align-items-center">
-            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                <i class="bi bi-person"></i>
-            </div>
-            <div>
-                <h6 class="mb-1"><?= esc($contact['first_name'] . ' ' . $contact['last_name']) ?></h6>
-                <small class="text-muted">ID: <?= $contact['id'] ?></small>
-            </div>
-        </div>
+        <h6 class="mb-1"><?= esc($contact['first_name'] . ' ' . $contact['last_name']) ?></h6>
     </td>
     <td>
         <?php if (!empty($contact['company_id'])): ?>

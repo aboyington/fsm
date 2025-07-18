@@ -10,6 +10,20 @@
                 <div class="modal-body">
                     <input type="hidden" id="contactId" name="id">
                     
+                    <!-- Account Number -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="account_number" class="form-label">Account Number</label>
+                                <input type="text" class="form-control" id="account_number" name="account_number" placeholder="Auto-generated if empty">
+                                <small class="text-muted">Leave empty to auto-generate</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Empty column for spacing -->
+                        </div>
+                    </div>
+                    
                     <!-- Basic Information -->
                     <div class="row">
                         <div class="col-md-6">

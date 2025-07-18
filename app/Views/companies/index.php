@@ -163,15 +163,7 @@
                         <?php foreach ($companies as $company): ?>
                         <tr>
                             <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                        <i class="bi bi-building"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1"><?= esc($company['client_name']) ?></h6>
-                                        <small class="text-muted">ID: <?= $company['id'] ?></small>
-                                    </div>
-                                </div>
+                                <h6 class="mb-1"><?= esc($company['client_name']) ?></h6>
                             </td>
                             <td><?= esc($company['account_number'] ?? '-') ?></td>
                             <td><?= esc($company['contact_person'] ?? '-') ?></td>
@@ -236,8 +228,22 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <label for="account_number" class="form-label">Account Number</label>
+                                <input type="text" class="form-control" id="account_number" name="account_number" placeholder="Auto-generated if empty">
+                                <div class="form-text">Leave empty to auto-generate account number</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
                                 <label for="contact_person" class="form-label">Contact Person</label>
                                 <input type="text" class="form-control" id="contact_person" name="contact_person">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <!-- Empty column for layout balance -->
                             </div>
                         </div>
                     </div>
@@ -437,6 +443,7 @@ function editCompany(id) {
             // Populate form fields
             document.getElementById('companyId').value = company.id;
             document.getElementById('client_name').value = company.client_name || '';
+            document.getElementById('account_number').value = company.account_number || '';
             document.getElementById('contact_person').value = company.contact_person || '';
             document.getElementById('email').value = company.email || '';
             document.getElementById('website').value = company.website || '';
@@ -502,16 +509,9 @@ function updateCompaniesTable(companies) {
     tbody.innerHTML = companies.map(company => `
         <tr>
             <td>
-                <div class="d-flex align-items-center">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                        <i class="bi bi-building"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-1">${escapeHtml(company.client_name)}</h6>
-                        <small class="text-muted">ID: ${company.id}</small>
-                    </div>
-                </div>
+                <h6 class="mb-1">${escapeHtml(company.client_name)}</h6>
             </td>
+            <td>${company.account_number || '-'}</td>
             <td>${company.contact_person || '-'}</td>
             <td>${company.email || '-'}</td>
             <td>${company.phone || '-'}</td>

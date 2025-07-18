@@ -116,6 +116,7 @@ function editContact(id) {
             document.getElementById('last_name').value = contact.last_name || '';
             document.getElementById('email').value = contact.email || '';
             document.getElementById('job_title').value = contact.job_title || '';
+            document.getElementById('account_number').value = contact.account_number || '';
             document.getElementById('company_id').value = contact.company_id || '';
             document.getElementById('phone').value = contact.phone || '';
             document.getElementById('mobile').value = contact.mobile || '';
@@ -255,15 +256,7 @@ function updateContactsTable(contacts) {
         return `
             <tr>
                 <td>
-                    <div class="d-flex align-items-center">
-                        <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                            <i class="bi bi-person"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1">${escapeHtml(fullName)}</h6>
-                            <small class="text-muted">ID: ${contact.id}</small>
-                        </div>
-                    </div>
+                    <h6 class="mb-1">${escapeHtml(fullName)}</h6>
                 </td>
                 <td>${accountNumber}</td>
                 <td>${companyBadge}</td>
@@ -343,6 +336,7 @@ function displayFormErrors(errors) {
 document.getElementById('createContactModal').addEventListener('hidden.bs.modal', function() {
     document.getElementById('contactForm').reset();
     document.getElementById('contactId').value = '';
+    document.getElementById('account_number').value = '';
     document.getElementById('createContactModalLabel').textContent = 'Add Contact';
     document.getElementById('saveContactBtn').textContent = 'Add Contact';
     
