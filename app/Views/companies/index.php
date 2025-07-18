@@ -15,84 +15,100 @@
             <h1 class="h3 mb-0">Companies</h1>
         </div>
         <div class="col-auto">
-            <?php if (!empty($companies)): ?>
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
-                <i class="bi bi-plus-circle"></i> Create Company
-            </button>
-            <?php endif; ?>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
+                    <i class="bi bi-plus-circle"></i> Add Company
+                </button>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-download"></i> More
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><h6 class="dropdown-header">Export</h6></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportCompanies()">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> Export Companies
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Import</h6></li>
+                        <li><a class="dropdown-item" href="#" onclick="showImportModal()">
+                            <i class="bi bi-file-earmark-arrow-up"></i> Import Companies
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="downloadTemplate()">
+                            <i class="bi bi-file-earmark-text"></i> Download Companies Template
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 
     <?php if (empty($companies)): ?>
     <!-- Empty State -->
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card border-0 bg-light">
-                <div class="card-body text-center py-5">
-                    <!-- Company Illustration -->
-                    <div class="mb-4">
-                        <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-3 p-4 shadow-sm" style="width: 200px; height: 140px;">
-                            <!-- Building/Company Icon -->
-                            <div class="position-relative">
-                                <!-- Main building -->
-                                <div class="bg-success rounded-2 me-2" style="width: 60px; height: 80px; position: relative;">
-                                    <!-- Windows -->
-                                    <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 10px; left: 8px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 10px; right: 8px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 25px; left: 8px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 25px; right: 8px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 40px; left: 8px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 40px; right: 8px;"></div>
-                                    <!-- Door -->
-                                    <div class="bg-primary rounded-1" style="width: 12px; height: 20px; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
-                                </div>
-                                
-                                <!-- Side building -->
-                                <div class="bg-info rounded-2" style="width: 40px; height: 60px; position: absolute; top: 20px; right: -35px;">
-                                    <!-- Windows -->
-                                    <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 8px; left: 6px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 8px; right: 6px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 20px; left: 6px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 20px; right: 6px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 32px; left: 6px;"></div>
-                                    <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 32px; right: 6px;"></div>
-                                </div>
-                                
-                                <!-- Documents/List -->
-                                <div class="bg-white border rounded-2 shadow-sm" style="width: 50px; height: 60px; position: absolute; top: 10px; left: -45px; padding: 6px;">
-                                    <!-- Document lines -->
-                                    <div class="bg-secondary rounded" style="width: 100%; height: 2px; margin-bottom: 3px;"></div>
-                                    <div class="bg-secondary rounded" style="width: 80%; height: 2px; margin-bottom: 3px;"></div>
-                                    <div class="bg-secondary rounded" style="width: 90%; height: 2px; margin-bottom: 3px;"></div>
-                                    <div class="bg-secondary rounded" style="width: 70%; height: 2px; margin-bottom: 3px;"></div>
-                                    <div class="bg-secondary rounded" style="width: 85%; height: 2px; margin-bottom: 3px;"></div>
-                                    <div class="bg-secondary rounded" style="width: 95%; height: 2px; margin-bottom: 3px;"></div>
-                                    <div class="bg-secondary rounded" style="width: 75%; height: 2px; margin-bottom: 3px;"></div>
-                                    <div class="bg-secondary rounded" style="width: 90%; height: 2px;"></div>
-                                    
-                                    <!-- Company info section -->
-                                    <div class="mt-2 pt-2 border-top">
-                                        <div class="bg-success rounded" style="width: 60%; height: 2px; margin-bottom: 2px;"></div>
-                                        <div class="bg-success rounded" style="width: 40%; height: 2px; margin-bottom: 2px;"></div>
-                                        <div class="bg-success rounded" style="width: 50%; height: 2px;"></div>
-                                    </div>
-                                </div>
+        <div class="col-lg-8 text-center py-5">
+            <!-- Company Illustration -->
+            <div class="mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-3 p-4" style="width: 200px; height: 140px;">
+                    <!-- Building/Company Icon -->
+                    <div class="position-relative">
+                        <!-- Main building -->
+                        <div class="bg-success rounded-2 me-2" style="width: 60px; height: 80px; position: relative;">
+                            <!-- Windows -->
+                            <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 10px; left: 8px;"></div>
+                            <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 10px; right: 8px;"></div>
+                            <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 25px; left: 8px;"></div>
+                            <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 25px; right: 8px;"></div>
+                            <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 40px; left: 8px;"></div>
+                            <div class="bg-white rounded-1" style="width: 8px; height: 8px; position: absolute; top: 40px; right: 8px;"></div>
+                            <!-- Door -->
+                            <div class="bg-primary rounded-1" style="width: 12px; height: 20px; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
+                        </div>
+                        
+                        <!-- Side building -->
+                        <div class="bg-info rounded-2" style="width: 40px; height: 60px; position: absolute; top: 20px; right: -35px;">
+                            <!-- Windows -->
+                            <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 8px; left: 6px;"></div>
+                            <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 8px; right: 6px;"></div>
+                            <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 20px; left: 6px;"></div>
+                            <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 20px; right: 6px;"></div>
+                            <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 32px; left: 6px;"></div>
+                            <div class="bg-white rounded-1" style="width: 6px; height: 6px; position: absolute; top: 32px; right: 6px;"></div>
+                        </div>
+                        
+                        <!-- Documents/List -->
+                        <div class="bg-white border rounded-2" style="width: 50px; height: 60px; position: absolute; top: 10px; left: -45px; padding: 6px;">
+                            <!-- Document lines -->
+                            <div class="bg-secondary rounded" style="width: 100%; height: 2px; margin-bottom: 3px;"></div>
+                            <div class="bg-secondary rounded" style="width: 80%; height: 2px; margin-bottom: 3px;"></div>
+                            <div class="bg-secondary rounded" style="width: 90%; height: 2px; margin-bottom: 3px;"></div>
+                            <div class="bg-secondary rounded" style="width: 70%; height: 2px; margin-bottom: 3px;"></div>
+                            <div class="bg-secondary rounded" style="width: 85%; height: 2px; margin-bottom: 3px;"></div>
+                            <div class="bg-secondary rounded" style="width: 95%; height: 2px; margin-bottom: 3px;"></div>
+                            <div class="bg-secondary rounded" style="width: 75%; height: 2px; margin-bottom: 3px;"></div>
+                            <div class="bg-secondary rounded" style="width: 90%; height: 2px;"></div>
+                            
+                            <!-- Company info section -->
+                            <div class="mt-2 pt-2 border-top">
+                                <div class="bg-success rounded" style="width: 60%; height: 2px; margin-bottom: 2px;"></div>
+                                <div class="bg-success rounded" style="width: 40%; height: 2px; margin-bottom: 2px;"></div>
+                                <div class="bg-success rounded" style="width: 50%; height: 2px;"></div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Content -->
-                    <h2 class="h4 mb-3">Companies</h2>
-                    <p class="text-muted mb-4">
-                        Maintain comprehensive records for each company or business you work with, along with the ability to link multiple contacts within the organization. This enables you to manage the full history of interactions with each company, including requests, estimates, work orders, appointments, and billing details, ensuring seamless and transparent client management.
-                    </p>
-                    
-                    <!-- Create Company Button -->
-                    <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
-                        <i class="bi bi-plus-circle me-2"></i>Create Company
-                    </button>
                 </div>
             </div>
+            
+            <!-- Content -->
+            <h2 class="h4 mb-3">Companies</h2>
+            <p class="text-muted mb-4">
+                Organize contact information with multiple service locations and billing addresses. Keep easy track on all the previous requests, estimates, work orders, and appointments while also staying on top of invoices and payments, ensuring easy management of overdue tasks and pending payments.
+            </p>
+            
+            <!-- Create Company Button -->
+            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
+                <i class="bi bi-plus-circle me-2"></i>Create Company
+            </button>
         </div>
     </div>
     <?php else: ?>
@@ -100,102 +116,98 @@
     <div class="row">
         <div class="col-12">
             <!-- Filter Bar -->
-            <div class="card border-0 mb-4">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input type="text" class="form-control" id="searchCompanies" placeholder="Search companies...">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select" id="statusFilter">
-                                <option value="">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-md-5 text-end">
-                            <span class="text-muted">
-                                Total: <?= $total_companies ?> | 
-                                Active: <?= $active_companies ?> | 
-                                Inactive: <?= $inactive_companies ?>
+            <div class="mb-4 p-3 bg-light rounded">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
                             </span>
+                            <input type="text" class="form-control" id="searchCompanies" placeholder="Search companies...">
                         </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5 text-end">
+                        <span class="text-muted">
+                            Total: <?= $total_companies ?> | 
+                            Active: <?= $active_companies ?> | 
+                            Inactive: <?= $inactive_companies ?>
+                        </span>
                     </div>
                 </div>
             </div>
 
             <!-- Companies Table -->
-            <div class="card border-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Company Name</th>
-                                <th>Contact Person</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Location</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="companiesTableBody">
-                            <?php foreach ($companies as $company): ?>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                            <i class="bi bi-building"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-1"><?= esc($company['client_name']) ?></h6>
-                                            <small class="text-muted">ID: <?= $company['id'] ?></small>
-                                        </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Company Name</th>
+                            <th>Contact Person</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="companiesTableBody">
+                        <?php foreach ($companies as $company): ?>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-building"></i>
                                     </div>
-                                </td>
-                                <td><?= esc($company['contact_person'] ?? '-') ?></td>
-                                <td><?= esc($company['email'] ?? '-') ?></td>
-                                <td><?= esc($company['phone'] ?? '-') ?></td>
-                                <td>
-                                    <?php if ($company['city'] || $company['state']): ?>
-                                        <?= esc($company['city']) ?><?= $company['city'] && $company['state'] ? ', ' : '' ?><?= esc($company['state']) ?>
-                                    <?php else: ?>
-                                        -
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if ($company['status'] === 'active'): ?>
-                                        <span class="badge bg-success">Active</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <small class="text-muted">
-                                        <?= date('M j, Y', strtotime($company['created_at'])) ?>
-                                    </small>
-                                </td>
-                                <td class="text-center">
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="editCompany(<?= $company['id'] ?>)" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteCompany(<?= $company['id'] ?>)" title="Delete">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                    <div>
+                                        <h6 class="mb-1"><?= esc($company['client_name']) ?></h6>
+                                        <small class="text-muted">ID: <?= $company['id'] ?></small>
                                     </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                </div>
+                            </td>
+                            <td><?= esc($company['contact_person'] ?? '-') ?></td>
+                            <td><?= esc($company['email'] ?? '-') ?></td>
+                            <td><?= esc($company['phone'] ?? '-') ?></td>
+                            <td>
+                                <?php if ($company['city'] || $company['state']): ?>
+                                    <?= esc($company['city']) ?><?= $company['city'] && $company['state'] ? ', ' : '' ?><?= esc($company['state']) ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ($company['status'] === 'active'): ?>
+                                    <span class="badge bg-success">Active</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Inactive</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    <?= date('M j, Y', strtotime($company['created_at'])) ?>
+                                </small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editCompany(<?= $company['id'] ?>)" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteCompany(<?= $company['id'] ?>)" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -572,6 +584,122 @@ function displayFormErrors(errors) {
             input.parentNode.appendChild(feedback);
         }
     }
+}
+
+// Export Companies function
+function exportCompanies() {
+    showAlert('info', 'Preparing companies export...');
+    
+    // Create a temporary form to trigger the export
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `<?= base_url('customers/companies/export') ?>`;
+    form.style.display = 'none';
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+// Show Import Modal function
+function showImportModal() {
+    // Create and show import modal
+    const importModalHtml = `
+        <div class="modal fade" id="importCompaniesModal" tabindex="-1" aria-labelledby="importCompaniesModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importCompaniesModalLabel">Import Companies</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="importCompaniesForm" enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="importFile" class="form-label">Choose CSV File</label>
+                                <input type="file" class="form-control" id="importFile" name="import_file" accept=".csv" required>
+                                <div class="form-text">Upload a CSV file with company data. <a href="#" onclick="downloadTemplate()">Download template</a> for the correct format.</div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="updateExisting" name="update_existing" value="1">
+                                    <label class="form-check-label" for="updateExisting">
+                                        Update existing companies (match by name)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Import Companies</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if present
+    const existingModal = document.getElementById('importCompaniesModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', importModalHtml);
+    
+    // Show modal
+    const importModal = new bootstrap.Modal(document.getElementById('importCompaniesModal'));
+    importModal.show();
+    
+    // Handle form submission
+    document.getElementById('importCompaniesForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('button[type="submit"]');
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Importing...';
+        
+        fetch(`<?= base_url('customers/companies/import') ?>`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                importModal.hide();
+                showAlert('success', data.message);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'An error occurred during import.');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Import Companies';
+        });
+    });
+}
+
+// Download Template function
+function downloadTemplate() {
+    const link = document.createElement('a');
+    link.href = `<?= base_url('customers/companies/template') ?>`;
+    link.download = 'companies_template.csv';
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showAlert('info', 'Companies template download started.');
 }
 
 // Reset modal form when hidden

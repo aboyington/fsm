@@ -25,7 +25,7 @@
     <div id="alertContainer"></div>
 
     <!-- Service Reports Card -->
-    <div class="card shadow mb-4">
+    <div class="card mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Service Reports Management</h6>
         </div>
@@ -141,30 +141,17 @@
 
     <!-- Empty State (when no reports exist) -->
     <?php if (empty($reports)): ?>
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card border-0 bg-light">
-                    <div class="card-body text-center py-5">
-                        <!-- Service Reports Illustration -->
-                        <div class="mb-4">
-                            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-3 p-4 shadow-sm" style="width: 200px; height: 140px;">
-                                <i class="bi bi-file-earmark-text display-1 text-primary"></i>
-                            </div>
-                        </div>
-
-                        <!-- Content -->
-                        <h2 class="h4 mb-3">No Service Reports Yet</h2>
-                        <p class="text-muted mb-4">
-                            The Service Report module enables field technicians to capture critical work progress and job completion information directly from the field. With customizable templates, businesses can provide their customers with transparent, detailed, and timely updates about the service performed, improving customer satisfaction and engagement.
-                        </p>
-
-                        <!-- Create Service Report Button -->
-                        <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createServiceReportModal">
-                            <i class="bi bi-plus-circle me-2"></i>Create Service Report
-                        </button>
-                    </div>
-                </div>
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-file-earmark-text display-1 text-primary"></i>
             </div>
+            <h2 class="h4 mb-3">No Service Reports Yet</h2>
+            <p class="text-muted mb-4">
+                The Service Report module enables field technicians to capture critical work progress and job completion information directly from the field. With customizable templates, businesses can provide their customers with transparent, detailed, and timely updates about the service performed, improving customer satisfaction and engagement.
+            </p>
+            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createServiceReportModal">
+                <i class="bi bi-plus-circle me-2"></i>Create Service Report
+            </button>
         </div>
     <?php endif; ?>
 </div>

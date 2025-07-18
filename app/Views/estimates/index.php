@@ -25,26 +25,24 @@
     <!-- Empty State -->
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card border-0 bg-light">
-                <div class="card-body text-center py-5">
-                    <!-- Estimate Illustration -->
-                    <div class="mb-4">
-                        <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-3 p-4 shadow-sm" style="width: 200px; height: 140px;">
-                            <i class="bi bi-calculator display-1 text-primary"></i>
-                        </div>
+            <div class="text-center py-5">
+                <!-- Estimate Illustration -->
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-3 p-4 shadow-sm" style="width: 200px; height: 140px;">
+                        <i class="bi bi-calculator display-1 text-primary"></i>
                     </div>
-                    
-                    <!-- Content -->
-                    <h2 class="h4 mb-3">Estimates</h2>
-                    <p class="text-muted mb-4">
-                        Build detailed estimates with highly customisable templates and streamline estimate approvals through an online process. It helps you define a clear upfront price, and reduce time-consuming back-and-forth communication.
-                    </p>
-                    
-                    <!-- Create Estimate Button -->
-                    <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createEstimateModal">
-                        <i class="bi bi-plus-circle me-2"></i>Create Estimate
-                    </button>
                 </div>
+                
+                <!-- Content -->
+                <h2 class="h4 mb-3">Estimates</h2>
+                <p class="text-muted mb-4">
+                    Build detailed estimates with highly customisable templates and streamline estimate approvals through an online process. It helps you define a clear upfront price, and reduce time-consuming back-and-forth communication.
+                </p>
+                
+                <!-- Create Estimate Button -->
+                <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createEstimateModal">
+                    <i class="bi bi-plus-circle me-2"></i>Create Estimate
+                </button>
             </div>
         </div>
     </div>

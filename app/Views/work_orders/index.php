@@ -25,26 +25,24 @@
     <!-- Empty State -->
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card border-0 bg-light">
-                <div class="card-body text-center py-5">
-                    <!-- Work Order Illustration -->
-                    <div class="mb-4">
-                        <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-3 p-4 shadow-sm" style="width: 200px; height: 140px;">
-                            <i class="bi bi-clipboard-check display-1 text-primary"></i>
-                        </div>
+            <div class="text-center py-5">
+                <!-- Work Order Illustration -->
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-3 p-4 shadow-sm" style="width: 200px; height: 140px;">
+                        <i class="bi bi-clipboard-check display-1 text-primary"></i>
                     </div>
-                    
-                    <!-- Content -->
-                    <h2 class="h4 mb-3">Work Orders</h2>
-                    <p class="text-muted mb-4">
-                        The Work Order Module centralizes all work-related details, allowing for easy work assignment, progress tracking, and management of invoicing and payments. It simplifies the creation of both one-time and recurring work orders for effective operations.
-                    </p>
-                    
-                    <!-- Create Work Order Button -->
-                    <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createWorkOrderModal">
-                        <i class="bi bi-plus-circle me-2"></i>Create Work Order
-                    </button>
                 </div>
+                
+                <!-- Content -->
+                <h2 class="h4 mb-3">Work Orders</h2>
+                <p class="text-muted mb-4">
+                    The Work Order Module centralizes all work-related details, allowing for easy work assignment, progress tracking, and management of invoicing and payments. It simplifies the creation of both one-time and recurring work orders for effective operations.
+                </p>
+                
+                <!-- Create Work Order Button -->
+                <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createWorkOrderModal">
+                    <i class="bi bi-plus-circle me-2"></i>Create Work Order
+                </button>
             </div>
         </div>
     </div>

@@ -128,7 +128,7 @@
                     <span class="text-muted">FSM by Anthony Boyington &copy; 2025 - Integrated with Canvass Global</span>
                 </div>
                 <div class="col-md-4 text-center text-md-end">
-                    <span class="text-muted">v2.3.0</span>
+                    <span class="text-muted">v2.4.0</span>
                 </div>
             </div>
         </div>

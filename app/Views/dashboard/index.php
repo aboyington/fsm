@@ -20,62 +20,42 @@
     <div class="row">
         <!-- Summary Statistics -->
         <div class="col-md-3">
-            <div class="card stat-card mb-4">
-                <div class="card-body">
-                    <p class="stat-value" id="totalCustomers">0</p>
-                    <p class="stat-label">Total Customers</p>
-                </div>
-            </div>
+            <h5 id="totalCustomers">0</h5>
+            <p class="text-muted">Total Customers</p>
         </div>
         <div class="col-md-3">
-            <div class="card stat-card mb-4">
-                <div class="card-body">
-                    <p class="stat-value" id="activeWorkOrders">0</p>
-                    <p class="stat-label">Active Work Orders</p>
-                </div>
-            </div>
+            <h5 id="activeWorkOrders">0</h5>
+            <p class="text-muted">Active Work Orders</p>
         </div>
         <div class="col-md-3">
-            <div class="card stat-card mb-4">
-                <div class="card-body">
-                    <p class="stat-value" id="todaysAppointments">0</p>
-                    <p class="stat-label">Today's Appointments</p>
-                </div>
-            </div>
+            <h5 id="todaysAppointments">0</h5>
+            <p class="text-muted">Today's Appointments</p>
         </div>
         <div class="col-md-3">
-            <div class="card stat-card mb-4">
-                <div class="card-body">
-                    <p class="stat-value" id="totalTechnicians">0</p>
-                    <p class="stat-label">Field Technicians</p>
-                </div>
-            </div>
+            <h5 id="totalTechnicians">0</h5>
+            <p class="text-muted">Field Technicians</p>
         </div>
     </div>
     <!-- Recent Work Orders Table -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h6 class="card-title">Recent Work Orders</h6>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Customer</th>
-                            <th scope="col">Type</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Priority</th>
-                            <th scope="col">Scheduled</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recentWorkOrdersBody">
-                        <!-- Dynamic rows here -->
-                    </tbody>
-                </table>
-            </div>
+    <div class="mb-4">
+        <h6 class="mb-3">Recent Work Orders</h6>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Scheduled</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recentWorkOrdersBody">
+                    <!-- Dynamic rows here -->
+                </tbody>
+            </table>
         </div>
     </div>
 

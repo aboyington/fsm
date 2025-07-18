@@ -27,8 +27,7 @@
     <!-- Empty State -->
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card border-0 bg-light">
-                <div class="card-body text-center py-5">
+<div class="text-center py-5">
                     <!-- Asset Illustration -->
                     <div class="mb-4">
                         <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-3 p-4 shadow-sm" style="width: 200px; height: 140px;">
@@ -93,8 +92,7 @@
     <div class="row">
         <div class="col-12">
             <!-- Filter Bar -->
-            <div class="card border-0 mb-4">
-                <div class="card-body">
+<div class="bg-light p-3 rounded mb-4">
                     <div class="row align-items-center">
                         <div class="col-md-3">
                             <div class="input-group">
@@ -127,14 +125,12 @@
                                 Active: <?= $active_assets ?> | 
                                 Inactive: <?= $inactive_assets ?>
                             </span>
-                        </div>
-                    </div>
                 </div>
             </div>
-
+        </div>
+    </div>
             <!-- Assets Table -->
-            <div class="card border-0">
-                <div class="table-responsive">
+<div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
@@ -229,7 +225,6 @@
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                </div>
             </div>
         </div>
     </div>

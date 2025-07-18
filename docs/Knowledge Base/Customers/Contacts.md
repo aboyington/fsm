@@ -299,11 +299,15 @@ You can also add addresses, and notes.
 - **Data Preservation**: Maintain historical records during merge
 - **Relationship Updates**: Update all related records after merge
 
-### Contact Import/Export
-- **Bulk Import**: Import contacts from CSV, Excel, or vCard files
-- **Data Validation**: Verify email uniqueness and required fields
-- **Error Handling**: Report and resolve import errors
-- **Export Options**: Export contact data in multiple formats
+### Contact Import/Export (v2.4.0)
+- **Bulk Import**: Import contacts from CSV files with comprehensive validation
+- **Data Validation**: Verify email uniqueness, required fields, and data integrity
+- **Error Handling**: Detailed error reporting and resolution guidance
+- **Export Options**: Export contact data in CSV format for backup or migration
+- **Template Download**: Download CSV templates for proper data formatting
+- **Update Existing**: Option to update existing contacts during import (match by name)
+- **Real-time Feedback**: Progress indicators and success/error notifications
+- **Easy Access**: Import/export options available via More dropdown in Contacts page
 
 ### Contact History and Timeline
 - **Interaction History**: Complete communication log

@@ -14,3 +14,6 @@ hi there, please read the following docs to get up to speed.
 /Users/anthony/Sites/fsm/docs/Workforce/Users.md
 confirm that you understand. 
 
+- Make sure all pages have an empty state section, which shows as a default empty state page when no data is available or created
+Empty State (When no data exist)
+please update all relevant documents in the /docs folder and subfolders, create new docuemnts if needed

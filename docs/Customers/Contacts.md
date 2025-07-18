@@ -299,11 +299,98 @@ You can also add addresses, and notes.
 - **Data Preservation**: Maintain historical records during merge
 - **Relationship Updates**: Update all related records after merge
 
-### Contact Import/Export
-- **Bulk Import**: Import contacts from CSV, Excel, or vCard files
-- **Data Validation**: Verify email uniqueness and required fields
-- **Error Handling**: Report and resolve import errors
-- **Export Options**: Export contact data in multiple formats
+### Contact Import/Export (v2.4.0)
+
+#### Accessing Import/Export Features
+1. Navigate to **Customers** → **Contacts**
+2. Click the **More** dropdown button (next to Add Contact)
+3. Select from available options:
+   - **Export Contacts**: Download all contacts to CSV
+   - **Import Contacts**: Upload CSV file to add/update contacts
+   - **Download Contacts Template**: Get CSV template for proper formatting
+
+#### Exporting Contacts
+**Purpose**: Create backups, migrate data, or share contact information
+
+**Process**:
+1. Click **More** → **Export Contacts**
+2. System generates CSV file with all contact data
+3. File downloads automatically to your device
+4. Includes all fields: names, emails, phones, companies, addresses, etc.
+
+#### Importing Contacts
+**Purpose**: Add multiple contacts at once or update existing contact information
+
+**Process**:
+1. Click **More** → **Import Contacts**
+2. Select CSV file from your device
+3. Choose import options:
+   - **Update existing contacts**: Match by name and update information
+   - **Skip existing contacts**: Only add new contacts
+4. Click **Import Contacts** to process
+5. Review import results and any error messages
+
+#### CSV Template and Format
+**Template Download**: Click **More** → **Download Contacts Template**
+
+**Required Fields**:
+- `first_name`: Contact's first name
+- `last_name`: Contact's last name (required)
+- `email`: Primary email address (must be unique)
+
+**Optional Fields**:
+- `company_name`: Associated company name
+- `job_title`: Professional title
+- `phone`: Primary phone number
+- `mobile`: Mobile phone number
+- `address`: Street address
+- `city`: City name
+- `state`: State or province
+- `zip_code`: ZIP or postal code
+- `country`: Country name
+- `status`: Contact status (active/inactive)
+- `notes`: Additional notes
+
+#### Data Validation and Error Handling
+**Validation Rules**:
+- Email addresses must be unique across all contacts
+- Last name is required for all contacts
+- Phone or email must be provided (at least one contact method)
+- Company names are matched against existing companies
+- Invalid email formats are rejected
+
+**Error Reporting**:
+- Detailed error messages for each failed row
+- Line number references for easy correction
+- Success/failure summary after import
+- Partial imports allowed (successful rows are processed)
+
+#### Best Practices for Import/Export
+**Before Importing**:
+1. Download and use the official CSV template
+2. Verify email addresses are unique and properly formatted
+3. Ensure company names match existing records
+4. Test with a small batch first
+
+**Data Preparation**:
+1. Remove any duplicate entries
+2. Standardize phone number formats
+3. Ensure consistent address formatting
+4. Verify all required fields are populated
+
+**After Import**:
+1. Review import results carefully
+2. Check for any warning messages
+3. Verify contact associations with companies
+4. Test search functionality with new contacts
+
+- **Bulk Import**: Import contacts from CSV files with comprehensive validation
+- **Data Validation**: Verify email uniqueness, required fields, and data integrity
+- **Error Handling**: Detailed error reporting and resolution guidance
+- **Export Options**: Export contact data in CSV format for backup or migration
+- **Template Download**: Download CSV templates for proper data formatting
+- **Update Existing**: Option to update existing contacts during import (match by name)
+- **Real-time Feedback**: Progress indicators and success/error notifications
 
 ### Contact History and Timeline
 - **Interaction History**: Complete communication log

@@ -167,6 +167,90 @@ Companies can have multiple addresses for different purposes:
 - **Saved Searches**: Save frequently used search criteria
 - **Quick Filters**: Predefined common filters
 
+## Company Import/Export (v2.4.0)
+
+### Accessing Import/Export Features
+1. Navigate to **Customers** → **Companies**
+2. Click the **More** dropdown button (next to Add Company)
+3. Select from available options:
+   - **Export Companies**: Download all companies to CSV
+   - **Import Companies**: Upload CSV file to add/update companies
+   - **Download Companies Template**: Get CSV template for proper formatting
+
+### Exporting Companies
+**Purpose**: Create backups, migrate data, or share company information
+
+**Process**:
+1. Click **More** → **Export Companies**
+2. System generates CSV file with all company data
+3. File downloads automatically to your device
+4. Includes all fields: names, contacts, addresses, financial settings, etc.
+
+### Importing Companies
+**Purpose**: Add multiple companies at once or update existing company information
+
+**Process**:
+1. Click **More** → **Import Companies**
+2. Select CSV file from your device
+3. Choose import options:
+   - **Update existing companies**: Match by name and update information
+   - **Skip existing companies**: Only add new companies
+4. Click **Import Companies** to process
+5. Review import results and any error messages
+
+### CSV Template and Format
+**Template Download**: Click **More** → **Download Companies Template**
+
+**Required Fields**:
+- `client_name`: Company name (required)
+
+**Optional Fields**:
+- `contact_person`: Primary contact person
+- `email`: Primary email address
+- `phone`: Primary phone number
+- `website`: Company website URL
+- `company_type`: Account type (Customer, Vendor, etc.)
+- `address`: Street address
+- `city`: City name
+- `state`: State or province
+- `zip_code`: ZIP or postal code
+- `country`: Country name
+- `territory_id`: Assigned territory ID
+- `status`: Company status (active/inactive)
+- `notes`: Additional notes
+
+### Data Validation and Error Handling
+**Validation Rules**:
+- Company names should be unique for better organization
+- Email addresses must be valid format if provided
+- Territory IDs must match existing territories
+- Status must be either 'active' or 'inactive'
+
+**Error Reporting**:
+- Detailed error messages for each failed row
+- Line number references for easy correction
+- Success/failure summary after import
+- Partial imports allowed (successful rows are processed)
+
+### Best Practices for Import/Export
+**Before Importing**:
+1. Download and use the official CSV template
+2. Verify company names are unique and properly formatted
+3. Ensure territory assignments match existing territories
+4. Test with a small batch first
+
+**Data Preparation**:
+1. Remove any duplicate entries
+2. Standardize company name formats
+3. Ensure consistent address formatting
+4. Verify contact information is accurate
+
+**After Import**:
+1. Review import results carefully
+2. Check for any warning messages
+3. Verify territory assignments
+4. Test search functionality with new companies
+
 ## Integration Features
 
 ### Billing Integration

@@ -249,26 +249,130 @@
                         <!-- Calendar Tab -->
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0">Calendar</h6>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-calendar-month"></i> This Month
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="#">This Week</a></li>
-                                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                                        <li><a class="dropdown-item" href="#">Next Month</a></li>
-                                    </ul>
+                                <div class="d-flex align-items-center gap-3">
+                                    <h6 class="mb-0">Calendar</h6>
+                                    
+                                    <!-- Calendar View Toggle -->
+                                    <div class="btn-group" role="group" aria-label="Calendar views">
+                                        <input type="radio" class="btn-check" name="calendarView" id="liveView" autocomplete="off" checked>
+                                        <label class="btn btn-outline-primary btn-sm" for="liveView">Live</label>
+                                        
+                                        <input type="radio" class="btn-check" name="calendarView" id="monthView" autocomplete="off">
+                                        <label class="btn btn-outline-primary btn-sm" for="monthView">Month</label>
+                                        
+                                        <input type="radio" class="btn-check" name="calendarView" id="dayView" autocomplete="off">
+                                        <label class="btn btn-outline-primary btn-sm" for="dayView">Day</label>
+                                        
+                                        <input type="radio" class="btn-check" name="calendarView" id="weekView" autocomplete="off">
+                                        <label class="btn btn-outline-primary btn-sm" for="weekView">Week</label>
+                                        
+                                        <input type="radio" class="btn-check" name="calendarView" id="listView" autocomplete="off">
+                                        <label class="btn btn-outline-primary btn-sm" for="listView">List</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center gap-2">
+                                    <!-- Navigation Controls -->
+                                    <div class="btn-group">
+                                        <button class="btn btn-outline-secondary btn-sm" id="prevPeriod">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm" id="nextPeriod">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Current Period Display -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="currentPeriod">
+                                            <i class="bi bi-calendar-month"></i> <span id="periodText">July, 2025</span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="goToToday()">Today</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="goToThisWeek()">This Week</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="goToThisMonth()">This Month</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="card">
-                                        <div class="card-body text-center py-5">
-                                            <i class="bi bi-calendar-event fs-1 text-muted mb-3"></i>
-                                            <h6 class="text-muted">Calendar View</h6>
-                                            <p class="text-muted small">View and manage your scheduled appointments and events</p>
+
+                            <div class="calendar-view">
+                                <!-- Calendar Views Container -->
+                                <div class="calendar-container">
+                                    <!-- Month View -->
+                                    <div id="monthViewContainer" class="view-container" style="display: none;">
+                                        <div class="calendar-grid">
+                                            <div class="week-days">
+                                                <div>Sun</div>
+                                                <div>Mon</div>
+                                                <div>Tue</div>
+                                                <div>Wed</div>
+                                                <div>Thu</div>
+                                                <div>Fri</div>
+                                                <div>Sat</div>
+                                            </div>
+                                            <div class="days" id="monthDays"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Week View -->
+                                    <div id="weekViewContainer" class="view-container" style="display: none;">
+                                        <div class="week-view">
+                                            <div class="week-header" id="weekHeader"></div>
+                                            <div class="week-body" id="weekBody"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Day View -->
+                                    <div id="dayViewContainer" class="view-container" style="display: none;">
+                                        <div class="day-view">
+                                            <div class="day-header" id="dayHeader"></div>
+                                            <div class="day-body" id="dayBody"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- List View -->
+                                    <div id="listViewContainer" class="view-container" style="display: none;">
+                                        <div class="list-view">
+                                            <div class="list-header">Upcoming Events</div>
+                                            <div class="list-body" id="listBody"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Live View (Default) -->
+                                    <div id="liveViewContainer" class="view-container" style="display: block;">
+                                        <div class="live-view">
+                                            <div class="live-header">Live Calendar</div>
+                                            <div class="live-body" id="liveBody">
+                                                <div class="alert alert-info">
+                                                    <i class="bi bi-info-circle"></i> This is the Live view showing real-time calendar data.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Side panel for appointments and holidays -->
+                                <div class="side-panel">
+                                    <h6 class="mb-3">Event Filters</h6>
+                                    <div class="filter-group">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="serviceAppointments" checked>
+                                            <label class="form-check-label" for="serviceAppointments">
+                                                <i class="bi bi-calendar-check text-primary"></i> Service Appointments
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="timeOff" checked>
+                                            <label class="form-check-label" for="timeOff">
+                                                <i class="bi bi-clock text-warning"></i> Time Off
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="holiday" checked>
+                                            <label class="form-check-label" for="holiday">
+                                                <i class="bi bi-star text-success"></i> Holiday
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -669,6 +773,140 @@
     font-weight: 500;
 }
 
+/* Calendar Styles */
+.calendar-view {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.calendar-grid {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    margin-bottom: 10px;
+}
+
+.week-days > div {
+    text-align: center;
+    font-weight: 600;
+    padding: 10px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+}
+
+.day {
+    min-height: 60px;
+    padding: 8px;
+    border: 1px solid #e9ecef;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.day:hover {
+    background: #f8f9fa;
+}
+
+.day.today {
+    background: #e8f5e8;
+    border-color: #198754;
+}
+
+.day.today .day-number {
+    background: #198754;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.day.other-month {
+    background: #f8f9fa;
+    color: #adb5bd;
+}
+
+.day.has-event {
+    background: #fff3cd;
+    border-color: #ffc107;
+}
+
+.day-number {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.event-indicator {
+    width: 6px;
+    height: 6px;
+    background: #198754;
+    border-radius: 50%;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+}
+
+.side-panel {
+    width: 250px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+.side-panel .list-group-item {
+    border: none;
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.side-panel .list-group-item:last-child {
+    margin-bottom: 0;
+}
+
+.side-panel .list-group-item.active {
+    background: #198754;
+    color: white;
+}
+
+.side-panel .list-group-item:not(.active) {
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+.side-panel .list-group-item:not(.active):hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
 /* Responsive improvements */
 @media (max-width: 768px) {
     .timeline-item {
@@ -683,6 +921,21 @@
     
     .timeline-content {
         padding: 10px 12px;
+    }
+    
+    .calendar-view {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .side-panel {
+        width: 100%;
+        order: -1;
+    }
+    
+    .day {
+        min-height: 50px;
+        padding: 6px;
     }
 }
 </style>
@@ -733,6 +986,427 @@ function loadUserForEdit(userId) {
 }
 
 // Handle edit form submission
+// Sample calendar data for demonstration
+const calendarData = {
+    serviceAppointments: [
+        {
+            id: 1,
+            title: 'CCTV System Installation - Corporate Office',
+            date: '2025-07-20',
+            time: '09:00',
+            duration: 240,
+            customer: 'TechCorp Industries',
+            address: '123 Business Plaza, Downtown',
+            status: 'scheduled',
+            type: 'service',
+            serviceType: 'CCTV Installation'
+        },
+        {
+            id: 2,
+            title: 'Alarm System Maintenance - Retail Store',
+            date: '2025-07-22',
+            time: '14:30',
+            duration: 90,
+            customer: 'City Electronics',
+            address: '456 Mall Drive, Shopping Center',
+            status: 'confirmed',
+            type: 'service',
+            serviceType: 'Alarm Maintenance'
+        },
+        {
+            id: 3,
+            title: 'Door Access Control Setup - Medical Clinic',
+            date: '2025-07-25',
+            time: '08:00',
+            duration: 180,
+            customer: 'Downtown Medical Center',
+            address: '789 Health Ave, Medical District',
+            status: 'scheduled',
+            type: 'service',
+            serviceType: 'Access Control'
+        },
+        {
+            id: 4,
+            title: 'IT Support - Network Infrastructure',
+            date: '2025-07-23',
+            time: '10:00',
+            duration: 120,
+            customer: 'StartUp Hub',
+            address: '321 Innovation St, Tech Park',
+            status: 'confirmed',
+            type: 'service',
+            serviceType: 'IT Support'
+        },
+        {
+            id: 5,
+            title: 'Security Camera Repair - Warehouse',
+            date: '2025-07-26',
+            time: '13:00',
+            duration: 150,
+            customer: 'Logistics Plus',
+            address: '654 Industrial Blvd, Warehouse District',
+            status: 'scheduled',
+            type: 'service',
+            serviceType: 'CCTV Repair'
+        }
+    ],
+    timeOff: [
+        {
+            id: 1,
+            title: 'Vacation',
+            startDate: '2025-07-28',
+            endDate: '2025-07-30',
+            status: 'approved',
+            type: 'timeoff'
+        },
+        {
+            id: 2,
+            title: 'Personal Day',
+            startDate: '2025-07-24',
+            endDate: '2025-07-24',
+            status: 'pending',
+            type: 'timeoff'
+        }
+    ],
+    holidays: [
+        {
+            id: 1,
+            title: 'Independence Day',
+            date: '2025-07-04',
+            type: 'holiday'
+        }
+    ]
+};
+
+// Current calendar state
+let currentDate = new Date();
+let currentView = 'live';
+let activeFilters = {
+    serviceAppointments: true,
+    timeOff: true,
+    holiday: true
+};
+
+// Initialize calendar
+function initializeCalendar() {
+    loadCalendarViews();
+    setupNavigationHandlers();
+    setupFilterHandlers();
+    setupViewHandlers();
+    renderCurrentView();
+}
+
+function loadCalendarViews() {
+    renderMonth();
+    renderWeek();
+    renderDay();
+    renderList();
+}
+
+function renderMonth() {
+    const monthDaysContainer = document.getElementById('monthDays');
+    if (!monthDaysContainer) return;
+    
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // Clear existing content
+    monthDaysContainer.innerHTML = '';
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const firstDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < firstDayOfWeek; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'day other-month';
+        monthDaysContainer.appendChild(emptyDay);
+    }
+    
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isToday = dateStr === new Date().toISOString().split('T')[0];
+        
+        dayElement.className = `day ${isToday ? 'today' : ''}`;
+        dayElement.innerHTML = `<span class="day-number">${day}</span>`;
+        
+        // Add events for this day
+        const dayEvents = getEventsForDate(dateStr);
+        if (dayEvents.length > 0) {
+            dayElement.classList.add('has-event');
+            dayEvents.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.className = `event event-${event.type}`;
+                eventElement.textContent = event.title.length > 20 ? event.title.substring(0, 20) + '...' : event.title;
+                eventElement.title = event.title;
+                dayElement.appendChild(eventElement);
+            });
+        }
+        
+        monthDaysContainer.appendChild(dayElement);
+    }
+}
+
+function renderList() {
+    const listBody = document.getElementById('listBody');
+    if (!listBody) return;
+    
+    // Clear existing content
+    listBody.innerHTML = '';
+    
+    // Get all events and sort by date
+    const allEvents = getAllEvents().sort((a, b) => {
+        const dateA = new Date(a.date || a.startDate);
+        const dateB = new Date(b.date || b.startDate);
+        return dateA - dateB;
+    });
+    
+    if (allEvents.length === 0) {
+        listBody.innerHTML = '<div class="no-events">No events found</div>';
+        return;
+    }
+    
+    allEvents.forEach(event => {
+        const eventElement = document.createElement('div');
+        eventElement.className = `list-event event-${event.type}`;
+        
+        const eventDate = new Date(event.date || event.startDate);
+        const formattedDate = eventDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+        
+        eventElement.innerHTML = `
+            <div class="event-date">${formattedDate}</div>
+            <div class="event-details">
+                <div class="event-title">${event.title}</div>
+                ${event.time ? `<div class="event-time">${event.time}</div>` : ''}
+                ${event.customer ? `<div class="event-customer">${event.customer}</div>` : ''}
+                ${event.status ? `<div class="event-status status-${event.status}">${event.status}</div>` : ''}
+            </div>
+        `;
+        
+        listBody.appendChild(eventElement);
+    });
+}
+
+function getEventsForDate(dateStr) {
+    const events = [];
+    
+    // Get service appointments
+    if (activeFilters.serviceAppointments) {
+        calendarData.serviceAppointments.forEach(appointment => {
+            if (appointment.date === dateStr) {
+                events.push(appointment);
+            }
+        });
+    }
+    
+    // Get time off
+    if (activeFilters.timeOff) {
+        calendarData.timeOff.forEach(timeOff => {
+            const startDate = new Date(timeOff.startDate);
+            const endDate = new Date(timeOff.endDate);
+            const currentDate = new Date(dateStr);
+            
+            if (currentDate >= startDate && currentDate <= endDate) {
+                events.push(timeOff);
+            }
+        });
+    }
+    
+    // Get holidays
+    if (activeFilters.holiday) {
+        calendarData.holidays.forEach(holiday => {
+            if (holiday.date === dateStr) {
+                events.push(holiday);
+            }
+        });
+    }
+    
+    return events;
+}
+
+function getAllEvents() {
+    const events = [];
+    
+    if (activeFilters.serviceAppointments) {
+        events.push(...calendarData.serviceAppointments);
+    }
+    
+    if (activeFilters.timeOff) {
+        events.push(...calendarData.timeOff);
+    }
+    
+    if (activeFilters.holiday) {
+        events.push(...calendarData.holidays);
+    }
+    
+    return events;
+}
+
+function setupViewHandlers() {
+    const calendarViews = document.querySelectorAll('input[name="calendarView"]');
+    
+    calendarViews.forEach(view => {
+        view.addEventListener('change', function() {
+            // Hide all view containers
+            const viewContainers = document.querySelectorAll('.view-container');
+            viewContainers.forEach(container => {
+                container.style.display = 'none';
+            });
+
+            // Show the selected view container
+            const selectedContainer = document.getElementById(this.id + 'Container');
+            if (selectedContainer) {
+                selectedContainer.style.display = 'block';
+            }
+
+            renderCurrentView();
+        });
+    });
+}
+
+function setupNavigationHandlers() {
+    const prevBtn = document.getElementById('prevPeriod');
+    const nextBtn = document.getElementById('nextPeriod');
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updatePeriodText();
+            renderCurrentView();
+        });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updatePeriodText();
+            renderCurrentView();
+        });
+    }
+    
+    updatePeriodText();
+}
+
+function setupFilterHandlers() {
+    const filterCheckboxes = document.querySelectorAll('.filter-group input[type="checkbox"]');
+    
+    filterCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            activeFilters[this.id] = this.checked;
+            renderCurrentView();
+        });
+    });
+}
+
+function updatePeriodText() {
+    const periodText = document.getElementById('periodText');
+    if (periodText) {
+        periodText.textContent = currentDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long'
+        });
+    }
+}
+
+function renderCurrentView() {
+    const activeViewInput = document.querySelector('input[name="calendarView"]:checked');
+    if (activeViewInput) {
+        currentView = activeViewInput.id.replace('View', '');
+        
+        switch (currentView) {
+            case 'month':
+                renderMonth();
+                break;
+            case 'week':
+                renderWeek();
+                break;
+            case 'day':
+                renderDay();
+                break;
+            case 'list':
+                renderList();
+                break;
+            default:
+                // Live view - show current events
+                const liveBody = document.getElementById('liveBody');
+                if (liveBody) {
+                    const todayEvents = getEventsForDate(new Date().toISOString().split('T')[0]);
+                    liveBody.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Today's Schedule (${todayEvents.length} events)
+                        </div>
+                        ${todayEvents.map(event => `
+                            <div class="live-event event-${event.type}">
+                                <div class="event-title">${event.title}</div>
+                                ${event.time ? `<div class="event-time">${event.time}</div>` : ''}
+                                ${event.customer ? `<div class="event-customer">${event.customer}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    `;
+                }
+                break;
+        }
+    }
+}
+
+function renderWeek() {
+    const weekBody = document.getElementById('weekBody');
+    if (!weekBody) return;
+    
+    weekBody.innerHTML = '<div class="text-center p-4">Week view coming soon...</div>';
+}
+
+function renderDay() {
+    const dayBody = document.getElementById('dayBody');
+    if (!dayBody) return;
+    
+    dayBody.innerHTML = '<div class="text-center p-4">Day view coming soon...</div>';
+}
+
+// Navigation functions
+function goToToday() {
+    currentDate = new Date();
+    updatePeriodText();
+    renderCurrentView();
+}
+
+function goToThisWeek() {
+    currentDate = new Date();
+    updatePeriodText();
+    renderCurrentView();
+}
+
+function goToThisMonth() {
+    currentDate = new Date();
+    updatePeriodText();
+    renderCurrentView();
+}
+
+// Initialize calendar when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCalendar);
+} else {
+    initializeCalendar();
+}
+
+// Initialize calendar when calendar tab is shown
+const calendarTab = document.getElementById('calendar-tab');
+if (calendarTab) {
+    calendarTab.addEventListener('shown.bs.tab', function() {
+        initializeCalendar();
+    });
+}
+
 document.getElementById('editUserForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
