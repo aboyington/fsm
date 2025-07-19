@@ -6,6 +6,7 @@ use App\Models\RequestModel;
 use App\Models\ClientModel;
 use App\Models\ContactModel;
 use App\Models\TerritoryModel;
+use App\Models\UserSessionModel;
 
 class RequestsController extends BaseController
 {
@@ -13,6 +14,7 @@ class RequestsController extends BaseController
     protected $clientModel;
     protected $contactModel;
     protected $territoryModel;
+    protected $userSessionModel;
 
     public function __construct()
     {
@@ -20,6 +22,27 @@ class RequestsController extends BaseController
         $this->clientModel = new ClientModel();
         $this->contactModel = new ContactModel();
         $this->territoryModel = new TerritoryModel();
+        $this->userSessionModel = new UserSessionModel();
+    }
+    
+    /**
+     * Get current user ID from session
+     */
+    protected function getCurrentUserId()
+    {
+        $authToken = session()->get('auth_token');
+        
+        if (!$authToken) {
+            return null;
+        }
+        
+        $session = $this->userSessionModel->validateSession($authToken);
+        
+        if ($session) {
+            return $session['user_id'];
+        }
+        
+        return null;
     }
 
     public function index()
@@ -38,6 +61,7 @@ class RequestsController extends BaseController
             'total_requests' => count($requests),
             'pending_requests' => count(array_filter($requests, function($r) { return $r['status'] === 'pending'; })),
             'in_progress_requests' => count(array_filter($requests, function($r) { return $r['status'] === 'in_progress'; })),
+            'on_hold_requests' => count(array_filter($requests, function($r) { return $r['status'] === 'on_hold'; })),
             'completed_requests' => count(array_filter($requests, function($r) { return $r['status'] === 'completed'; }))
         ];
         
@@ -58,7 +82,14 @@ class RequestsController extends BaseController
             }
             
             // Set created_by to current user
-            $data['created_by'] = session()->get('user_id');
+            $userId = $this->getCurrentUserId();
+            if (!$userId) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ]);
+            }
+            $data['created_by'] = $userId;
             
             // Insert the request
             if ($this->requestModel->insert($data)) {
@@ -227,5 +258,21 @@ class RequestsController extends BaseController
             'success' => true,
             'data' => $requests
         ]);
+    }
+
+    public function view($id)
+    {
+        $request = $this->requestModel->getRequestWithDetails($id);
+        
+        if (!$request) {
+            return redirect()->to('/work-order-management/requests')->with('error', 'Request not found');
+        }
+        
+        $data = [
+            'title' => 'REQ' . str_pad($id, 3, '0', STR_PAD_LEFT) . ' - Request Details',
+            'request' => $request
+        ];
+        
+        return view('requests/view', $data);
     }
 }

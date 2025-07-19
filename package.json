@@ -1,6 +1,6 @@
 {
   "name": "fsm-field-service-management",
-  "version": "2.6.0-alpha",
+  "version": "2.6.2-alpha",
   "description": "Field Service Management Application by Anthony Boyington",
   "main": "index.php",
   "scripts": {

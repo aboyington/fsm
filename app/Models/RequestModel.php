@@ -13,6 +13,7 @@ class RequestModel extends Model
     protected $useSoftDeletes = false;
     protected $protectFields = true;
     protected $allowedFields = [
+        'request_number',
         'request_name',
         'description',
         'client_id',
@@ -45,7 +46,7 @@ class RequestModel extends Model
         'description' => 'permit_empty|max_length[1000]',
         'client_id' => 'permit_empty|integer',
         'contact_id' => 'permit_empty|integer',
-        'status' => 'required|in_list[pending,in_progress,completed]',
+        'status' => 'required|in_list[pending,in_progress,on_hold,completed]',
         'priority' => 'permit_empty|in_list[low,medium,high]'
     ];
 
@@ -62,11 +63,29 @@ class RequestModel extends Model
 
     protected $skipValidation = false;
 
+    // Auto-generate request number before insert
+    protected $beforeInsert = ['generateRequestNumber'];
+
+    protected function generateRequestNumber(array $data)
+    {
+        if (!isset($data['data']['request_number']) || empty($data['data']['request_number'])) {
+            // Get the next ID to generate the request number
+            $db = \Config\Database::connect();
+            $nextId = $db->table($this->table)->selectMax('id')->get()->getRow()->id ?? 0;
+            $nextId += 1;
+            
+            $data['data']['request_number'] = 'REQ-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
+        }
+        
+        return $data;
+    }
+
     public function getRequests($status = null, $searchTerm = null, $clientId = null, $priority = null)
     {
-        $builder = $this->select('requests.*, clients.client_name as client_name, contacts.first_name as contact_first_name, contacts.last_name as contact_last_name')
+        $builder = $this->select('requests.*, clients.client_name as client_name, contacts.first_name as contact_first_name, contacts.last_name as contact_last_name, users.first_name as created_by_first_name, users.last_name as created_by_last_name')
                         ->join('clients', 'clients.id = requests.client_id', 'left')
-                        ->join('contacts', 'contacts.id = requests.contact_id', 'left');
+                        ->join('contacts', 'contacts.id = requests.contact_id', 'left')
+                        ->join('users', 'users.id = requests.created_by', 'left');
 
         if ($status) {
             $builder->where('requests.status', $status);
@@ -82,7 +101,8 @@ class RequestModel extends Model
 
         if ($searchTerm) {
             $builder->groupStart()
-                   ->like('requests.request_name', $searchTerm)
+                   ->like('requests.request_number', $searchTerm)
+                   ->orLike('requests.request_name', $searchTerm)
                    ->orLike('requests.description', $searchTerm)
                    ->orLike('clients.client_name', $searchTerm)
                    ->orLike('contacts.first_name', $searchTerm)
@@ -100,9 +120,10 @@ class RequestModel extends Model
 
     public function getRequestWithDetails($id)
     {
-        return $this->select('requests.*, clients.client_name as client_name, contacts.first_name as contact_first_name, contacts.last_name as contact_last_name')
+        return $this->select('requests.*, clients.client_name as client_name, contacts.first_name as contact_first_name, contacts.last_name as contact_last_name, users.first_name as created_by_first_name, users.last_name as created_by_last_name')
                     ->join('clients', 'clients.id = requests.client_id', 'left')
                     ->join('contacts', 'contacts.id = requests.contact_id', 'left')
+                    ->join('users', 'users.id = requests.created_by', 'left')
                     ->where('requests.id', $id)
                     ->first();
     }

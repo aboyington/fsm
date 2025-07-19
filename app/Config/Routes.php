@@ -161,6 +161,7 @@ $routes->group('customers', ['filter' => 'auth'], function($routes) {
 $routes->group('work-order-management', ['filter' => 'auth'], function($routes) {
     // Request routes
     $routes->get('request', 'RequestsController::index');
+    $routes->get('request/view/(:num)', 'RequestsController::view/$1');
     $routes->post('request/create', 'RequestsController::create');
     $routes->get('request/get/(:num)', 'RequestsController::get/$1');
     $routes->post('request/update/(:num)', 'RequestsController::update/$1');
@@ -168,6 +169,10 @@ $routes->group('work-order-management', ['filter' => 'auth'], function($routes) 
     $routes->get('request/search', 'RequestsController::search');
     $routes->post('request/status/(:num)', 'RequestsController::updateStatus/$1');
     $routes->get('request/company/(:num)', 'RequestsController::getByCompany/$1');
+    
+    // Requests alias routes (plural)
+    $routes->get('requests', 'RequestsController::index');
+    $routes->get('requests/view/(:num)', 'RequestsController::view/$1');
     
     // Estimates routes
     $routes->get('estimates', 'EstimatesController::index');
@@ -259,8 +264,7 @@ $routes->group('workforce', ['filter' => 'auth'], function($routes) {
     $routes->post('time-off/update/(:num)', 'WorkforceController::updateTimeOff/$1');
     $routes->post('time-off/delete/(:num)', 'WorkforceController::deleteTimeOff/$1');
 });
-
-// Parts & Services Routes
+// Parts \u0026 Services Routes
 $routes->group('parts-services', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'PartsServices::index');
     $routes->get('data', 'PartsServices::getData');
@@ -270,6 +274,11 @@ $routes->group('parts-services', ['filter' => 'auth'], function($routes) {
     $routes->delete('delete/(:num)', 'PartsServices::delete/$1');
     $routes->get('stats', 'PartsServices::getStats');
     $routes->get('insights', 'PartsServices::getPopularityInsights');
+    
+    // Export and Import routes
+    $routes->get('export/(:segment)', 'PartsServices::export/$1');
+    $routes->post('import', 'PartsServices::import');
+    $routes->get('template/(:segment)', 'PartsServices::template/$1');
 });
 
 // API Routes

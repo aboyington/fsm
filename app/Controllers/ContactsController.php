@@ -43,11 +43,32 @@ class ContactsController extends BaseController
         if ($this->request->getMethod() === 'POST') {
             $data = $this->request->getPost();
             
-            // Validate the data
-            if (!$this->contactModel->validate($data)) {
+            // Create custom validation rules for new contacts (without id placeholder)
+            $validationRules = [
+                'first_name' => 'required|max_length[100]',
+                'last_name' => 'required|max_length[100]',
+                'email' => 'permit_empty|valid_email|max_length[255]|is_unique[contacts.email]',
+                'phone' => 'permit_empty|max_length[50]',
+                'mobile' => 'permit_empty|max_length[50]',
+                'job_title' => 'permit_empty|max_length[100]',
+                'company_id' => 'permit_empty|integer',
+                'territory_id' => 'permit_empty|integer',
+                'city' => 'permit_empty|max_length[100]',
+                'state' => 'permit_empty|max_length[100]',
+                'zip_code' => 'permit_empty|max_length[20]',
+                'country' => 'permit_empty|max_length[100]',
+                'status' => 'permit_empty|in_list[active,inactive]',
+                'is_primary' => 'permit_empty|in_list[0,1]'
+            ];
+            
+            // Use validation service directly
+            $validation = \Config\Services::validation();
+            $validation->setRules($validationRules);
+            
+            if (!$validation->run($data)) {
                 return $this->response->setJSON([
                     'success' => false,
-                    'errors' => $this->contactModel->errors()
+                    'errors' => $validation->getErrors()
                 ]);
             }
             
@@ -62,8 +83,10 @@ class ContactsController extends BaseController
                                   ->update();
             }
             
-            // Insert the contact
+            // Insert the contact (skip model validation since we already validated)
+            $this->contactModel->skipValidation(true);
             if ($this->contactModel->insert($data)) {
+                $this->contactModel->skipValidation(false);
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Contact created successfully'

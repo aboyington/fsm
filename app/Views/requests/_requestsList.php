@@ -1,18 +1,14 @@
 <?php foreach ($requests as $request): ?>
 <tr>
     <td>
-        <div class="d-flex align-items-center">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                <i class="bi bi-clipboard-check"></i>
-            </div>
-            <div>
-                <h6 class="mb-1"><?= esc($request['request_name']) ?></h6>
-                <small class="text-muted">ID: <?= $request['id'] ?></small>
-                <?php if (!empty($request['description'])): ?>
-                <br><small class="text-muted"><?= esc(substr($request['description'], 0, 50)) ?><?= strlen($request['description']) > 50 ? '...' : '' ?></small>
-                <?php endif; ?>
-            </div>
+        <div class="text-center">
+            <a href="<?= base_url('work-order-management/request/view/' . $request['id']) ?>" class="fw-medium text-decoration-none">
+                <?= esc($request['request_number']) ?>
+            </a>
         </div>
+    </td>
+    <td>
+        <span class="fw-medium"><?= esc($request['request_name']) ?></span>
     </td>
     <td>
         <?php if (!empty($request['client_name'])): ?>
@@ -40,6 +36,10 @@
             case 'in_progress':
                 $statusClass = 'bg-info';
                 $statusText = 'In Progress';
+                break;
+            case 'on_hold':
+                $statusClass = 'bg-secondary';
+                $statusText = 'On Hold';
                 break;
             case 'completed':
                 $statusClass = 'bg-success';
@@ -81,8 +81,20 @@
             <?= date('M j, Y', strtotime($request['created_at'])) ?>
         </small>
     </td>
+    <td>
+        <?php if (!empty($request['created_by_first_name']) && !empty($request['created_by_last_name'])): ?>
+            <span class="text-dark">
+                <?= esc($request['created_by_first_name'] . ' ' . $request['created_by_last_name']) ?>
+            </span>
+        <?php else: ?>
+            <span class="text-muted">-</span>
+        <?php endif; ?>
+    </td>
     <td class="text-center">
         <div class="btn-group" role="group">
+            <button type="button" class="btn btn-sm btn-outline-info" onclick="viewRequest(<?= $request['id'] ?>)" title="View">
+                <i class="bi bi-eye"></i>
+            </button>
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="editRequest(<?= $request['id'] ?>)" title="Edit">
                 <i class="bi bi-pencil"></i>
             </button>

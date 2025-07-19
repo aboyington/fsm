@@ -161,8 +161,8 @@ class PartsServices extends Controller
                 'category' => 'required|max_length[100]',
                 'unit_price' => 'required|decimal',
                 'cost_price' => 'permit_empty|decimal',
-                'quantity_on_hand' => 'required|integer',
-                'minimum_stock' => 'required|integer',
+                'quantity_on_hand' => 'permit_empty|integer',
+                'minimum_stock' => 'permit_empty|integer',
                 'supplier' => 'permit_empty|max_length[255]',
                 'manufacturer' => 'permit_empty|max_length[255]',
                 'manufacturer_part_number' => 'permit_empty|max_length[100]',
@@ -257,17 +257,17 @@ class PartsServices extends Controller
         
         $validation = \Config\Services::validation();
         
-        // Same validation rules as create
+        // Same validation rules as create but with SKU uniqueness exception for current item
         if ($type === 'part') {
             $rules = [
                 'name' => 'required|min_length[3]|max_length[255]',
-                'sku' => 'required|min_length[3]|max_length[100]',
+                'sku' => "required|min_length[3]|max_length[100]|is_unique[product_skus.sku_code,id,{$id}]",
                 'description' => 'permit_empty|max_length[500]',
                 'category' => 'required|max_length[100]',
                 'unit_price' => 'required|decimal',
                 'cost_price' => 'permit_empty|decimal',
-                'quantity_on_hand' => 'required|integer',
-                'minimum_stock' => 'required|integer',
+                'quantity_on_hand' => 'permit_empty|integer',
+                'minimum_stock' => 'permit_empty|integer',
                 'supplier' => 'permit_empty|max_length[255]',
                 'manufacturer' => 'permit_empty|max_length[255]',
                 'manufacturer_part_number' => 'permit_empty|max_length[100]',
@@ -279,7 +279,7 @@ class PartsServices extends Controller
         } else {
             $rules = [
                 'name' => 'required|min_length[3]|max_length[255]',
-                'sku' => 'required|min_length[3]|max_length[100]',
+                'sku' => "required|min_length[3]|max_length[100]|is_unique[product_skus.sku_code,id,{$id}]",
                 'description' => 'permit_empty|max_length[500]',
                 'category' => 'required|max_length[100]',
                 'unit_price' => 'required|decimal',
@@ -331,14 +331,18 @@ class PartsServices extends Controller
                 $data['weight'] = $request->getPost('weight');
                 $data['dimensions'] = $request->getPost('dimensions');
                 
-                // Use PartsModel to update part
+                // Skip model validation to avoid placeholder issues
+                $this->partsModel->skipValidation(true);
                 $result = $this->partsModel->updatePart($id, $data);
+                $this->partsModel->skipValidation(false);
             } else {
                 $data['duration_minutes'] = $request->getPost('duration_minutes');
                 $data['is_taxable'] = $request->getPost('is_taxable') ? 1 : 0;
                 
-                // Use ServicesModel to update service
+                // Skip model validation to avoid placeholder issues
+                $this->servicesModel->skipValidation(true);
                 $result = $this->servicesModel->updateService($id, $data);
+                $this->servicesModel->skipValidation(false);
             }
 
             if ($result) {
@@ -439,54 +443,60 @@ class PartsServices extends Controller
      */
     public function getStats()
     {
-        // Disable debug toolbar for clean JSON
-        if (function_exists('ini_set')) {
-            ini_set('display_errors', 0);
-        }
-        
-        // Force JSON response and disable debug toolbar
-        $this->response->setHeader('Content-Type', 'application/json');
-        $this->response->setHeader('Cache-Control', 'no-cache');
-        
-        // Get all data to calculate statistics
-        $allData = $this->getMockData('all');
-        $parts = $this->getMockData('parts');
-        $services = $this->getMockData('services');
-        
-        // Calculate total parts and services
-        $totalParts = count($parts);
-        $totalServices = count($services);
-        
-        // Calculate low stock items (only applies to parts)
-        $lowStockItems = 0;
-        foreach ($parts as $part) {
-            if ($part['quantity_on_hand'] <= $part['minimum_stock']) {
-                $lowStockItems++;
+        try {
+            // Get data from database
+            $builder = $this->productModel->builder();
+            
+            // Get parts count
+            $totalParts = $builder->where('category', 'PRT')->countAllResults();
+            
+            // Get services count
+            $totalServices = $builder->where('category', 'SRV')->countAllResults();
+            
+            // Get low stock items (parts only)
+            $lowStockQuery = $this->productModel->builder()
+                ->where('category', 'PRT')
+                ->where('quantity_on_hand <=', 'minimum_stock', false)
+                ->where('minimum_stock >', 0); // Only count items with minimum stock set
+            $lowStockItems = $lowStockQuery->countAllResults();
+            
+            // Calculate total inventory value (parts only)
+            $partsData = $this->productModel->builder()
+                ->select('quantity_on_hand, price')
+                ->where('category', 'PRT')
+                ->get()
+                ->getResultArray();
+            
+            $totalValue = 0;
+            foreach ($partsData as $part) {
+                $totalValue += ($part['quantity_on_hand'] ?? 0) * ($part['price'] ?? 0);
             }
+            
+            $stats = [
+                'total_parts' => $totalParts,
+                'total_services' => $totalServices,
+                'low_stock_count' => $lowStockItems,
+                'total_value' => $totalValue
+            ];
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'data' => $stats
+            ]);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Error getting stats: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to load statistics',
+                'data' => [
+                    'total_parts' => 0,
+                    'total_services' => 0,
+                    'low_stock_count' => 0,
+                    'total_value' => 0
+                ]
+            ]);
         }
-        
-        // Calculate total value (parts inventory value + services value)
-        $totalValue = 0;
-        foreach ($parts as $part) {
-            $totalValue += $part['quantity_on_hand'] * $part['unit_price'];
-        }
-        foreach ($services as $service) {
-            $totalValue += $service['unit_price'] * 10; // Assume 10 uses per service for demo
-        }
-        
-        $stats = [
-            'total_parts' => $totalParts,
-            'total_services' => $totalServices,
-            'low_stock_count' => $lowStockItems,
-            'total_value' => $totalValue
-        ];
-        
-        // Return clean JSON response
-        echo json_encode([
-            'success' => true,
-            'data' => $stats
-        ]);
-        exit;
     }
 
     /**
@@ -494,36 +504,41 @@ class PartsServices extends Controller
      */
     public function getPopularityInsights()
     {
-        // Force JSON response and disable debug toolbar
-        $this->response->setHeader('Content-Type', 'application/json');
-        
-        // TODO: Implement actual analytics from service history
-        $mockInsights = [
-            'most_used_services' => [
-                ['name' => 'CCTV System Installation', 'usage_count' => 52],
-                ['name' => 'Alarm System Programming', 'usage_count' => 41],
-                ['name' => 'Access Control Setup', 'usage_count' => 35],
-                ['name' => 'Network Configuration', 'usage_count' => 28],
-                ['name' => 'Security System Maintenance', 'usage_count' => 24]
-            ],
-            'most_used_parts' => [
-                ['name' => 'IP Camera 4MP Dome', 'usage_count' => 67],
-                ['name' => 'PIR Motion Sensor', 'usage_count' => 54],
-                ['name' => 'Cat6 Ethernet Cable', 'usage_count' => 89],
-                ['name' => 'Proximity Card Reader', 'usage_count' => 31]
-            ],
-            'low_stock_alerts' => [
-                ['name' => 'IP Camera 4MP Dome', 'current_stock' => 3, 'minimum_stock' => 10],
-                ['name' => 'Proximity Card Reader', 'current_stock' => 2, 'minimum_stock' => 5]
-            ]
-        ];
-
-        // Return clean JSON response
-        echo json_encode([
-            'success' => true,
-            'data' => $mockInsights
-        ]);
-        exit;
+        try {
+            // Get low stock alerts from real data
+            $lowStockAlerts = $this->productModel->builder()
+                ->select('name, quantity_on_hand as current_stock, minimum_stock')
+                ->where('category', 'PRT')
+                ->where('quantity_on_hand <=', 'minimum_stock', false)
+                ->where('minimum_stock >', 0)
+                ->orderBy('quantity_on_hand', 'ASC')
+                ->limit(10)
+                ->get()
+                ->getResultArray();
+            
+            $insights = [
+                'most_used_services' => [], // TODO: Implement when service usage tracking is added
+                'most_used_parts' => [], // TODO: Implement when parts usage tracking is added
+                'low_stock_alerts' => $lowStockAlerts
+            ];
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'data' => $insights
+            ]);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Error getting insights: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to load insights',
+                'data' => [
+                    'most_used_services' => [],
+                    'most_used_parts' => [],
+                    'low_stock_alerts' => []
+                ]
+            ]);
+        }
     }
 
     /**
@@ -550,185 +565,6 @@ class PartsServices extends Controller
         }
     }
 
-    /**
-     * Generate mock data for testing
-     */
-    private function getMockData($type = 'all')
-    {
-        $parts = [
-            [
-                'id' => 1,
-                'type' => 'part',
-                'name' => 'IP Camera 4MP Dome',
-                'sku' => 'CAM-IP-001',
-                'description' => '4MP IP security camera with night vision',
-                'category' => 'CCTV',
-                'unit_price' => 189.99,
-                'cost_price' => 125.00,
-                'quantity_on_hand' => 3,
-                'minimum_stock' => 10,
-                'supplier' => 'Security Supply Co.',
-                'manufacturer' => 'Hikvision',
-                'manufacturer_part_number' => 'DS-2CD2143G0-I',
-                'warranty_period' => 24,
-                'weight' => 1.2,
-                'dimensions' => '5.5x5.5x4.2',
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ],
-            [
-                'id' => 2,
-                'type' => 'part',
-                'name' => 'PIR Motion Sensor',
-                'sku' => 'PIR-001',
-                'description' => 'Passive infrared motion detector for alarm systems',
-                'category' => 'Alarm',
-                'unit_price' => 45.99,
-                'cost_price' => 28.00,
-                'quantity_on_hand' => 100,
-                'minimum_stock' => 20,
-                'supplier' => 'Alarm Components Ltd.',
-                'manufacturer' => 'Paradox',
-                'manufacturer_part_number' => 'DG75',
-                'warranty_period' => 36,
-                'weight' => 0.3,
-                'dimensions' => '4.5x3.2x2.1',
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ],
-            [
-                'id' => 3,
-                'type' => 'part',
-                'name' => 'Proximity Card Reader',
-                'sku' => 'ACR-001',
-                'description' => 'RFID proximity card reader for access control',
-                'category' => 'Access Control',
-                'unit_price' => 125.99,
-                'cost_price' => 85.00,
-                'quantity_on_hand' => 2,
-                'minimum_stock' => 5,
-                'supplier' => 'Access Control Solutions',
-                'manufacturer' => 'HID',
-                'manufacturer_part_number' => 'ProxPoint Plus 6005',
-                'warranty_period' => 24,
-                'weight' => 0.8,
-                'dimensions' => '4.8x3.5x1.2',
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ],
-            [
-                'id' => 4,
-                'type' => 'part',
-                'name' => 'Cat6 Ethernet Cable',
-                'sku' => 'CAB-006',
-                'description' => 'Category 6 ethernet cable for network installations',
-                'category' => 'Networking',
-                'unit_price' => 0.85,
-                'cost_price' => 0.45,
-                'quantity_on_hand' => 5000,
-                'minimum_stock' => 1000,
-                'supplier' => 'Network Supply Inc.',
-                'manufacturer' => 'Belden',
-                'manufacturer_part_number' => 'CAT6-UTP',
-                'warranty_period' => 12,
-                'weight' => 0.02,
-                'dimensions' => 'N/A',
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ]
-        ];
-
-        $services = [
-            [
-                'id' => 5,
-                'type' => 'service',
-                'name' => 'CCTV System Installation',
-                'sku' => 'SV-CCTV-001',
-                'description' => 'Complete CCTV camera system installation and configuration',
-                'category' => 'CCTV',
-                'unit_price' => 250.00,
-                'cost_price' => 120.00,
-                'duration_minutes' => 180,
-                'is_taxable' => 1,
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ],
-            [
-                'id' => 6,
-                'type' => 'service',
-                'name' => 'Alarm System Programming',
-                'sku' => 'SV-ALM-001',
-                'description' => 'Alarm system programming and zone configuration',
-                'category' => 'Alarm',
-                'unit_price' => 125.00,
-                'cost_price' => 65.00,
-                'duration_minutes' => 90,
-                'is_taxable' => 1,
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ],
-            [
-                'id' => 7,
-                'type' => 'service',
-                'name' => 'Access Control Setup',
-                'sku' => 'SV-ACC-001',
-                'description' => 'Access control system setup and user management',
-                'category' => 'Access Control',
-                'unit_price' => 185.00,
-                'cost_price' => 90.00,
-                'duration_minutes' => 150,
-                'is_taxable' => 1,
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ],
-            [
-                'id' => 8,
-                'type' => 'service',
-                'name' => 'Network Configuration',
-                'sku' => 'SV-NET-001',
-                'description' => 'Network setup and configuration for security systems',
-                'category' => 'I.T',
-                'unit_price' => 165.00,
-                'cost_price' => 85.00,
-                'duration_minutes' => 120,
-                'is_taxable' => 1,
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ],
-            [
-                'id' => 9,
-                'type' => 'service',
-                'name' => 'Security System Maintenance',
-                'sku' => 'SV-SEC-001',
-                'description' => 'General security system maintenance and inspection',
-                'category' => 'Security',
-                'unit_price' => 145.00,
-                'cost_price' => 70.00,
-                'duration_minutes' => 105,
-                'is_taxable' => 1,
-                'is_active' => 1,
-                'created_at' => '2025-01-15 10:00:00',
-                'updated_at' => '2025-01-15 10:00:00'
-            ]
-        ];
-
-        switch ($type) {
-            case 'parts':
-                return $parts;
-            case 'services':
-                return $services;
-            default:
-                return array_merge($parts, $services);
-        }
-    }
 
     /**
      * Map database subcategory to frontend category
@@ -754,8 +590,18 @@ class PartsServices extends Controller
     public function export($type)
     {
         try {
-            $model = $type === 'parts' ? $this->partsModel : $this->servicesModel;
-            $data = $model->findAll();
+            // Get data using the product model with proper filtering
+            $builder = $this->productModel->builder();
+            
+            if ($type === 'parts') {
+                $builder->where('category', 'PRT');
+            } elseif ($type === 'services') {
+                $builder->where('category', 'SRV');
+            } else {
+                $builder->whereIn('category', ['PRT', 'SRV']);
+            }
+            
+            $data = $builder->get()->getResultArray();
             
             $filename = $type . '-export-' . date('Y-m-d') . '.csv';
             
@@ -872,9 +718,9 @@ class PartsServices extends Controller
     {
         $common = [
             $row['name'],
-            $row['sku'],
-            $row['category'],
-            $row['unit_price'],
+            $row['sku_code'],
+            $this->mapSubcategoryToCategory($row['subcategory'] ?? ''),
+            $row['price'],
             $row['cost_price'],
             $row['description'],
             $row['is_active'] ? 'Yes' : 'No'
@@ -960,15 +806,23 @@ class PartsServices extends Controller
                     $itemData = $this->parseImportRow($data, $type);
                     
                     // Check if item exists by SKU
-                    $existing = $model->where('sku', $itemData['sku'])->first();
+                    $existing = $this->productModel->where('sku_code', $itemData['sku'])->first();
                     
                     if ($existing) {
-                        // Update existing item
-                        $model->update($existing['id'], $itemData);
+                        // Update existing item using the appropriate model method
+                        if ($type === 'parts') {
+                            $result = $this->partsModel->updatePart($existing['id'], $itemData);
+                        } else {
+                            $result = $this->servicesModel->updateService($existing['id'], $itemData);
+                        }
                         $summary['updated']++;
                     } else {
-                        // Create new item
-                        $model->insert($itemData);
+                        // Create new item using the appropriate model method
+                        if ($type === 'parts') {
+                            $result = $this->partsModel->createPart($itemData);
+                        } else {
+                            $result = $this->servicesModel->createService($itemData);
+                        }
                         $summary['created']++;
                     }
                 } catch (Exception $e) {

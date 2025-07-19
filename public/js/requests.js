@@ -1,10 +1,12 @@
 // Request management JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     const requestForm = document.getElementById('requestForm');
-    const createModal = new bootstrap.Modal(document.getElementById('createRequestModal'));
+    const createModalElement = document.getElementById('createRequestModal');
+    const createModal = createModalElement ? new bootstrap.Modal(createModalElement) : null;
     
     // Form submission
-    requestForm.addEventListener('submit', function(e) {
+    if (requestForm) {
+        requestForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const formData = new FormData(requestForm);
@@ -38,7 +40,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
             showAlert('danger', 'An error occurred while saving the request.');
         });
-    });
+        });
+    }
     
     // Search functionality
     const searchInput = document.getElementById('searchRequests');
@@ -152,11 +155,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Reset modal when closed
-    document.getElementById('createRequestModal').addEventListener('hidden.bs.modal', function() {
+    const modalElement = document.getElementById('createRequestModal');
+    if (modalElement) {
+        modalElement.addEventListener('hidden.bs.modal', function() {
         requestForm.reset();
         document.getElementById('requestId').value = '';
         document.getElementById('createRequestModalLabel').textContent = 'Create Request';
         document.getElementById('saveRequestBtn').textContent = 'Create Request';
+        
+        // Reset default values
+        document.getElementById('priority').value = 'medium';
+        document.getElementById('status').value = 'pending';
         
         // Clear any error messages
         const errorElements = document.querySelectorAll('.text-danger');
@@ -165,10 +174,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Remove error classes
         const errorInputs = document.querySelectorAll('.is-invalid');
         errorInputs.forEach(input => input.classList.remove('is-invalid'));
-    });
+        });
+    }
 });
 
 function editRequest(id) {
+    // Check if we're on the view page (no form elements)
+    if (!document.getElementById('requestId')) {
+        // If no form exists, redirect to the requests list page instead
+        window.location.href = `${baseUrl}/work-order-management/request`;
+        return;
+    }
+    
     fetch(`${baseUrl}/work-order-management/request/get/${id}`)
     .then(response => response.json())
     .then(data => {
@@ -182,6 +199,7 @@ function editRequest(id) {
             document.getElementById('client_id').value = request.client_id || '';
             document.getElementById('contact_id').value = request.contact_id || '';
             document.getElementById('priority').value = request.priority || 'medium';
+            document.getElementById('status').value = request.status || 'pending';
             
             // Populate new fields
             if (document.getElementById('due_date')) {
@@ -256,6 +274,11 @@ function editRequest(id) {
     });
 }
 
+function viewRequest(id) {
+    // Redirect to the request view page
+    window.location.href = `${baseUrl}/work-order-management/request/view/${id}`;
+}
+
 function deleteRequest(id) {
     if (confirm('Are you sure you want to delete this request? This action cannot be undone.')) {
         fetch(`${baseUrl}/work-order-management/request/delete/${id}`, {
@@ -283,7 +306,7 @@ function updateRequestsTable(requests) {
     const tbody = document.getElementById('requestsTableBody');
     
     if (requests.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No requests found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No requests found</td></tr>';
         return;
     }
     
@@ -306,6 +329,10 @@ function updateRequestsTable(requests) {
             case 'in_progress':
                 statusClass = 'bg-info';
                 statusText = 'In Progress';
+                break;
+            case 'on_hold':
+                statusClass = 'bg-secondary';
+                statusText = 'On Hold';
                 break;
             case 'completed':
                 statusClass = 'bg-success';
@@ -336,9 +363,6 @@ function updateRequestsTable(requests) {
                 priorityText = 'Medium';
         }
         
-        const description = request.description ? 
-            `<br><small class="text-muted">${escapeHtml(request.description.substring(0, 50))}${request.description.length > 50 ? '...' : ''}</small>` : 
-            '';
         
         const createdDate = new Date(request.created_at).toLocaleDateString('en-US', {
             month: 'short', 
@@ -346,19 +370,21 @@ function updateRequestsTable(requests) {
             year: 'numeric'
         });
         
+        const createdBy = (request.created_by_first_name && request.created_by_last_name) ?
+            `<span class="text-dark">${escapeHtml(request.created_by_first_name)} ${escapeHtml(request.created_by_last_name)}</span>` :
+            '<span class="text-muted">-</span>';
+        
         return `
             <tr>
                 <td>
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                            <i class="bi bi-clipboard-check"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1">${escapeHtml(request.request_name)}</h6>
-                            <small class="text-muted">ID: ${request.id}</small>
-                            ${description}
-                        </div>
+                    <div class="text-center">
+                        <a href="${baseUrl}/work-order-management/request/view/${request.id}" class="fw-medium text-decoration-none">
+                            ${escapeHtml(request.request_number || '')}
+                        </a>
                     </div>
+                </td>
+                <td>
+                    <span class="fw-medium">${escapeHtml(request.request_name)}</span>
                 </td>
                 <td>${companyBadge}</td>
                 <td>${contactName}</td>
@@ -367,8 +393,14 @@ function updateRequestsTable(requests) {
                 <td>
                     <small class="text-muted">${createdDate}</small>
                 </td>
+                <td>
+                    ${createdBy}
+                </td>
                 <td class="text-center">
                     <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-info" onclick="viewRequest(${request.id})" title="View">
+                            <i class="bi bi-eye"></i>
+                        </button>
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="editRequest(${request.id})" title="Edit">
                             <i class="bi bi-pencil"></i>
                         </button>
@@ -387,4 +419,65 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Function to display form validation errors
+function displayFormErrors(errors) {
+    // Clear previous error messages
+    const errorElements = document.querySelectorAll('.text-danger');
+    errorElements.forEach(element => element.remove());
+    
+    // Remove previous error classes
+    const errorInputs = document.querySelectorAll('.is-invalid');
+    errorInputs.forEach(input => input.classList.remove('is-invalid'));
+    
+    // Display new errors
+    Object.keys(errors).forEach(fieldName => {
+        const field = document.getElementById(fieldName) || document.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+            field.classList.add('is-invalid');
+            
+            // Create error message element
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'text-danger small mt-1';
+            errorDiv.textContent = errors[fieldName];
+            
+            // Insert error message after the field
+            if (field.parentElement.classList.contains('input-group')) {
+                field.parentElement.parentElement.appendChild(errorDiv);
+            } else {
+                field.parentElement.appendChild(errorDiv);
+            }
+        }
+    });
+}
+
+// Function to show alert messages
+function showAlert(type, message) {
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.alert-dismissible');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    // Create new alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert at the top of the page
+    const container = document.querySelector('.container-fluid');
+    if (container) {
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // Auto-hide success messages after 3 seconds
+        if (type === 'success') {
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+    }
 }

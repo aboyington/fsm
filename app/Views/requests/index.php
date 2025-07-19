@@ -66,6 +66,7 @@
                             <option value="">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="in_progress">In Progress</option>
+                            <option value="on_hold">On Hold</option>
                             <option value="completed">Completed</option>
                         </select>
                     </div>
@@ -90,6 +91,7 @@
                             Total: <?= $total_requests ?> | 
                             Pending: <?= $pending_requests ?> | 
                             In Progress: <?= $in_progress_requests ?> | 
+                            On Hold: <?= $on_hold_requests ?> | 
                             Completed: <?= $completed_requests ?>
                         </span>
                     </div>
@@ -100,12 +102,14 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
+                            <th>Request Number</th>
                             <th>Request Name</th>
                             <th>Company</th>
                             <th>Contact</th>
                             <th>Status</th>
                             <th>Priority</th>
                             <th>Created</th>
+                            <th>Created By</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -124,5 +128,9 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script>
+// Define baseUrl for JavaScript
+const baseUrl = '<?= base_url() ?>';
+</script>
 <script src="<?= base_url('js/requests.js') ?>"></script>
 <?= $this->endSection() ?>

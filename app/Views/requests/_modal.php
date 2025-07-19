@@ -15,22 +15,32 @@
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label for="summary" class="form-label">Summary <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="summary" name="summary" rows="3" required placeholder="Enter request summary"></textarea>
+                                <label for="request_name" class="form-label">Request Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="request_name" name="request_name" required placeholder="Enter request name" maxlength="100">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="priority" class="form-label">Priority</label>
                                 <select class="form-select" id="priority" name="priority">
-                                    <option value="">Select</option>
                                     <option value="low">Low</option>
                                     <option value="medium" selected>Medium</option>
                                     <option value="high">High</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="pending" selected>Pending</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="on_hold">On Hold</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="due_date" class="form-label">Due Date</label>
                                 <input type="date" class="form-control" id="due_date" name="due_date" placeholder="MMM DD, YYYY">
