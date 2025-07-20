@@ -14,7 +14,6 @@ class WorkOrderModel extends Model
     protected $protectFields = true;
     protected $allowedFields = [
         'work_order_number',
-        'request_id',
         'summary',
         'priority',
         'type',
@@ -53,8 +52,8 @@ class WorkOrderModel extends Model
     // Validation
     protected $validationRules = [
         'summary' => 'required|min_length[3]|max_length[255]',
-        'priority' => 'permit_empty|in_list[low,medium,high]',
-        'type' => 'permit_empty|in_list[service,corrective,preventive]',
+        'priority' => 'permit_empty|in_list[none,low,medium,critical,high]',
+        'type' => 'permit_empty|in_list[none,corrective,preventive,service,site_survey,inspection,installation,maintenance,emergency,scheduled_maintenance,standard]',
         'due_date' => 'permit_empty|valid_date',
         'company_id' => 'permit_empty|integer',
         'contact_id' => 'permit_empty|integer',
@@ -84,10 +83,10 @@ class WorkOrderModel extends Model
             'max_length' => 'Work order summary cannot exceed 255 characters'
         ],
         'priority' => [
-            'in_list' => 'Priority must be low, medium, or high'
+            'in_list' => 'Priority must be none, low, medium, critical, or high'
         ],
         'type' => [
-            'in_list' => 'Type must be service, corrective, or preventive'
+            'in_list' => 'Type must be none, corrective, preventive, service, site_survey, inspection, installation, maintenance, emergency, scheduled_maintenance, or standard'
         ],
         'due_date' => [
             'valid_date' => 'Please enter a valid due date'
@@ -149,7 +148,7 @@ class WorkOrderModel extends Model
     public function getWorkOrders($status = null, $searchTerm = null, $companyId = null)
     {
         $builder = $this->db->table($this->table . ' w')
-                           ->select('w.*, c.client_name as company_name, ct.first_name, ct.last_name, ct.email as contact_email, a.asset_name, u.username as created_by_name')
+                           ->select('w.*, c.client_name as company_name, ct.first_name, ct.last_name, ct.email as contact_email, a.asset_name, COALESCE(u.first_name || " " || u.last_name, u.username) as created_by_name')
                            ->join('clients c', 'c.id = w.company_id', 'left')
                            ->join('contacts ct', 'ct.id = w.contact_id', 'left')
                            ->join('assets a', 'a.id = w.asset_id', 'left')
@@ -184,7 +183,7 @@ class WorkOrderModel extends Model
     public function getWorkOrderWithDetails($id)
     {
         return $this->db->table($this->table . ' w')
-                       ->select('w.*, c.client_name as company_name, c.client_code, ct.first_name, ct.last_name, ct.email as contact_email, ct.phone as contact_phone, a.asset_name, a.model as asset_model, u.username as created_by_name')
+                       ->select('w.*, c.client_name as company_name, c.client_code, ct.first_name, ct.last_name, ct.email as contact_email, ct.phone as contact_phone, a.asset_name, a.model as asset_model, COALESCE(u.first_name || " " || u.last_name, u.username) as created_by_name')
                        ->join('clients c', 'c.id = w.company_id', 'left')
                        ->join('contacts ct', 'ct.id = w.contact_id', 'left')
                        ->join('assets a', 'a.id = w.asset_id', 'left')
@@ -196,21 +195,13 @@ class WorkOrderModel extends Model
     }
 
     /**
-     * Get work orders by request ID
+     * Get work orders by request ID (placeholder - request_id field doesn't exist yet)
      */
     public function getWorkOrdersByRequest($requestId)
     {
-        return $this->db->table($this->table . ' w')
-                       ->select('w.*, c.client_name as company_name, ct.first_name, ct.last_name, a.asset_name, u.username as created_by_name')
-                       ->join('clients c', 'c.id = w.company_id', 'left')
-                       ->join('contacts ct', 'ct.id = w.contact_id', 'left')
-                       ->join('assets a', 'a.id = w.asset_id', 'left')
-                       ->join('users u', 'u.id = w.created_by', 'left')
-                       ->where('w.request_id', $requestId)
-                       ->where('w.deleted_at IS NULL')
-                       ->orderBy('w.created_at', 'DESC')
-                       ->get()
-                       ->getResultArray();
+        // Note: request_id field doesn't exist in the current schema
+        // This method is a placeholder for future functionality
+        return [];
     }
 
     /**

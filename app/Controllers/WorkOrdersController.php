@@ -7,6 +7,10 @@ use App\Models\ClientModel;
 use App\Models\ContactModel;
 use App\Models\AssetModel;
 use App\Models\ServiceRegistryModel;
+use App\Models\ServicesModel;
+use App\Models\PartsModel;
+use App\Models\SkillModel;
+use App\Models\UserSessionModel;
 
 class WorkOrdersController extends BaseController
 {
@@ -14,7 +18,11 @@ class WorkOrdersController extends BaseController
     protected $clientModel;
     protected $contactModel;
     protected $assetModel;
-    protected $serviceModel;
+    protected $serviceRegistryModel;
+    protected $servicesModel;
+    protected $partsModel;
+    protected $skillModel;
+    protected $userSessionModel;
 
     public function __construct()
     {
@@ -22,7 +30,31 @@ class WorkOrdersController extends BaseController
         $this->clientModel = new ClientModel();
         $this->contactModel = new ContactModel();
         $this->assetModel = new AssetModel();
-        $this->serviceModel = new ServiceRegistryModel();
+        $this->serviceRegistryModel = new ServiceRegistryModel();
+        $this->servicesModel = new ServicesModel();
+        $this->partsModel = new PartsModel();
+        $this->skillModel = new SkillModel();
+        $this->userSessionModel = new UserSessionModel();
+    }
+    
+    /**
+     * Get current user ID from session
+     */
+    protected function getCurrentUserId()
+    {
+        $authToken = session()->get('auth_token');
+        
+        if (!$authToken) {
+            return null;
+        }
+        
+        $session = $this->userSessionModel->validateSession($authToken);
+        
+        if ($session) {
+            return $session['user_id'];
+        }
+        
+        return null;
     }
 
     public function index()
@@ -31,7 +63,15 @@ class WorkOrdersController extends BaseController
         $companies = $this->clientModel->where('status', 'active')->findAll();
         $contacts = $this->contactModel->findAll();
         $assets = $this->assetModel->findAll();
-        $services = $this->serviceModel->findAll();
+        
+        // Load active services from product_skus table (category = 'SRV')
+        $services = $this->servicesModel->getAllServices(['status' => 'active']);
+        
+        // Load active parts from product_skus table (category = 'PRT')
+        $parts = $this->partsModel->getAllParts(['status' => 'active']);
+        
+        // Load active skills
+        $skills = $this->skillModel->getActiveSkills();
         
         $data = [
             'title' => 'Work Orders - FSM Platform',
@@ -40,6 +80,8 @@ class WorkOrdersController extends BaseController
             'contacts' => $contacts,
             'assets' => $assets,
             'services' => $services,
+            'parts' => $parts,
+            'skills' => $skills,
             'total_work_orders' => count($workOrders),
             'pending_work_orders' => count(array_filter($workOrders, function($w) { return $w['status'] === 'pending'; })),
             'in_progress_work_orders' => count(array_filter($workOrders, function($w) { return $w['status'] === 'in_progress'; })),
@@ -63,7 +105,14 @@ class WorkOrdersController extends BaseController
             }
             
             // Set created_by to current user
-            $data['created_by'] = session()->get('user_id');
+            $userId = $this->getCurrentUserId();
+            if (!$userId) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ]);
+            }
+            $data['created_by'] = $userId;
             
             // Insert the work order
             if ($this->workOrderModel->insert($data)) {

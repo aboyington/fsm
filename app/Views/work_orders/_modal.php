@@ -9,6 +9,7 @@
             <form id="workOrderForm">
                 <div class="modal-body">
                     <input type="hidden" id="workOrderId" name="id">
+                    <?= csrf_field() ?>
                     
                     <!-- Work Order Summary -->
                     <h6 class="mb-3 text-primary">Work Order Summary</h6>
@@ -24,8 +25,10 @@
                                 <label for="priority" class="form-label">Priority</label>
                                 <select class="form-select" id="priority" name="priority">
                                     <option value="">Select</option>
+                                    <option value="none">-None-</option>
                                     <option value="low">Low</option>
                                     <option value="medium" selected>Medium</option>
+                                    <option value="critical">Critical</option>
                                     <option value="high">High</option>
                                 </select>
                             </div>
@@ -35,9 +38,17 @@
                                 <label for="type" class="form-label">Type</label>
                                 <select class="form-select" id="type" name="type">
                                     <option value="">Select</option>
-                                    <option value="service" selected>Service</option>
+                                    <option value="none">-None-</option>
                                     <option value="corrective">Corrective</option>
                                     <option value="preventive">Preventive</option>
+                                    <option value="service">Service</option>
+                                    <option value="site_survey">Site Survey</option>
+                                    <option value="inspection">Inspection</option>
+                                    <option value="installation">Installation</option>
+                                    <option value="maintenance">Maintenance</option>
+                                    <option value="emergency">Emergency</option>
+                                    <option value="scheduled_maintenance">Scheduled Maintenance</option>
+                                    <option value="standard">Standard</option>
                                 </select>
                             </div>
                         </div>
@@ -224,7 +235,7 @@
                                                     <option value="">Select Service</option>
                                                     <?php if (isset($services)): ?>
                                                     <?php foreach ($services as $service): ?>
-                                                    <option value="<?= $service['id'] ?>" data-rate="<?= $service['rate'] ?? 0 ?>"><?= esc($service['service_name']) ?></option>
+                                                    <option value="<?= $service['id'] ?>" data-rate="<?= $service['price'] ?? 0 ?>"><?= esc($service['name']) ?></option>
                                                     <?php endforeach; ?>
                                                     <?php endif; ?>
                                                 </select>
@@ -270,7 +281,14 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <input type="text" class="form-control" name="parts[0][part_name]" placeholder="Part name">
+                                                <select class="form-select part-select" name="parts[0][part_id]">
+                                                    <option value="">Select Part</option>
+                                                    <?php if (isset($parts)): ?>
+                                                    <?php foreach ($parts as $part): ?>
+                                                    <option value="<?= $part['id'] ?>" data-rate="<?= $part['price'] ?? 0 ?>"><?= esc($part['name']) ?></option>
+                                                    <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </select>
                                             </td>
                                             <td>
                                                 <input type="number" class="form-control quantity-input" name="parts[0][quantity]" value="1" min="1" step="0.01">
@@ -385,7 +403,14 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <input type="text" class="form-control" name="skills[0][skill_name]" placeholder="Skill name">
+                                                <select class="form-select skill-select" name="skills[0][skill_id]">
+                                                    <option value="">Select Skill</option>
+                                                    <?php if (isset($skills)): ?>
+                                                    <?php foreach ($skills as $skill): ?>
+                                                    <option value="<?= $skill['id'] ?>"><?= esc($skill['name']) ?></option>
+                                                    <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </select>
                                             </td>
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-outline-danger remove-skill" disabled>

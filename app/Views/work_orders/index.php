@@ -110,8 +110,8 @@
                                 <th>Contact</th>
                                 <th>Status</th>
                                 <th>Priority</th>
-                                <th>Due Date</th>
                                 <th>Created</th>
+                                <th>Created By</th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
@@ -131,5 +131,9 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script>
+// Define baseUrl for JavaScript
+const baseUrl = '<?= base_url() ?>';
+</script>
 <script src="<?= base_url('js/work_orders.js') ?>"></script>
 <?= $this->endSection() ?>

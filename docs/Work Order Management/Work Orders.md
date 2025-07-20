@@ -73,6 +73,18 @@ The Work Orders module manages the formal work authorizations and job management
 - Quick action buttons for common operations
 - Status indicators with color coding
 
+### Table Structure
+The main Work Orders table displays the following columns:
+- **Work Order #**: Unique work order identifier (clickable link to details)
+- **Summary**: Descriptive title of the work to be performed
+- **Company**: Associated customer company name
+- **Contact**: Primary contact person with email
+- **Status**: Current work order status with color-coded badges
+- **Priority**: Work priority level with color-coded badges
+- **Created**: Date when the work order was created (Month Day, Year format)
+- **Created By**: Full name of the user who created the work order
+- **Actions**: View, Edit, and additional action buttons
+
 ### Create/Edit Modal
 - Two-column responsive layout
 - Client and contact selection with dynamic loading
@@ -222,6 +234,19 @@ Draft → Open → In Progress → Completed
 - **Permissions**: Verify user roles and territory assignments
 - **Integration**: Check API endpoints and data relationships
 - **Validation**: Review model validation rules
+
+### Work Order Form Issues
+For comprehensive troubleshooting of Work Order form problems (modal submissions, validation errors, data persistence issues), see the detailed guide:
+
+**📖 [Work Order Form Issues and Fixes](./WORK_ORDER_FORM_ISSUES.md)**
+
+This guide covers all recent fixes applied in January 2025, including:
+- Modal form submission failures
+- HTTP method detection problems
+- Form validation and data persistence
+- Date and time handling issues
+- Customer and user assignment problems
+- Modal state management
 
 ### Debug Tools
 - **Error Logging**: Comprehensive error tracking

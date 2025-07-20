@@ -2,15 +2,7 @@
     <?php foreach ($workOrders as $workOrder): ?>
     <tr>
         <td>
-            <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <i class="bi bi-clipboard-check text-primary"></i>
-                </div>
-                <div>
-                    <div class="fw-medium"><?= esc($workOrder['work_order_number']) ?></div>
-                    <small class="text-muted">by <?= esc($workOrder['created_by_name'] ?? 'Unknown') ?></small>
-                </div>
-            </div>
+            <div class="fw-medium"><?= esc($workOrder['work_order_number']) ?></div>
         </td>
         <td>
             <div class="fw-medium"><?= esc($workOrder['summary']) ?></div>
@@ -68,15 +60,10 @@
             <span class="badge <?= $priorityClass ?> text-white"><?= $priorityText ?></span>
         </td>
         <td>
-            <?php if ($workOrder['due_date']): ?>
-            <div class="fw-medium"><?= date('M d, Y', strtotime($workOrder['due_date'])) ?></div>
-            <?php else: ?>
-            <span class="text-muted">No due date</span>
-            <?php endif; ?>
+            <div class="fw-medium"><?= date('M d, Y', strtotime($workOrder['created_at'])) ?></div>
         </td>
         <td>
-            <div class="fw-medium"><?= date('M d, Y', strtotime($workOrder['created_at'])) ?></div>
-            <small class="text-muted"><?= date('H:i', strtotime($workOrder['created_at'])) ?></small>
+            <div class="fw-medium"><?= esc($workOrder['created_by_name'] ?? 'Unknown') ?></div>
         </td>
         <td class="text-center">
             <div class="btn-group" role="group">
