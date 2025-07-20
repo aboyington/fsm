@@ -169,6 +169,8 @@ $routes->group('work-order-management', ['filter' => 'auth'], function($routes) 
     $routes->get('request/search', 'RequestsController::search');
     $routes->post('request/status/(:num)', 'RequestsController::updateStatus/$1');
     $routes->get('request/company/(:num)', 'RequestsController::getByCompany/$1');
+    $routes->get('request/timeline/(:num)', 'RequestsController::getTimeline/$1');
+    $routes->get('request/related-list/(:num)', 'RequestsController::getRelatedList/$1');
     
     // Requests alias routes (plural)
     $routes->get('requests', 'RequestsController::index');
@@ -301,5 +303,19 @@ $routes->group('api', function($routes) {
         $routes->post('customers', 'Api\CustomerController::create');
         $routes->put('customers/(:num)', 'Api\CustomerController::update/$1');
         $routes->delete('customers/(:num)', 'Api\CustomerController::delete/$1');
+        
+        // Request Notes
+        $routes->get('requests/(:num)/notes', 'Api\RequestNotesController::index/$1');
+        $routes->post('requests/(:num)/notes', 'Api\RequestNotesController::create/$1');
+        $routes->put('requests/(:num)/notes/(:num)', 'Api\RequestNotesController::update/$1/$2');
+        $routes->delete('requests/(:num)/notes/(:num)', 'Api\RequestNotesController::delete/$1/$2');
+        $routes->post('requests/(:num)/notes/(:num)/toggle-pin', 'Api\RequestNotesController::togglePin/$1/$2');
+        
+        // Request Attachments
+        $routes->get('requests/(:num)/attachments', 'Api\AttachmentsController::index/$1');
+        $routes->post('requests/(:num)/attachments/upload', 'Api\AttachmentsController::upload/$1');
+        $routes->get('requests/(:num)/attachments/(:num)/download', 'Api\AttachmentsController::download/$1/$2');
+        $routes->get('requests/(:num)/attachments/(:num)/preview', 'Api\AttachmentsController::preview/$1/$2');
+        $routes->delete('requests/(:num)/attachments/(:num)', 'Api\AttachmentsController::delete/$1/$2');
     });
 });

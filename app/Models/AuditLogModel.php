@@ -15,6 +15,8 @@ class AuditLogModel extends Model
     protected $allowedFields = [
         'user_id',
         'target_user_id',
+        'entity_type',
+        'entity_id',
         'event_type',
         'module',
         'title',
@@ -44,7 +46,7 @@ class AuditLogModel extends Model
     /**
      * Log an audit event
      */
-    public function logEvent($eventType, $title, $description = null, $targetUserId = null, $oldValue = null, $newValue = null)
+    public function logEvent($eventType, $title, $description = null, $targetUserId = null, $oldValue = null, $newValue = null, $module = 'users', $entityType = null, $entityId = null)
     {
         $request = \Config\Services::request();
         $session = session();
@@ -52,8 +54,10 @@ class AuditLogModel extends Model
         $data = [
             'user_id' => $session->get('user')['id'] ?? null,
             'target_user_id' => $targetUserId,
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
             'event_type' => $eventType,
-            'module' => 'users', // Can be made dynamic based on context
+            'module' => $module,
             'title' => $title,
             'description' => $description,
             'old_value' => is_array($oldValue) ? json_encode($oldValue) : $oldValue,
@@ -78,8 +82,47 @@ class AuditLogModel extends Model
                 ->where('audit_logs.target_user_id', $userId);
         
         // Apply date filter
-        $now = new \DateTime();
+        $this->applyDateFilter($builder, $filter);
         
+        // Order by newest first
+        $builder->orderBy('audit_logs.created_at', 'DESC');
+        
+        $results = $builder->get()->getResultArray();
+        
+        // Format the results
+        return $this->formatTimelineResults($results);
+    }
+    
+    /**
+     * Get timeline for a specific request
+     */
+    public function getRequestTimeline($requestId, $filter = 'all')
+    {
+        $builder = $this->builder();
+        
+        // Base query - get events where request is the entity
+        $builder->select('audit_logs.*, users.first_name, users.last_name')
+                ->join('users', 'users.id = audit_logs.user_id', 'left')
+                ->where('audit_logs.entity_type', 'request')
+                ->where('audit_logs.entity_id', $requestId);
+        
+        // Apply date filter
+        $this->applyDateFilter($builder, $filter);
+        
+        // Order by newest first
+        $builder->orderBy('audit_logs.created_at', 'DESC');
+        
+        $results = $builder->get()->getResultArray();
+        
+        // Format the results
+        return $this->formatTimelineResults($results);
+    }
+
+    /**
+     * Apply date filter to query builder
+     */
+    private function applyDateFilter($builder, $filter)
+    {
         switch ($filter) {
             case 'today':
                 $startDate = new \DateTime('today');
@@ -108,13 +151,13 @@ class AuditLogModel extends Model
                 $builder->where('audit_logs.created_at >=', $startDate->format('Y-m-d H:i:s'));
                 break;
         }
-        
-        // Order by newest first
-        $builder->orderBy('audit_logs.created_at', 'DESC');
-        
-        $results = $builder->get()->getResultArray();
-        
-        // Format the results
+    }
+    
+    /**
+     * Format timeline results for display
+     */
+    private function formatTimelineResults($results)
+    {
         foreach ($results as &$result) {
             // Create user name from first and last name
             $result['user_name'] = trim(($result['first_name'] ?? '') . ' ' . ($result['last_name'] ?? ''));
@@ -128,6 +171,11 @@ class AuditLogModel extends Model
             }
             if (!empty($result['new_value']) && $this->isJson($result['new_value'])) {
                 $result['new_value'] = json_decode($result['new_value'], true);
+            }
+            
+            // Format date for display
+            if (!empty($result['created_at'])) {
+                $result['formatted_date'] = date('M j, Y g:i A', strtotime($result['created_at']));
             }
         }
         
@@ -156,4 +204,15 @@ class AuditLogModel extends Model
     const EVENT_LOGOUT = 'logout';
     const EVENT_SERVICE_ASSIGNED = 'service_assigned';
     const EVENT_SERVICE_COMPLETED = 'service_completed';
+    
+    // Request-specific events
+    const EVENT_REQUEST_CREATED = 'request_created';
+    const EVENT_REQUEST_UPDATED = 'request_updated';
+    const EVENT_REQUEST_DELETED = 'request_deleted';
+    const EVENT_REQUEST_STATUS_CHANGED = 'request_status_changed';
+    const EVENT_REQUEST_PRIORITY_CHANGED = 'request_priority_changed';
+    const EVENT_REQUEST_ASSIGNED = 'request_assigned';
+    const EVENT_REQUEST_CONVERTED = 'request_converted';
+    const EVENT_REQUEST_NOTE_ADDED = 'request_note_added';
+    const EVENT_REQUEST_ATTACHMENT_ADDED = 'request_attachment_added';
 }

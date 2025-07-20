@@ -116,10 +116,47 @@ The Requests module is accessible via:
 - **Status Badge**: Current status with appropriate color
 
 **Quick Info Sections**
-- **Company Information**: Company name, contact details
+- **Company Information**: Company name and comprehensive contact details
 - **Priority Level**: Visual priority indicator
 - **Created Information**: Creation date and creator
 - **Last Modified**: Modification date and user
+
+#### Contact Information Section
+
+The Contact section in the sidebar provides comprehensive contact details:
+
+**Company**
+- **Icon**: Building icon (`bi-building`)
+- **Display**: Company name with clickable link
+- **Data Source**: `client_name` from clients table
+
+**Contact**
+- **Icon**: Person icon (`bi-person`)
+- **Display**: Full contact name (first name + last name)
+- **Data Source**: `contact_first_name` and `contact_last_name` from contacts table
+
+**Email**
+- **Icon**: Envelope icon (`bi-envelope`)
+- **Display**: Clickable email link with `mailto:` functionality
+- **Data Source**: `contact_email` from contacts table
+- **Styling**: Text decoration removed from link for clean appearance
+
+**Phone**
+- **Icon**: Telephone icon (`bi-telephone`)
+- **Display**: Clickable phone link with `tel:` functionality
+- **Data Source**: `contact_phone` from contacts table
+- **Styling**: Text decoration removed from link for clean appearance
+
+**Mobile**
+- **Icon**: Phone icon (`bi-phone`)
+- **Display**: Clickable mobile link with `tel:` functionality
+- **Data Source**: `contact_mobile` from contacts table
+- **Styling**: Text decoration removed from link for clean appearance
+
+**Conditional Display**
+- All contact fields are conditionally displayed only when data exists
+- Uses PHP `empty()` checks to prevent displaying empty sections
+- Maintains clean UI by hiding missing information
 
 #### Main Content Area - Tabbed Interface
 

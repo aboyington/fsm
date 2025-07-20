@@ -14,6 +14,7 @@ class EstimateModel extends Model
     protected $protectFields = true;
     protected $allowedFields = [
         'estimate_number',
+        'request_id',
         'summary',
         'expiry_date',
         'company_id',
@@ -188,6 +189,24 @@ class EstimateModel extends Model
                        ->join('contacts ct', 'ct.id = e.contact_id', 'left')
                        ->join('assets a', 'a.id = e.asset_id', 'left')
                        ->where('e.company_id', $companyId)
+                       ->where('e.deleted_at IS NULL')
+                       ->orderBy('e.created_at', 'DESC')
+                       ->get()
+                       ->getResultArray();
+    }
+
+    /**
+     * Get estimates by request ID
+     */
+    public function getEstimatesByRequest($requestId)
+    {
+        return $this->db->table($this->table . ' e')
+                       ->select('e.*, c.client_name as company_name, ct.first_name, ct.last_name, a.asset_name, u.username as created_by_name')
+                       ->join('clients c', 'c.id = e.company_id', 'left')
+                       ->join('contacts ct', 'ct.id = e.contact_id', 'left')
+                       ->join('assets a', 'a.id = e.asset_id', 'left')
+                       ->join('users u', 'u.id = e.created_by', 'left')
+                       ->where('e.request_id', $requestId)
                        ->where('e.deleted_at IS NULL')
                        ->orderBy('e.created_at', 'DESC')
                        ->get()

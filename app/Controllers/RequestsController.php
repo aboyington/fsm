@@ -7,6 +7,8 @@ use App\Models\ClientModel;
 use App\Models\ContactModel;
 use App\Models\TerritoryModel;
 use App\Models\UserSessionModel;
+use App\Models\EstimateModel;
+use App\Models\WorkOrderModel;
 
 class RequestsController extends BaseController
 {
@@ -15,6 +17,9 @@ class RequestsController extends BaseController
     protected $contactModel;
     protected $territoryModel;
     protected $userSessionModel;
+    protected $auditLogModel;
+    protected $estimateModel;
+    protected $workOrderModel;
 
     public function __construct()
     {
@@ -23,6 +28,9 @@ class RequestsController extends BaseController
         $this->contactModel = new ContactModel();
         $this->territoryModel = new TerritoryModel();
         $this->userSessionModel = new UserSessionModel();
+        $this->auditLogModel = new \App\Models\AuditLogModel();
+        $this->estimateModel = new EstimateModel();
+        $this->workOrderModel = new WorkOrderModel();
     }
     
     /**
@@ -274,5 +282,83 @@ class RequestsController extends BaseController
         ];
         
         return view('requests/view', $data);
+    }
+    
+    public function getTimeline($id)
+    {
+        // Check if user is authenticated
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Verify request exists
+        $request = $this->requestModel->find($id);
+        if (!$request) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Request not found'
+            ])->setStatusCode(404);
+        }
+        
+        $filter = $this->request->getVar('filter') ?? 'all';
+        
+        // Fetch timeline data from audit logs
+        $timelineData = $this->auditLogModel->getRequestTimeline($id, $filter);
+        
+        return $this->response->setJSON([
+            'success' => true,
+            'timeline' => $timelineData,
+            'total' => count($timelineData)
+        ]);
+    }
+    
+    public function getRelatedList($id)
+    {
+        // Check if user is authenticated
+        if (!session()->get('auth_token')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized: Please login to continue'
+            ])->setStatusCode(401);
+        }
+        
+        // Verify request exists
+        $request = $this->requestModel->find($id);
+        if (!$request) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Request not found'
+            ])->setStatusCode(404);
+        }
+        
+        try {
+            // Get related estimates
+            $estimates = $this->estimateModel->getEstimatesByRequest($id);
+            
+            // Get related work orders
+            $workOrders = $this->workOrderModel->getWorkOrdersByRequest($id);
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'data' => [
+                    'estimates' => $estimates,
+                    'work_orders' => $workOrders
+                ],
+                'counts' => [
+                    'estimates' => count($estimates),
+                    'work_orders' => count($workOrders),
+                    'total' => count($estimates) + count($workOrders)
+                ]
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching related list: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error fetching related records'
+            ])->setStatusCode(500);
+        }
     }
 }

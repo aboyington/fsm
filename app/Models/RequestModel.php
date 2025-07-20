@@ -63,8 +63,11 @@ class RequestModel extends Model
 
     protected $skipValidation = false;
 
-    // Auto-generate request number before insert
+    // Auto-generate request number before insert and log events
     protected $beforeInsert = ['generateRequestNumber'];
+    protected $afterInsert = ['logRequestCreated'];
+    protected $afterUpdate = ['logRequestUpdated'];
+    protected $afterDelete = ['logRequestDeleted'];
 
     protected function generateRequestNumber(array $data)
     {
@@ -77,6 +80,86 @@ class RequestModel extends Model
             $data['data']['request_number'] = 'REQ-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
         }
         
+        return $data;
+    }
+    
+    protected function logRequestCreated(array $data)
+    {
+        if (isset($data['id'])) {
+            $auditLogModel = new \App\Models\AuditLogModel();
+            $request = $this->find($data['id']);
+            
+            if ($request) {
+                $auditLogModel->logEvent(
+                    \App\Models\AuditLogModel::EVENT_REQUEST_CREATED,
+                    'Request Created',
+                    'Request "' . ($request['request_name'] ?? 'Unnamed') . '" was created',
+                    null,
+                    null,
+                    json_encode($request),
+                    'requests',
+                    'request',
+                    (string)$data['id']
+                );
+            }
+        }
+        return $data;
+    }
+    
+    protected function logRequestUpdated(array $data)
+    {
+        if (isset($data['id'][0])) {
+            $requestId = is_array($data['id']) ? $data['id'][0] : $data['id'];
+            $auditLogModel = new \App\Models\AuditLogModel();
+            
+            // Get the updated request
+            $request = $this->find($requestId);
+            
+            if ($request) {
+                $description = 'Request "' . ($request['request_name'] ?? 'Unnamed') . '" was updated';
+                
+                // Check for specific field changes
+                if (isset($data['data']['status'])) {
+                    $description = 'Request status changed to "' . ucfirst($data['data']['status']) . '"';
+                }
+                if (isset($data['data']['priority'])) {
+                    $description = 'Request priority changed to "' . ucfirst($data['data']['priority']) . '"';
+                }
+                
+                $auditLogModel->logEvent(
+                    \App\Models\AuditLogModel::EVENT_REQUEST_UPDATED,
+                    'Request Updated',
+                    $description,
+                    null,
+                    null,
+                    json_encode($data['data'] ?? []),
+                    'requests',
+                    'request',
+                    (string)$requestId
+                );
+            }
+        }
+        return $data;
+    }
+    
+    protected function logRequestDeleted(array $data)
+    {
+        if (isset($data['id'][0])) {
+            $requestId = is_array($data['id']) ? $data['id'][0] : $data['id'];
+            $auditLogModel = new \App\Models\AuditLogModel();
+            
+            $auditLogModel->logEvent(
+                \App\Models\AuditLogModel::EVENT_REQUEST_DELETED,
+                'Request Deleted',
+                'Request was deleted from the system',
+                null,
+                null,
+                null,
+                'requests',
+                'request',
+                (string)$requestId
+            );
+        }
         return $data;
     }
 
@@ -120,7 +203,7 @@ class RequestModel extends Model
 
     public function getRequestWithDetails($id)
     {
-        return $this->select('requests.*, clients.client_name as client_name, contacts.first_name as contact_first_name, contacts.last_name as contact_last_name, users.first_name as created_by_first_name, users.last_name as created_by_last_name')
+        return $this->select('requests.*, clients.client_name as client_name, contacts.first_name as contact_first_name, contacts.last_name as contact_last_name, contacts.email as contact_email, contacts.phone as contact_phone, contacts.mobile as contact_mobile, users.first_name as created_by_first_name, users.last_name as created_by_last_name')
                     ->join('clients', 'clients.id = requests.client_id', 'left')
                     ->join('contacts', 'contacts.id = requests.contact_id', 'left')
                     ->join('users', 'users.id = requests.created_by', 'left')

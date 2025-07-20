@@ -317,8 +317,47 @@
                             <p>Billing content will be added here.</p>
                         </div>
                         <div class="tab-pane fade" id="related-list" role="tabpanel" aria-labelledby="related-list-tab">
-                            <h3>Related List</h3>
-                            <p>Related content will be added here.</p>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h6 class="mb-0">Related List</h6>
+                            </div>
+                            
+                            <!-- Estimates Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0 text-primary">Estimates</h6>
+                                        <button type="button" class="btn btn-sm btn-success" onclick="createEstimateForCompany(<?= $company['id'] ?? 0 ?>)">
+                                            <i class="bi bi-plus"></i> Create Estimate
+                                        </button>
+                                    </div>
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body text-center py-5">
+                                            <i class="bi bi-calculator display-4 text-muted mb-3"></i>
+                                            <h6 class="text-muted mb-2">No Estimates Found</h6>
+                                            <p class="text-muted small mb-0">No estimates have been created for this company yet.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Work Orders Section -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0 text-primary">Work Orders</h6>
+                                        <button type="button" class="btn btn-sm btn-success" onclick="createWorkOrderForCompany(<?= $company['id'] ?? 0 ?>)">
+                                            <i class="bi bi-plus"></i> Create Work Order
+                                        </button>
+                                    </div>
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body text-center py-5">
+                                            <i class="bi bi-clipboard-check display-4 text-muted mb-3"></i>
+                                            <h6 class="text-muted mb-2">No Work Orders Found</h6>
+                                            <p class="text-muted small mb-0">No work orders have been created for this company yet.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -380,6 +419,18 @@
 <script>
 function someFunctionRelatedToCompany() {
     // JavaScript related to company view
+}
+
+function createEstimateForCompany(companyId) {
+    // Redirect to estimate creation with company pre-selected
+    const baseUrl = '<?= base_url() ?>';
+    window.location.href = `${baseUrl}/work-order-management/estimates/create?company_id=${companyId}`;
+}
+
+function createWorkOrderForCompany(companyId) {
+    // Redirect to work order creation with company pre-selected
+    const baseUrl = '<?= base_url() ?>';
+    window.location.href = `${baseUrl}/work-order-management/work-orders/create?company_id=${companyId}`;
 }
 </script>
 <?= $this->endSection() ?>

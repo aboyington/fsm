@@ -494,9 +494,42 @@
                                 <h6 class="mb-0">Related List</h6>
                             </div>
                             
-                            <div class="text-center text-muted py-4">
-                                <i class="bi bi-list-ul fs-1 d-block mb-2"></i>
-                                No related items available yet
+                            <!-- Estimates Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0 text-primary">Estimates</h6>
+                                        <button type="button" class="btn btn-sm btn-success" onclick="createEstimateForContact(<?= $contact['id'] ?? 0 ?>)">
+                                            <i class="bi bi-plus"></i> Create Estimate
+                                        </button>
+                                    </div>
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body text-center py-5">
+                                            <i class="bi bi-calculator display-4 text-muted mb-3"></i>
+                                            <h6 class="text-muted mb-2">No Estimates Found</h6>
+                                            <p class="text-muted small mb-0">No estimates have been created for this contact yet.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Work Orders Section -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0 text-primary">Work Orders</h6>
+                                        <button type="button" class="btn btn-sm btn-success" onclick="createWorkOrderForContact(<?= $contact['id'] ?? 0 ?>)">
+                                            <i class="bi bi-plus"></i> Create Work Order
+                                        </button>
+                                    </div>
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body text-center py-5">
+                                            <i class="bi bi-clipboard-check display-4 text-muted mb-3"></i>
+                                            <h6 class="text-muted mb-2">No Work Orders Found</h6>
+                                            <p class="text-muted small mb-0">No work orders have been created for this contact yet.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -661,6 +694,18 @@
 function loadContactForEdit(contactId) {
     // This function will be implemented when the edit modal is created
     console.log('Loading contact for edit:', contactId);
+}
+
+function createEstimateForContact(contactId) {
+    // Redirect to estimate creation with contact pre-selected
+    const baseUrl = '<?= base_url() ?>';
+    window.location.href = `${baseUrl}/work-order-management/estimates/create?contact_id=${contactId}`;
+}
+
+function createWorkOrderForContact(contactId) {
+    // Redirect to work order creation with contact pre-selected
+    const baseUrl = '<?= base_url() ?>';
+    window.location.href = `${baseUrl}/work-order-management/work-orders/create?contact_id=${contactId}`;
 }
 </script>
 <?= $this->endSection() ?>
