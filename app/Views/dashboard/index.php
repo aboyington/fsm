@@ -102,8 +102,8 @@
                     <h6 class="mb-3 text-primary">Work Order Summary</h6>
                     <div class="row mb-4">
                         <div class="col-md-12 mb-3">
-                            <label for="summary" class="form-label">Summary <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="summary" name="summary" rows="3" required placeholder="Enter work order summary"></textarea>
+                            <label for="summary" class="form-label">Work Order Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="summary" name="summary" required placeholder="Enter work order name">
                         </div>
                         <div class="col-md-6">
                             <label for="priority" class="form-label">Priority</label>
@@ -221,6 +221,10 @@
                         <div class="col-md-12">
                             <label for="preferenceNote" class="form-label">Preference Note</label>
                             <textarea class="form-control" id="preferenceNote" rows="2" placeholder="Enter any preferences"></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Enter detailed description of the work to be performed..."></textarea>
                         </div>
                     </div>
 
@@ -529,10 +533,13 @@ function createStatusChart(workOrders) {
     // Count statuses
     const statusCounts = {
         new: 0,
-        assigned: 0,
+        pending: 0,
         in_progress: 0,
+        cannot_complete: 0,
         completed: 0,
-        cancelled: 0
+        closed: 0,
+        cancelled: 0,
+        scheduled_appointment: 0
     };
     
     workOrders.forEach(order => {
@@ -544,15 +551,18 @@ function createStatusChart(workOrders) {
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['New', 'Assigned', 'In Progress', 'Completed', 'Cancelled'],
+            labels: ['New', 'Pending', 'In Progress', 'Cannot Complete', 'Completed', 'Closed', 'Cancelled', 'Scheduled Appointment'],
             datasets: [{
                 data: Object.values(statusCounts),
                 backgroundColor: [
-                    '#0dcaf0', // info
-                    '#ffc107', // warning
-                    '#0d6efd', // primary
-                    '#198754', // success
-                    '#dc3545'  // danger
+                    '#0d6efd', // primary - blue
+                    '#ffc107', // warning - yellow
+                    '#0dcaf0', // info - light blue
+                    '#6f42c1', // dark - purple
+                    '#198754', // success - green
+                    '#6c757d', // secondary - gray
+                    '#dc3545', // danger - red
+                    '#f8f9fa'  // light - light gray
                 ]
             }]
         },
@@ -629,11 +639,14 @@ async function createWorkOrder() {
 // Helper functions
 function getStatusBadge(status) {
     const badges = {
-        new: '<span class="badge bg-info">New</span>',
-        assigned: '<span class="badge bg-warning">Assigned</span>',
-        in_progress: '<span class="badge bg-primary">In Progress</span>',
+        new: '<span class="badge bg-primary">New</span>',
+        pending: '<span class="badge bg-warning">Pending</span>',
+        in_progress: '<span class="badge bg-info">In Progress</span>',
+        cannot_complete: '<span class="badge bg-dark">Cannot Complete</span>',
         completed: '<span class="badge bg-success">Completed</span>',
-        cancelled: '<span class="badge bg-danger">Cancelled</span>'
+        closed: '<span class="badge bg-secondary">Closed</span>',
+        cancelled: '<span class="badge bg-danger">Cancelled</span>',
+        scheduled_appointment: '<span class="badge bg-light text-dark">Scheduled Appointment</span>'
     };
     return badges[status] || `<span class="badge bg-secondary">${status}</span>`;
 }

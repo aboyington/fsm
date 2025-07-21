@@ -54,7 +54,7 @@
             <div class="card border-0 mb-4">
                 <div class="card-body">
                     <div class="row align-items-center">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-search"></i>
@@ -65,9 +65,14 @@
                         <div class="col-md-2">
                             <select class="form-select" id="statusFilter">
                                 <option value="">All Status</option>
+                                <option value="new">New</option>
                                 <option value="pending">Pending</option>
                                 <option value="in_progress">In Progress</option>
+                                <option value="cannot_complete">Cannot Complete</option>
                                 <option value="completed">Completed</option>
+                                <option value="closed">Closed</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="scheduled_appointment">Scheduled Appointment</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -78,15 +83,7 @@
                                 <option value="high">High</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
-                            <select class="form-select" id="companyFilter">
-                                <option value="">All Companies</option>
-                                <?php foreach ($companies as $company): ?>
-                                <option value="<?= $company['id'] ?>"><?= esc($company['client_name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-3 text-end">
+                        <div class="col-md-4 text-end">
                             <span class="text-muted">
                                 Total: <?= $total_work_orders ?> | 
                                 Pending: <?= $pending_work_orders ?> | 
@@ -105,7 +102,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Work Order #</th>
-                                <th>Summary</th>
+                                <th>Work Order Title</th>
                                 <th>Company</th>
                                 <th>Contact</th>
                                 <th>Status</th>

@@ -117,6 +117,31 @@ class AuditLogModel extends Model
         // Format the results
         return $this->formatTimelineResults($results);
     }
+    
+    /**
+     * Get timeline for a specific work order
+     */
+    public function getWorkOrderTimeline($workOrderId, $filter = 'all')
+    {
+        $builder = $this->builder();
+        
+        // Base query - get events where work order is the entity
+        $builder->select('audit_logs.*, users.first_name, users.last_name')
+                ->join('users', 'users.id = audit_logs.user_id', 'left')
+                ->where('audit_logs.entity_type', 'work_order')
+                ->where('audit_logs.entity_id', $workOrderId);
+        
+        // Apply date filter
+        $this->applyDateFilter($builder, $filter);
+        
+        // Order by newest first
+        $builder->orderBy('audit_logs.created_at', 'DESC');
+        
+        $results = $builder->get()->getResultArray();
+        
+        // Format the results
+        return $this->formatTimelineResults($results);
+    }
 
     /**
      * Apply date filter to query builder
@@ -215,4 +240,18 @@ class AuditLogModel extends Model
     const EVENT_REQUEST_CONVERTED = 'request_converted';
     const EVENT_REQUEST_NOTE_ADDED = 'request_note_added';
     const EVENT_REQUEST_ATTACHMENT_ADDED = 'request_attachment_added';
+    
+    // Work Order-specific events
+    const EVENT_WORK_ORDER_CREATED = 'work_order_created';
+    const EVENT_WORK_ORDER_UPDATED = 'work_order_updated';
+    const EVENT_WORK_ORDER_DELETED = 'work_order_deleted';
+    const EVENT_WORK_ORDER_STATUS_CHANGED = 'work_order_status_changed';
+    const EVENT_WORK_ORDER_PRIORITY_CHANGED = 'work_order_priority_changed';
+    const EVENT_WORK_ORDER_ASSIGNED = 'work_order_assigned';
+    const EVENT_WORK_ORDER_COMPLETED = 'work_order_completed';
+    const EVENT_WORK_ORDER_CANCELLED = 'work_order_cancelled';
+    const EVENT_WORK_ORDER_NOTE_ADDED = 'work_order_note_added';
+    const EVENT_WORK_ORDER_ATTACHMENT_ADDED = 'work_order_attachment_added';
+    const EVENT_WORK_ORDER_SERVICE_APPOINTMENT_SCHEDULED = 'work_order_service_appointment_scheduled';
+    const EVENT_WORK_ORDER_INVOICE_GENERATED = 'work_order_invoice_generated';
 }

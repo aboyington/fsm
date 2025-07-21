@@ -15,6 +15,7 @@ class WorkOrderModel extends Model
     protected $allowedFields = [
         'work_order_number',
         'summary',
+        'description',
         'priority',
         'type',
         'due_date',
@@ -52,6 +53,7 @@ class WorkOrderModel extends Model
     // Validation
     protected $validationRules = [
         'summary' => 'required|min_length[3]|max_length[255]',
+        'description' => 'permit_empty|max_length[2000]',
         'priority' => 'permit_empty|in_list[none,low,medium,critical,high]',
         'type' => 'permit_empty|in_list[none,corrective,preventive,service,site_survey,inspection,installation,maintenance,emergency,scheduled_maintenance,standard]',
         'due_date' => 'permit_empty|valid_date',
@@ -72,7 +74,7 @@ class WorkOrderModel extends Model
         'discount' => 'permit_empty|decimal',
         'adjustment' => 'permit_empty|decimal',
         'grand_total' => 'permit_empty|decimal',
-        'status' => 'permit_empty|in_list[pending,in_progress,completed,cancelled]',
+        'status' => 'permit_empty|in_list[new,pending,in_progress,cannot_complete,completed,closed,cancelled,scheduled_appointment]',
         'created_by' => 'permit_empty|integer'
     ];
 
@@ -148,7 +150,7 @@ class WorkOrderModel extends Model
     public function getWorkOrders($status = null, $searchTerm = null, $companyId = null)
     {
         $builder = $this->db->table($this->table . ' w')
-                           ->select('w.*, c.client_name as company_name, ct.first_name, ct.last_name, ct.email as contact_email, a.asset_name, COALESCE(u.first_name || " " || u.last_name, u.username) as created_by_name')
+                           ->select('w.*, c.client_name as company_name, ct.first_name, ct.last_name, ct.email as contact_email, a.asset_name, COALESCE(CONCAT(u.first_name, " ", u.last_name), u.username) as created_by_name')
                            ->join('clients c', 'c.id = w.company_id', 'left')
                            ->join('contacts ct', 'ct.id = w.contact_id', 'left')
                            ->join('assets a', 'a.id = w.asset_id', 'left')
@@ -183,7 +185,7 @@ class WorkOrderModel extends Model
     public function getWorkOrderWithDetails($id)
     {
         return $this->db->table($this->table . ' w')
-                       ->select('w.*, c.client_name as company_name, c.client_code, ct.first_name, ct.last_name, ct.email as contact_email, ct.phone as contact_phone, a.asset_name, a.model as asset_model, COALESCE(u.first_name || " " || u.last_name, u.username) as created_by_name')
+                       ->select('w.*, c.client_name as company_name, ct.first_name, ct.last_name, ct.email as contact_email, ct.phone as contact_phone, a.asset_name, COALESCE(CONCAT(u.first_name, " ", u.last_name), u.username) as created_by_name')
                        ->join('clients c', 'c.id = w.company_id', 'left')
                        ->join('contacts ct', 'ct.id = w.contact_id', 'left')
                        ->join('assets a', 'a.id = w.asset_id', 'left')
@@ -226,17 +228,25 @@ class WorkOrderModel extends Model
     public function getWorkOrderStats()
     {
         $total = $this->countAllResults();
+        $new = $this->where('status', 'new')->countAllResults();
         $pending = $this->where('status', 'pending')->countAllResults();
         $inProgress = $this->where('status', 'in_progress')->countAllResults();
+        $cannotComplete = $this->where('status', 'cannot_complete')->countAllResults();
         $completed = $this->where('status', 'completed')->countAllResults();
+        $closed = $this->where('status', 'closed')->countAllResults();
         $cancelled = $this->where('status', 'cancelled')->countAllResults();
+        $scheduledAppointment = $this->where('status', 'scheduled_appointment')->countAllResults();
         
         return [
             'total' => $total,
+            'new' => $new,
             'pending' => $pending,
             'in_progress' => $inProgress,
+            'cannot_complete' => $cannotComplete,
             'completed' => $completed,
-            'cancelled' => $cancelled
+            'closed' => $closed,
+            'cancelled' => $cancelled,
+            'scheduled_appointment' => $scheduledAppointment
         ];
     }
 }

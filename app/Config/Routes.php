@@ -188,6 +188,7 @@ $routes->group('work-order-management', ['filter' => 'auth'], function($routes) 
     
     // Work Orders routes
     $routes->get('work-orders', 'WorkOrdersController::index');
+    $routes->get('work-orders/view/(:num)', 'WorkOrdersController::view/$1');
     $routes->post('work-orders/create', 'WorkOrdersController::create');
     $routes->get('work-orders/get/(:num)', 'WorkOrdersController::get/$1');
     $routes->post('work-orders/update/(:num)', 'WorkOrdersController::update/$1');
@@ -195,6 +196,15 @@ $routes->group('work-order-management', ['filter' => 'auth'], function($routes) 
     $routes->get('work-orders/search', 'WorkOrdersController::search');
     $routes->post('work-orders/status/(:num)', 'WorkOrdersController::updateStatus/$1');
     $routes->get('work-orders/company/(:num)', 'WorkOrdersController::getByCompany/$1');
+    
+    // Work Order Timeline and Logging routes
+    $routes->get('work-orders/timeline/(:num)', 'WorkOrdersController::getTimeline/$1');
+    $routes->post('work-orders/notes/(:num)', 'WorkOrdersController::addNote/$1');
+    $routes->post('work-orders/attachments/log/(:num)', 'WorkOrdersController::logAttachment/$1');
+    $routes->post('work-orders/service-appointment/log/(:num)', 'WorkOrdersController::logServiceAppointment/$1');
+    $routes->post('work-orders/invoice/log/(:num)', 'WorkOrdersController::logInvoiceGeneration/$1');
+    $routes->post('work-orders/service-parts/log/(:num)', 'WorkOrdersController::logServiceAndParts/$1');
+    $routes->post('work-orders/related/log/(:num)', 'WorkOrdersController::logRelatedAction/$1');
     
     // Service Appointments routes
     $routes->get('service-appointments', 'ServiceAppointmentsController::index');
@@ -317,5 +327,24 @@ $routes->group('api', function($routes) {
         $routes->get('requests/(:num)/attachments/(:num)/download', 'Api\AttachmentsController::download/$1/$2');
         $routes->get('requests/(:num)/attachments/(:num)/preview', 'Api\AttachmentsController::preview/$1/$2');
         $routes->delete('requests/(:num)/attachments/(:num)', 'Api\AttachmentsController::delete/$1/$2');
+        
+        // Work Order Timeline
+        $routes->get('work-orders/(:num)/timeline', 'Api\WorkOrderTimelineController::index/$1');
+        $routes->get('work-orders/(:num)/timeline/stats', 'Api\WorkOrderTimelineController::stats/$1');
+        $routes->post('work-orders/(:num)/timeline/log', 'Api\WorkOrderTimelineController::logEvent/$1');
+
+        // Work Order Notes
+        $routes->get('work-orders/(:num)/notes', 'Api\WorkOrderNotesController::index/$1');
+        $routes->post('work-orders/(:num)/notes', 'Api\WorkOrderNotesController::create/$1');
+        $routes->put('work-order-notes/(:num)', 'Api\WorkOrderNotesController::update/$1');
+        $routes->delete('work-order-notes/(:num)', 'Api\WorkOrderNotesController::delete/$1');
+        $routes->post('work-order-notes/(:num)/toggle-pin', 'Api\WorkOrderNotesController::togglePin/$1');
+        
+        // Work Order Attachments
+        $routes->get('work-orders/(:num)/attachments', 'Api\WorkOrderAttachmentsController::index/$1');
+        $routes->post('work-orders/(:num)/attachments/upload', 'Api\WorkOrderAttachmentsController::upload/$1');
+        $routes->get('work-orders/(:num)/attachments/(:num)/download', 'Api\WorkOrderAttachmentsController::download/$1/$2');
+        $routes->get('work-orders/(:num)/attachments/(:num)/preview', 'Api\WorkOrderAttachmentsController::preview/$1/$2');
+        $routes->delete('work-orders/(:num)/attachments/(:num)', 'Api\WorkOrderAttachmentsController::delete/$1/$2');
     });
 });

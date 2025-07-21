@@ -16,8 +16,8 @@
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label for="summary" class="form-label">Summary <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="summary" name="summary" rows="3" required placeholder="Enter work order summary"></textarea>
+                                <label for="summary" class="form-label">Work Order Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="summary" name="summary" required placeholder="Enter work order name">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -53,6 +53,21 @@
                             </div>
                         </div>
                         <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="new" selected>New</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="cannot_complete">Cannot Complete</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="closed">Closed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                    <option value="scheduled_appointment">Scheduled Appointment</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
                             <div class="mb-3">
                                 <label for="due_date" class="form-label">Due Date</label>
                                 <input type="date" class="form-control" id="due_date" name="due_date" placeholder="MMM DD, YYYY">
@@ -209,6 +224,12 @@
                             <div class="mb-3">
                                 <label for="preference_note" class="form-label">Preference Note</label>
                                 <textarea class="form-control" id="preference_note" name="preference_note" rows="3" placeholder="Additional preference notes..."></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" placeholder="Enter detailed description of the work to be performed..."></textarea>
                             </div>
                         </div>
                     </div>

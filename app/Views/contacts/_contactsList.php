@@ -23,7 +23,7 @@
     <td>
         <?php if (!empty($contact['email'])): ?>
             <a href="mailto:<?= esc($contact['email']) ?>" class="text-decoration-none">
-                <?= esc($contact['email']) ?>
+                <i class="bi bi-envelope"></i>
             </a>
         <?php else: ?>
             -

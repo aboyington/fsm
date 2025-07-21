@@ -12,26 +12,43 @@
         </td>
         <td>
             <div class="fw-medium"><?= esc(($workOrder['first_name'] ?? '') . ' ' . ($workOrder['last_name'] ?? '')) ?></div>
-            <?php if ($workOrder['contact_email']): ?>
-            <small class="text-muted"><?= esc($workOrder['contact_email']) ?></small>
-            <?php endif; ?>
         </td>
         <td>
             <?php 
             $statusClass = '';
-            $statusText = ucfirst($workOrder['status'] ?? 'pending');
+            $statusText = ucfirst(str_replace('_', ' ', $workOrder['status'] ?? 'new'));
             switch ($workOrder['status']) {
+                case 'new':
+                    $statusClass = 'bg-primary';
+                    $statusText = 'New';
+                    break;
                 case 'pending':
                     $statusClass = 'bg-warning';
+                    $statusText = 'Pending';
                     break;
                 case 'in_progress':
                     $statusClass = 'bg-info';
+                    $statusText = 'In Progress';
+                    break;
+                case 'cannot_complete':
+                    $statusClass = 'bg-dark';
+                    $statusText = 'Cannot Complete';
                     break;
                 case 'completed':
                     $statusClass = 'bg-success';
+                    $statusText = 'Completed';
+                    break;
+                case 'closed':
+                    $statusClass = 'bg-secondary';
+                    $statusText = 'Closed';
                     break;
                 case 'cancelled':
                     $statusClass = 'bg-danger';
+                    $statusText = 'Cancelled';
+                    break;
+                case 'scheduled_appointment':
+                    $statusClass = 'bg-light text-dark';
+                    $statusText = 'Scheduled Appointment';
                     break;
                 default:
                     $statusClass = 'bg-secondary';
@@ -67,23 +84,15 @@
         </td>
         <td class="text-center">
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewWorkOrder(<?= $workOrder['id'] ?>)" title="View">
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="viewWorkOrder(<?= $workOrder['id'] ?>)" title="View">
                     <i class="bi bi-eye"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="editWorkOrder(<?= $workOrder['id'] ?>)" title="Edit">
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="editWorkOrder(<?= $workOrder['id'] ?>)" title="Edit">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-three-dots"></i>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="duplicateWorkOrder(<?= $workOrder['id'] ?>)"><i class="bi bi-copy me-2"></i>Duplicate</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="convertToInvoice(<?= $workOrder['id'] ?>)"><i class="bi bi-receipt me-2"></i>Convert to Invoice</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteWorkOrder(<?= $workOrder['id'] ?>)"><i class="bi bi-trash me-2"></i>Delete</a></li>
-                    </ul>
-                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteWorkOrder(<?= $workOrder['id'] ?>)" title="Delete">
+                    <i class="bi bi-trash"></i>
+                </button>
             </div>
         </td>
     </tr>
