@@ -72,12 +72,20 @@ class RequestModel extends Model
     protected function generateRequestNumber(array $data)
     {
         if (!isset($data['data']['request_number']) || empty($data['data']['request_number'])) {
-            // Get the next ID to generate the request number
-            $db = \Config\Database::connect();
-            $nextId = $db->table($this->table)->selectMax('id')->get()->getRow()->id ?? 0;
-            $nextId += 1;
+            $prefix = 'REQ-';
+            $year = substr(date('Y'), -3); // Use last 3 digits of year (e.g., 025 for 2025)
+            $lastRequest = $this->selectMax('request_number')
+                              ->where('request_number LIKE', $prefix . $year . '%')
+                              ->first();
             
-            $data['data']['request_number'] = 'REQ-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
+            if ($lastRequest && $lastRequest['request_number']) {
+                $lastNumber = intval(substr($lastRequest['request_number'], -4));
+                $newNumber = $lastNumber + 1;
+            } else {
+                $newNumber = 1;
+            }
+            
+            $data['data']['request_number'] = $prefix . $year . '-' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
         }
         
         return $data;

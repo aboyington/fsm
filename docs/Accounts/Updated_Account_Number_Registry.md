@@ -11,6 +11,16 @@ This document outlines the internal account codes assigned to various operationa
 <3-Char Category Prefix>-<3-Digit Group or Year ID>-<4-Digit Sequential Code or Abbreviation>
 ```
 
+### Year-Based Numbering System
+
+For document types (INV, EST, REQ, WRK), the 3-digit group represents the year:
+- **2025**: Uses format `XXX-025-XXXX` (e.g., REQ-025-0001)
+- **2026**: Uses format `XXX-026-XXXX` (e.g., REQ-026-0001)
+- **2027**: Uses format `XXX-027-XXXX` (e.g., REQ-027-0001)
+- And so on...
+
+**Important**: Each new year, the year code increments and sequential numbering resets to 0001.
+
 ### Legend of 3-Character Prefixes
 
 | Prefix | Category               |
@@ -25,6 +35,42 @@ This document outlines the internal account codes assigned to various operationa
 
 ---
 
+## Developer Implementation Notes for Year Changes
+
+### Annual Year Code Update Process
+
+Each January, the system requires updates to increment the year code in document numbering:
+
+#### For January 2026 Implementation:
+1. **Update Year Constants**: Change year code from `025` to `026`
+2. **Reset Sequential Counters**: Reset all document sequence counters to `0001`
+3. **Update Database Schema**: Ensure year-based partitioning or indexing is updated
+4. **Test Document Generation**: Verify new documents generate with format `REQ-026-0001`, `INV-026-0001`, etc.
+
+#### Code Locations to Update:
+- Configuration files containing year constants
+- Document generation functions/classes
+- Database sequence generators
+- Invoice/estimate/request numbering systems
+- Work order numbering systems
+
+#### Recommended Implementation:
+```php
+// Example configuration update for 2026
+define('CURRENT_YEAR_CODE', '026'); // Change from '025' to '026'
+define('DOCUMENT_SEQUENCE_START', 1); // Reset to 1 each year
+```
+
+#### Testing Checklist for 2026:
+- [ ] New requests generate as REQ-026-0001, REQ-026-0002, etc.
+- [ ] New invoices generate as INV-026-0001, INV-026-0002, etc.
+- [ ] New estimates generate as EST-026-0001, EST-026-0002, etc.
+- [ ] New work orders generate as WRK-026-0001, WRK-026-0002, etc.
+- [ ] Previous year documents (025) remain accessible and unchanged
+- [ ] Reporting functions handle both old and new year formats
+
+---
+
 ## Sample Registry
 
 | Code Type      | Code Example | Description                             |
@@ -32,10 +78,12 @@ This document outlines the internal account codes assigned to various operationa
 | Client Account | ACC-001-ACME | ACME Limited (client)                   |
 | Client Account | ACC-002-NWFU | New York Furs (client)                  |
 | Client Account | ACC-003-SMIT | Smith I.T. (client)                     |
-| Invoice        | INV-025-0001 | Invoice #1 issued in 2025               |
-| Invoice        | INV-025-0002 | Invoice #2 issued in 2025               |
-| Estimate       | EST-025-0001 | Estimate #1 issued in 2025              |
-| Estimate       | EST-025-0002 | Estimate #2 issued in 2025              |
+| Invoice 2025   | INV-025-0001 | Invoice #1 issued in 2025               |
+| Invoice 2025   | INV-025-0002 | Invoice #2 issued in 2025               |
+| Invoice 2026   | INV-026-0001 | Invoice #1 issued in 2026 (new year)    |
+| Estimate 2025  | EST-025-0001 | Estimate #1 issued in 2025              |
+| Estimate 2025  | EST-025-0002 | Estimate #2 issued in 2025              |
+| Estimate 2026  | EST-026-0001 | Estimate #1 issued in 2026 (new year)   |
 | Material SKU   | MAT-0001     | Material item (cables, wire, etc.)      |
 | Hardware SKU   | HRD-0002     | Hardware item (mounts, DVRs, brackets)  |
 | Part SKU       | PRT-0003     | Part item (sensors, fittings, etc.)     |
@@ -43,6 +91,10 @@ This document outlines the internal account codes assigned to various operationa
 | Service SKU    | SRV-ALA-0001 | Alarm system repair/maintenance visit   |
 | Service SKU    | SRV-ITS-0001 | IT support or troubleshooting visit     |
 | Service SKU    | SRV-GEN-0001 | General service/labour (multi-purpose)  |
+| Work Order 2025| WRK-025-0001 | Work Order Management 2025              |
+| Work Order 2026| WRK-026-0001 | Work Order Management 2026 (new year)   |
+| Request 2025   | REQ-025-0001 | Work Order Request 2025                 |
+| Request 2026   | REQ-026-0001 | Work Order Request 2026 (new year)      |
 
 ---
 
@@ -96,11 +148,15 @@ This structure simplifies reporting, client management, and accounting integrati
 | Code Type      | Code Example     | Description                    |
 |----------------|------------------|--------------------------------|
 | Client Account | ACC-XXX-CLIENT   | Unique client code             |
-| Invoice        | INV-025-XXXX     | Invoice for year 2025          |
-| Estimate       | EST-025-XXXX     | Estimate for year 2025         |
+| Invoice        | INV-YYY-XXXX     | Invoice for year 20YY          |
+| Estimate       | EST-YYY-XXXX     | Estimate for year 20YY         |
+| Request        | REQ-YYY-XXXX     | Request for year 20YY          |
+| Work Order     | WRK-YYY-XXXX     | Work Order for year 20YY       |
 | SKU - Material | MAT-XXXX         | Material item                  |
 | SKU - Hardware | HRD-XXXX         | Hardware item                  |
 | SKU - Parts    | PRT-XXXX         | Replacement part               |
 | SKU - Service  | SRV-XXX-XXXX     | Service/maintenance visit      |
+
+**Note**: YYY represents the 3-digit year code (025 for 2025, 026 for 2026, etc.)
 
 This unified pattern simplifies growth, billing, and system integration.

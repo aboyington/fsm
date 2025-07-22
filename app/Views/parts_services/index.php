@@ -39,6 +39,9 @@
                             <li><a class="dropdown-item" href="#" onclick="showImportModal('services')">
                                 <i class="bi bi-file-earmark-arrow-up"></i> Import Services
                             </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showImportModal('all')">
+                                <i class="bi bi-file-earmark-arrow-up"></i> Import All
+                            </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#" onclick="downloadTemplate('parts')">
                                 <i class="bi bi-file-earmark-text"></i> Download Parts Template
@@ -152,23 +155,6 @@
         </div>
     </div>
 
-    <!-- Low Stock Alerts -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0 text-warning">
-                        <i class="bi bi-exclamation-triangle"></i> Low Stock Alerts
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div id="lowStockAlerts">
-                        <!-- Will be populated via AJAX -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Create/Edit Modal -->

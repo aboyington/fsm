@@ -37,7 +37,7 @@ class PartsServices extends Controller
     }
 
     /**
-     * Get parts and services data for DataTables
+     * Get parts and services data with pagination
      */
     public function getData()
     {
@@ -46,8 +46,9 @@ class PartsServices extends Controller
         $category = $request->getGet('category'); // category filter
         $status = $request->getGet('status'); // status filter
         $search = $request->getGet('search');
-        $start = $request->getGet('start') ?? 0;
-        $length = $request->getGet('length') ?? 10;
+        $page = $request->getGet('page') ?? 1;
+        $limit = $request->getGet('limit') ?? 50;
+        $start = ($page - 1) * $limit;
 
         try {
             // Get data from database
@@ -90,7 +91,7 @@ class PartsServices extends Controller
             
             // Apply pagination
             $data = $builder->orderBy('name', 'ASC')
-                          ->limit($length, $start)
+                          ->limit($limit, $start)
                           ->get()
                           ->getResultArray();
             
@@ -122,11 +123,19 @@ class PartsServices extends Controller
                 ];
             }
             
+            $totalPages = ceil($totalCount / $limit);
+            
             $response = [
-                'draw' => $request->getGet('draw'),
-                'recordsTotal' => $totalCount,
-                'recordsFiltered' => $totalCount,
-                'data' => $transformedData
+                'success' => true,
+                'data' => $transformedData,
+                'pagination' => [
+                    'current_page' => (int)$page,
+                    'per_page' => (int)$limit,
+                    'total_items' => (int)$totalCount,
+                    'total_pages' => (int)$totalPages,
+                    'has_next' => $page < $totalPages,
+                    'has_prev' => $page > 1
+                ]
             ];
 
             return $this->response->setJSON($response);
@@ -668,12 +677,42 @@ class PartsServices extends Controller
     {
         try {
             $type = $this->request->getPost('type');
-            $file = $this->request->getFile('csv_file');
+            $file = $this->request->getFile('import_file');
             
-            if (!$file || !$file->isValid()) {
+            // Debug logging
+            log_message('debug', 'Import attempt - Type: ' . ($type ?? 'null'));
+            log_message('debug', 'Import attempt - File: ' . ($file ? 'present' : 'null'));
+            
+            // Additional debugging info
+            if (!$file) {
+                log_message('error', 'No file uploaded for import');
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'Please select a valid CSV file'
+                    'message' => 'No file was uploaded. Please select a CSV file.'
+                ]);
+            }
+            
+            if (!$file->isValid()) {
+                $errorMessage = 'Invalid file upload';
+                if ($file->getError() !== UPLOAD_ERR_OK) {
+                    $errorMessage .= ': ' . $file->getErrorString();
+                }
+                log_message('error', 'Invalid file upload: ' . $errorMessage);
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => $errorMessage
+                ]);
+            }
+            
+            // Validate file type
+            $mimeType = $file->getMimeType();
+            $allowedMimes = ['text/csv', 'text/plain', 'application/csv'];
+            log_message('debug', 'File MIME type: ' . $mimeType);
+            if (!in_array($mimeType, $allowedMimes)) {
+                log_message('error', 'Invalid MIME type: ' . $mimeType);
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Please select a valid CSV file. Detected type: ' . $mimeType
                 ]);
             }
             
@@ -706,8 +745,14 @@ class PartsServices extends Controller
                 'quantity_on_hand', 'minimum_stock', 'supplier', 'manufacturer', 
                 'manufacturer_part_number', 'warranty_period', 'weight', 'dimensions'
             ]);
-        } else {
+        } elseif ($type === 'services') {
             return array_merge($common, ['duration_minutes', 'is_taxable']);
+        } else { // 'all' type
+            return array_merge(['type'], $common, [
+                'quantity_on_hand', 'minimum_stock', 'supplier', 'manufacturer', 
+                'manufacturer_part_number', 'warranty_period', 'weight', 'dimensions',
+                'duration_minutes', 'is_taxable'
+            ]);
         }
     }
 
@@ -737,9 +782,23 @@ class PartsServices extends Controller
                 $row['weight'],
                 $row['dimensions']
             ]);
-        } else {
+        } elseif ($type === 'services') {
             return array_merge($common, [
                 $row['duration_minutes'],
+                $row['is_taxable'] ? 'Yes' : 'No'
+            ]);
+        } else { // 'all' type
+            $itemType = $row['category'] === 'PRT' ? 'Part' : 'Service';
+            return array_merge([$itemType], $common, [
+                $row['quantity_on_hand'] ?? '',
+                $row['minimum_stock'] ?? '',
+                $row['supplier'] ?? '',
+                $row['manufacturer'] ?? '',
+                $row['manufacturer_part_number'] ?? '',
+                $row['warranty_period'] ?? '',
+                $row['weight'] ?? '',
+                $row['dimensions'] ?? '',
+                $row['duration_minutes'] ?? '',
                 $row['is_taxable'] ? 'Yes' : 'No'
             ]);
         }
@@ -771,8 +830,21 @@ class PartsServices extends Controller
                 '1.5 kg',
                 '10x5x3 cm'
             ]);
-        } else {
+        } elseif ($type === 'services') {
             return array_merge($common, ['60', 'Yes']);
+        } else { // 'all' type
+            return array_merge(['Part'], $common, [
+                '10',
+                '5',
+                'Sample Supplier',
+                'Sample Manufacturer',
+                'MPN123',
+                '12 months',
+                '1.5 kg',
+                '10x5x3 cm',
+                '',
+                ''
+            ]);
         }
     }
 
@@ -805,20 +877,52 @@ class PartsServices extends Controller
                 try {
                     $itemData = $this->parseImportRow($data, $type);
                     
+                    // Debug logging for import data
+                    log_message('debug', 'Import Row ' . $rowNumber . ' Data: ' . json_encode($itemData));
+                    
                     // Check if item exists by SKU
                     $existing = $this->productModel->where('sku_code', $itemData['sku'])->first();
                     
                     if ($existing) {
-                        // Update existing item using the appropriate model method
-                        if ($type === 'parts') {
+                        log_message('debug', 'Updating existing item ID: ' . $existing['id'] . ' SKU: ' . $itemData['sku']);
+                        log_message('debug', 'Current supplier: ' . ($existing['supplier'] ?? 'null') . ' New supplier: ' . ($itemData['supplier'] ?? 'null'));
+                        
+                        // Skip validation to avoid issues with model validation
+                        if ($type === 'all') {
+                            // For 'all' type, determine model based on item type
+                            if ($itemData['type'] === 'part') {
+                                $this->partsModel->skipValidation(true);
+                                $result = $this->partsModel->updatePart($existing['id'], $itemData);
+                                $this->partsModel->skipValidation(false);
+                            } else {
+                                $this->servicesModel->skipValidation(true);
+                                $result = $this->servicesModel->updateService($existing['id'], $itemData);
+                                $this->servicesModel->skipValidation(false);
+                            }
+                        } elseif ($type === 'parts') {
+                            $this->partsModel->skipValidation(true);
                             $result = $this->partsModel->updatePart($existing['id'], $itemData);
+                            $this->partsModel->skipValidation(false);
                         } else {
+                            $this->servicesModel->skipValidation(true);
                             $result = $this->servicesModel->updateService($existing['id'], $itemData);
+                            $this->servicesModel->skipValidation(false);
                         }
+                        
+                        log_message('debug', 'Update result: ' . ($result ? 'success' : 'failed'));
                         $summary['updated']++;
                     } else {
+                        log_message('debug', 'Creating new item SKU: ' . $itemData['sku']);
+                        
                         // Create new item using the appropriate model method
-                        if ($type === 'parts') {
+                        if ($type === 'all') {
+                            // For 'all' type, determine model based on item type
+                            if ($itemData['type'] === 'part') {
+                                $result = $this->partsModel->createPart($itemData);
+                            } else {
+                                $result = $this->servicesModel->createService($itemData);
+                            }
+                        } elseif ($type === 'parts') {
                             $result = $this->partsModel->createPart($itemData);
                         } else {
                             $result = $this->servicesModel->createService($itemData);
@@ -826,6 +930,7 @@ class PartsServices extends Controller
                         $summary['created']++;
                     }
                 } catch (Exception $e) {
+                    log_message('error', 'Import error row ' . $rowNumber . ': ' . $e->getMessage());
                     $summary['errors']++;
                     $errors[] = "Row {$rowNumber}: " . $e->getMessage();
                 }
@@ -860,29 +965,58 @@ class PartsServices extends Controller
      */
     private function parseImportRow($data, $type)
     {
-        $itemData = [
-            'name' => trim($data[0]),
-            'sku' => trim($data[1]),
-            'category' => trim($data[2]),
-            'unit_price' => floatval($data[3]),
-            'cost_price' => floatval($data[4]),
-            'description' => trim($data[5]),
-            'is_active' => strtolower(trim($data[6])) === 'yes' ? 1 : 0,
-            'type' => $type === 'parts' ? 'part' : 'service'
-        ];
-        
-        if ($type === 'parts') {
-            $itemData['quantity_on_hand'] = intval($data[7]);
-            $itemData['minimum_stock'] = intval($data[8]);
-            $itemData['supplier'] = trim($data[9]);
-            $itemData['manufacturer'] = trim($data[10]);
-            $itemData['manufacturer_part_number'] = trim($data[11]);
-            $itemData['warranty_period'] = trim($data[12]);
-            $itemData['weight'] = trim($data[13]);
-            $itemData['dimensions'] = trim($data[14]);
+        if ($type === 'all') {
+            // For 'all' type, first column is the item type
+            $itemType = strtolower(trim($data[0])) === 'part' ? 'part' : 'service';
+            
+            $itemData = [
+                'name' => trim($data[1]),
+                'sku' => trim($data[2]),
+                'category' => trim($data[3]),
+                'unit_price' => floatval($data[4]),
+                'cost_price' => floatval($data[5]),
+                'description' => trim($data[6]),
+                'is_active' => strtolower(trim($data[7])) === 'yes' ? 1 : 0,
+                'type' => $itemType
+            ];
+            
+            // Add all possible fields for 'all' type
+            $itemData['quantity_on_hand'] = !empty($data[8]) ? intval($data[8]) : 0;
+            $itemData['minimum_stock'] = !empty($data[9]) ? intval($data[9]) : 0;
+            $itemData['supplier'] = !empty($data[10]) ? trim($data[10]) : '';
+            $itemData['manufacturer'] = !empty($data[11]) ? trim($data[11]) : '';
+            $itemData['manufacturer_part_number'] = !empty($data[12]) ? trim($data[12]) : '';
+            $itemData['warranty_period'] = !empty($data[13]) ? trim($data[13]) : '';
+            $itemData['weight'] = !empty($data[14]) ? trim($data[14]) : '';
+            $itemData['dimensions'] = !empty($data[15]) ? trim($data[15]) : '';
+            $itemData['duration_minutes'] = !empty($data[16]) ? intval($data[16]) : 0;
+            $itemData['is_taxable'] = !empty($data[17]) && strtolower(trim($data[17])) === 'yes' ? 1 : 0;
         } else {
-            $itemData['duration_minutes'] = intval($data[7]);
-            $itemData['is_taxable'] = strtolower(trim($data[8])) === 'yes' ? 1 : 0;
+            // Original logic for specific types
+            $itemData = [
+                'name' => trim($data[0]),
+                'sku' => trim($data[1]),
+                'category' => trim($data[2]),
+                'unit_price' => floatval($data[3]),
+                'cost_price' => floatval($data[4]),
+                'description' => trim($data[5]),
+                'is_active' => strtolower(trim($data[6])) === 'yes' ? 1 : 0,
+                'type' => $type === 'parts' ? 'part' : 'service'
+            ];
+            
+            if ($type === 'parts') {
+                $itemData['quantity_on_hand'] = intval($data[7]);
+                $itemData['minimum_stock'] = intval($data[8]);
+                $itemData['supplier'] = trim($data[9]);
+                $itemData['manufacturer'] = trim($data[10]);
+                $itemData['manufacturer_part_number'] = trim($data[11]);
+                $itemData['warranty_period'] = trim($data[12]);
+                $itemData['weight'] = trim($data[13]);
+                $itemData['dimensions'] = trim($data[14]);
+            } else {
+                $itemData['duration_minutes'] = intval($data[7]);
+                $itemData['is_taxable'] = strtolower(trim($data[8])) === 'yes' ? 1 : 0;
+            }
         }
         
         return $itemData;

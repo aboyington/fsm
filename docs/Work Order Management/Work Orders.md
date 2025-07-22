@@ -20,28 +20,51 @@ The Work Orders module manages the formal work authorizations and job management
 
 ## Database Schema
 
-### Main Fields
+### Work Orders Table
 - `id` - Primary key
-- `estimate_id` - Link to originating estimate (nullable)
-- `request_id` - Link to originating request (nullable)
-- `client_id` - Customer company
+- `work_order_number` - Unique work order identifier (auto-generated)
+- `summary` - Brief description of work to be performed
+- `description` - Detailed work description
+- `priority` - Work priority level (low, medium, high, critical)
+- `type` - Work order type (service, corrective, preventive, etc.)
+- `status` - Current work order status (pending, in_progress, completed, cancelled)
+- `due_date` - Target completion date
+- `company_id` - Customer company reference
 - `contact_id` - Primary contact for the work
 - `asset_id` - Asset being serviced (nullable)
-- `assigned_to` - Technician assigned to the work
-- `territory_id` - Service territory
-- `priority` - Work priority level
-- `status` - Current work order status
-- `description` - Detailed work description
-- `notes` - Additional notes and instructions
-- `scheduled_date` - Planned work date
-- `completed_date` - Actual completion date
-- `estimated_hours` - Estimated time to complete
-- `actual_hours` - Actual time spent
+- `email` - Contact email
+- `phone` - Contact phone
+- `mobile` - Contact mobile
+- `service_address` - Service location
+- `billing_address` - Billing address
+- `preferred_date_1` - First preferred service date
+- `preferred_date_2` - Second preferred service date
+- `preferred_time` - Preferred service time
+- `preference_note` - Additional scheduling preferences
+- `sub_total` - Subtotal amount before tax
+- `tax_amount` - Tax amount
+- `discount` - Discount amount
+- `adjustment` - Additional adjustments
+- `grand_total` - Final total amount
 - `created_by` - User who created the work order
-- `updated_by` - User who last updated the work order
 - `created_at` - Creation timestamp
 - `updated_at` - Last update timestamp
 - `deleted_at` - Soft delete timestamp
+
+### Work Order Items Table
+- `id` - Primary key
+- `work_order_id` - Reference to work order
+- `item_type` - Type of item (service, part, skill)
+- `service_id` - Reference to product/service SKU
+- `item_name` - Name of the service/part
+- `line_item_name` - **Unique line item identifier (SVC-1, SVC-2, PRT-1, PRT-2, etc.)**
+- `description` - Item description
+- `quantity` - Quantity ordered
+- `rate` - Unit rate/price
+- `amount` - Total amount (quantity × rate)
+- `sort_order` - Display order
+- `created_at` - Creation timestamp
+- `updated_at` - Last update timestamp
 
 ### Priority Levels
 - **Low**: Non-urgent work
@@ -146,10 +169,42 @@ Draft → Open → In Progress → Completed
 - Time logging for payroll
 - Material usage tracking
 
+## Line Item Management
+
+### Unique Line Item Names
+Work orders support services and parts with automatically generated unique line item names:
+
+- **Service Line Items**: Automatically assigned names like `SVC-1`, `SVC-2`, `SVC-3`, etc.
+- **Parts Line Items**: Automatically assigned names like `PRT-1`, `PRT-2`, `PRT-3`, etc.
+- **Sequential Numbering**: Line items are numbered sequentially within each work order
+- **Persistent Storage**: Line item names are stored in the database for consistency
+- **Backward Compatibility**: Support for both `line_item_name` and legacy field names
+
+### Line Item Features
+- **Dynamic Generation**: Line item names are generated when saving work order items
+- **Unique Identification**: Each service/part has a distinct identifier within the work order
+- **Frontend Display**: Line item names are displayed in work order views and forms
+- **API Support**: Line item names are included in all API responses
+
+### Implementation Details
+```php
+// Example of generated line item names
+Services:
+- SVC-1: "HVAC System Inspection"
+- SVC-2: "Filter Replacement"
+- SVC-3: "System Tune-up"
+
+Parts:
+- PRT-1: "Air Filter - 16x20x1"
+- PRT-2: "Thermostat Battery"
+- PRT-3: "Refrigerant R410A"
+```
+
 ## Technical Implementation
 
 ### Model Layer
 - **WorkOrderModel**: Main model with validation and business logic
+- **Line Item Generation**: Automatic generation of unique line item names
 - **Soft Deletes**: Maintains data integrity
 - **Audit Trails**: Tracks all changes
 - **Relationships**: Links to all related entities

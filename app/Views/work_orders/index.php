@@ -131,6 +131,11 @@
 <script>
 // Define baseUrl for JavaScript
 const baseUrl = '<?= base_url() ?>';
+
+// Pass services, parts, and skills data to JavaScript
+const servicesData = <?= json_encode($services ?? []) ?>;
+const partsData = <?= json_encode($parts ?? []) ?>;
+const skillsData = <?= json_encode($skills ?? []) ?>;
 </script>
 <script src="<?= base_url('js/work_orders.js') ?>"></script>
 <?= $this->endSection() ?>

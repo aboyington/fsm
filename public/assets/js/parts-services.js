@@ -1,3 +1,125 @@
+// Global function to populate the table with data
+function populateTable(data) {
+    const partsServicesTable = document.getElementById('partsServicesTable');
+    const tbody = partsServicesTable.querySelector('tbody');
+    tbody.innerHTML = '';
+
+    data.forEach(item => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td>${item.type === 'part' ? 'Part' : 'Service'}</td>
+            <td>${item.name}</td>
+            <td>${item.sku}</td>
+            <td>${item.category}</td>
+            <td>${item.unit_price.toFixed(2)}</td>
+            <td>${item.type === 'part' ? item.quantity_on_hand : item.duration_minutes + ' min'}</td>
+            <td>${item.is_active ? 'Active' : 'Inactive'}</td>
+            <td>
+                <button class='btn btn-info btn-sm' onclick="editItem(${item.id}, '${item.type}')">Edit</button>
+                <button class='btn btn-danger btn-sm' onclick="deleteItem(${item.id}, '${item.type}')">Delete</button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+// Global function to load parts and services data
+async function loadPartsServicesData(page = 1) {
+    try {
+        const typeFilter = document.getElementById('typeFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const searchInput = document.getElementById('searchInput');
+        
+        const type = typeFilter.value;
+        const category = categoryFilter.value;
+        const status = statusFilter.value;
+        const search = searchInput.value;
+
+        const response = await fetch(`${window.location.origin}/fsm/public/parts-services/data?type=${type}&category=${category}&status=${status}&search=${search}&page=${page}&limit=50`);
+        const result = await response.json();
+
+        if (result.success) {
+            populateTable(result.data);
+            updatePagination(result.pagination);
+        } else {
+            console.error('Error fetching data', result.error);
+        }
+    } catch (error) {
+        console.error('Failed to load data:', error);
+    }
+}
+
+function updatePagination(pagination) {
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = '';
+    
+    // Show pagination info
+    const paginationInfo = document.createElement('div');
+    paginationInfo.className = 'pagination-info text-muted small mb-2';
+    const startItem = (pagination.current_page - 1) * pagination.per_page + 1;
+    const endItem = Math.min(pagination.current_page * pagination.per_page, pagination.total_items);
+    paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${pagination.total_items} items`;
+    paginationControls.appendChild(paginationInfo);
+    
+    if (pagination.total_pages > 1) {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'd-flex gap-1 justify-content-center';
+        
+        // Previous button
+        if (pagination.has_prev) {
+            const prevButton = document.createElement('button');
+            prevButton.textContent = '« Previous';
+            prevButton.classList.add('btn', 'btn-outline-secondary', 'btn-sm');
+            prevButton.addEventListener('click', () => loadPartsServicesData(pagination.current_page - 1));
+            buttonContainer.appendChild(prevButton);
+        }
+        
+        // Page number buttons (show max 5 pages centered around current page)
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, pagination.current_page - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(pagination.total_pages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i;
+            pageButton.classList.add('btn', 'btn-sm');
+            if (i === pagination.current_page) {
+                pageButton.classList.add('btn-primary');
+            } else {
+                pageButton.classList.add('btn-outline-secondary');
+                pageButton.addEventListener('click', () => loadPartsServicesData(i));
+            }
+            buttonContainer.appendChild(pageButton);
+        }
+        
+        // Next button
+        if (pagination.has_next) {
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next »';
+            nextButton.classList.add('btn', 'btn-outline-secondary', 'btn-sm');
+            nextButton.addEventListener('click', () => loadPartsServicesData(pagination.current_page + 1));
+            buttonContainer.appendChild(nextButton);
+        }
+        
+        paginationControls.appendChild(buttonContainer);
+    }
+}
+
+function setupPagination() {
+    const paginationControlsContainer = document.createElement('div');
+    paginationControlsContainer.id = 'paginationControls';
+    paginationControlsContainer.classList.add('d-flex', 'flex-column', 'align-items-center', 'my-3');
+    const tableContainer = document.querySelector('.table-responsive');
+    tableContainer.parentNode.insertBefore(paginationControlsContainer, tableContainer.nextSibling);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const typeFilter = document.getElementById('typeFilter');
     const categoryFilter = document.getElementById('categoryFilter');
@@ -27,49 +149,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initialize Table Data and Insights
+    setupPagination();
     loadPartsServicesData();
     loadInsights();
-
-    async function loadPartsServicesData() {
-        try {
-            const type = typeFilter.value;
-            const category = categoryFilter.value;
-            const status = statusFilter.value;
-            const search = searchInput.value;
-
-            const response = await fetch(`${window.location.origin}/fsm/public/parts-services/data?type=${type}&category=${category}&status=${status}&search=${search}`);
-            const data = await response.json();
-
-            populateTable(data);
-        } catch (error) {
-            console.error('Failed to load data:', error);
-        }
-    }
-
-    function populateTable(data) {
-        const tbody = partsServicesTable.querySelector('tbody');
-        tbody.innerHTML = '';
-
-        data.data.forEach(item => {
-            const tr = document.createElement('tr');
-
-            tr.innerHTML = `
-                <td>${item.type === 'part' ? 'Part' : 'Service'}</td>
-                <td>${item.name}</td>
-                <td>${item.sku}</td>
-                <td>${item.category}</td>
-                <td>${item.unit_price.toFixed(2)}</td>
-                <td>${item.type === 'part' ? item.quantity_on_hand : item.duration_minutes + ' min'}</td>
-                <td>${item.is_active ? 'Active' : 'Inactive'}</td>
-                <td>
-                    <button class='btn btn-info btn-sm' onclick="editItem(${item.id}, '${item.type}')">Edit</button>
-                    <button class='btn btn-danger btn-sm' onclick="deleteItem(${item.id}, '${item.type}')">Delete</button>
-                </td>
-            `;
-
-            tbody.appendChild(tr);
-        });
-    }
 
     // Handle form submissions
     createForm.addEventListener('submit', function(event) {
@@ -366,31 +448,6 @@ async function loadInsights() {
                     });
                 } else {
                     mostUsedPartsContainer.innerHTML = '<p class="text-muted">No parts usage data available</p>';
-                }
-            }
-            
-            // Populate Low Stock Alerts
-            const lowStockAlertsContainer = document.getElementById('lowStockAlerts');
-            if (lowStockAlertsContainer) {
-                lowStockAlertsContainer.innerHTML = '';
-                if (insights.low_stock_alerts && insights.low_stock_alerts.length > 0) {
-                    insights.low_stock_alerts.forEach(alert => {
-                        const alertItem = document.createElement('div');
-                        alertItem.className = 'alert alert-warning mb-2';
-                        alertItem.innerHTML = `
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>${alert.name}</strong>
-                                    <br>
-                                    <small>Current: ${alert.current_stock} | Minimum: ${alert.minimum_stock}</small>
-                                </div>
-                                <span class="badge bg-warning text-dark">Low Stock</span>
-                            </div>
-                        `;
-                        lowStockAlertsContainer.appendChild(alertItem);
-                    });
-                } else {
-                    lowStockAlertsContainer.innerHTML = '<div class="alert alert-info">No low stock alerts at this time</div>';
                 }
             }
         }

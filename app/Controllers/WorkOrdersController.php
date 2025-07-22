@@ -99,6 +99,16 @@ class WorkOrdersController extends BaseController
         if ($this->request->getMethod() === 'POST') {
             $data = $this->request->getPost();
             
+            // Extract services, parts, and skills data before validation
+            $services = $data['services'] ?? [];
+            $parts = $data['parts'] ?? [];
+            $skills = $data['skills'] ?? [];
+            
+            // Remove services, parts, and skills from main data array for validation
+            unset($data['services']);
+            unset($data['parts']);
+            unset($data['skills']);
+            
             // Validate the data
             if (!$this->workOrderModel->validate($data)) {
                 return $this->response->setJSON([
@@ -120,6 +130,23 @@ class WorkOrdersController extends BaseController
             // Insert the work order
             $workOrderId = $this->workOrderModel->insert($data);
             if ($workOrderId) {
+                
+                // Save services and parts
+                try {
+                    // Save services
+                    $this->workOrderModel->saveWorkOrderServices($workOrderId, $services);
+                    
+                    // Save parts
+                    $this->workOrderModel->saveWorkOrderParts($workOrderId, $parts);
+                    
+                    // Save skills
+                    $this->workOrderModel->saveWorkOrderSkills($workOrderId, $skills);
+                    
+                } catch (\Exception $e) {
+                    log_message('error', 'Error saving work order services/parts/skills: ' . $e->getMessage());
+                    // Continue with the response - work order was created successfully
+                }
+                
                 // Log the work order creation event
                 $workOrderNumber = $data['work_order_number'] ?? 'WO-' . str_pad($workOrderId, 6, '0', STR_PAD_LEFT);
                 $this->auditLogModel->logEvent(
@@ -190,6 +217,24 @@ class WorkOrdersController extends BaseController
         if ($this->request->getMethod() === 'POST') {
             $data = $this->request->getPost();
             
+            // Debug: Log all POST data
+            log_message('debug', 'WorkOrder Update POST data: ' . json_encode($data));
+            
+            // Extract services and parts data before validation
+            $services = $data['services'] ?? [];
+            $parts = $data['parts'] ?? [];
+            $skills = $data['skills'] ?? [];
+            
+            // Debug: Log extracted arrays
+            log_message('debug', 'Services: ' . json_encode($services));
+            log_message('debug', 'Parts: ' . json_encode($parts));
+            log_message('debug', 'Skills: ' . json_encode($skills));
+            
+            // Remove services and parts from main data array for validation
+            unset($data['services']);
+            unset($data['parts']);
+            unset($data['skills']);
+            
             // Find the work order
             $workOrder = $this->workOrderModel->find($id);
             if (!$workOrder) {
@@ -220,6 +265,22 @@ class WorkOrdersController extends BaseController
             
             // Update the work order
             if ($this->workOrderModel->update($id, $data)) {
+                
+                // Update services and parts
+                try {
+                    // Save services
+                    $this->workOrderModel->saveWorkOrderServices($id, $services);
+                    
+                    // Save parts
+                    $this->workOrderModel->saveWorkOrderParts($id, $parts);
+                    
+                    // Save skills
+                    $this->workOrderModel->saveWorkOrderSkills($id, $skills);
+                    
+                } catch (\Exception $e) {
+                    log_message('error', 'Error saving work order services/parts/skills: ' . $e->getMessage());
+                    // Continue with the response - work order was updated successfully
+                }
                 // Log specific change events
                 $workOrderNumber = $workOrder['work_order_number'] ?? 'WO-' . str_pad($id, 6, '0', STR_PAD_LEFT);
                 
@@ -726,6 +787,49 @@ class WorkOrdersController extends BaseController
             'success' => false,
             'message' => 'Method not allowed'
         ]);
+    }
+    
+    /**
+     * Get services and parts items for a work order
+     */
+    public function getItems($id)
+    {
+        try {
+            // Check if user is authenticated
+            if (!session()->get('auth_token')) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Unauthorized: Please login to continue'
+                ])->setStatusCode(401);
+            }
+            
+            // Verify work order exists
+            $workOrder = $this->workOrderModel->find($id);
+            if (!$workOrder) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Work order not found'
+                ])->setStatusCode(404);
+            }
+            
+            // Get services, parts, and skills for this work order
+            $services = $this->workOrderModel->getWorkOrderServices($id);
+            $parts = $this->workOrderModel->getWorkOrderParts($id);
+            $skills = $this->workOrderModel->getWorkOrderSkills($id);
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'services' => $services ?: [],
+                'parts' => $parts ?: [],
+                'skills' => $skills ?: []
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching work order items: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error fetching work order items: ' . $e->getMessage()
+            ])->setStatusCode(500);
+        }
     }
     
     /**

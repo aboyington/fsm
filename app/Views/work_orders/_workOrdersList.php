@@ -2,7 +2,9 @@
     <?php foreach ($workOrders as $workOrder): ?>
     <tr>
         <td>
-            <div class="fw-medium"><?= esc($workOrder['work_order_number']) ?></div>
+            <a href="<?= base_url('work-order-management/work-orders/view/' . $workOrder['id']) ?>" class="text-decoration-none text-primary">
+                <div class="fw-medium"><?= esc($workOrder['work_order_number']) ?></div>
+            </a>
         </td>
         <td>
             <div class="fw-medium"><?= esc($workOrder['summary']) ?></div>

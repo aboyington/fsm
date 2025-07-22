@@ -439,16 +439,80 @@
 
                         <!-- Service and Parts Tab Content -->
                         <div class="tab-pane fade" id="service-parts" role="tabpanel" aria-labelledby="service-parts-tab">
-                            <h3>Service and Parts</h3>
-                            <p class="text-muted">Manage services and parts required for this work order.</p>
-                            
-                            <div class="text-center py-5">
-                                <div class="mb-4">
-                                    <i class="bi bi-gear" style="font-size: 4rem; color: #dee2e6;"></i>
+                            <!-- Services Section -->
+                            <div class="mb-5">
+                                <h5 class="text-primary mb-3">Services</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 30%">Service Line Item Name</th>
+                                                <th style="width: 25%">Service</th>
+                                                <th style="width: 10%">Quantity</th>
+                                                <th style="width: 12%">List Price</th>
+                                                <th style="width: 12%">Tax Name</th>
+                                                <th style="width: 15%">Line Item Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="servicesViewTableBody">
+                                            <!-- Services data will be loaded here -->
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <h5 class="text-muted">Service and Parts Management</h5>
-                                <p class="text-muted">Add services and parts that will be used for this work order.</p>
-                                <button type="button" class="btn btn-success">Add Service/Parts</button>
+                            </div>
+                            
+                            <!-- Parts Section -->
+                            <div class="mb-5">
+                                <h5 class="text-primary mb-3">Parts</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 30%">Part Line Item Name</th>
+                                                <th style="width: 25%">Part</th>
+                                                <th style="width: 10%">Quantity</th>
+                                                <th style="width: 12%">List Price</th>
+                                                <th style="width: 12%">Tax Name</th>
+                                                <th style="width: 15%">Line Item Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="partsViewTableBody">
+                                            <!-- Parts data will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Totals Section -->
+                            <div class="row">
+                                <div class="col-md-6 offset-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <table class="table table-sm mb-0">
+                                                <tr>
+                                                    <td class="text-end border-0">Sub Total:</td>
+                                                    <td class="text-end border-0 fw-medium" id="viewSubTotalDisplay">CA$ 0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end border-0">Tax Amount:</td>
+                                                    <td class="text-end border-0 fw-medium" id="viewTaxAmountDisplay">CA$ 0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end border-0">Discount:</td>
+                                                    <td class="text-end border-0 fw-medium" id="viewDiscountDisplay">CA$ 0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end border-0">Adjustment:</td>
+                                                    <td class="text-end border-0 fw-medium" id="viewAdjustmentDisplay">CA$ 0.00</td>
+                                                </tr>
+                                                <tr class="table-active">
+                                                    <td class="text-end fw-bold">Grand Total:</td>
+                                                    <td class="text-end fw-bold" id="viewGrandTotalDisplay">CA$ 0.00</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -796,6 +860,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadTimeline(workOrderId);
                 }
             });
+        }
+        
+        // Initialize services and parts loading when Service and Parts tab becomes active
+        const servicePartsTab = document.getElementById('service-parts-tab');
+        if (servicePartsTab) {
+            servicePartsTab.addEventListener('shown.bs.tab', function() {
+                loadWorkOrderServicesAndPartsView(workOrderId);
+            });
+            
+            // Load services and parts if Service and Parts tab is active on page load
+            if (servicePartsTab.classList.contains('active')) {
+                loadWorkOrderServicesAndPartsView(workOrderId);
+            }
         }
     }
 });

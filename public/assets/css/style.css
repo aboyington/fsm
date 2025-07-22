@@ -493,9 +493,7 @@ main {
 }
 
 /* Dashboard color overrides */
-.text-primary {
-    color: var(--dashboard-text-color) !important;
-}
+/* .text-primary override removed to allow clickable links to show in primary blue */
 
 .card-header h6.text-primary {
     color: var(--dashboard-text-color) !important;

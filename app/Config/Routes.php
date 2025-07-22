@@ -191,6 +191,7 @@ $routes->group('work-order-management', ['filter' => 'auth'], function($routes) 
     $routes->get('work-orders/view/(:num)', 'WorkOrdersController::view/$1');
     $routes->post('work-orders/create', 'WorkOrdersController::create');
     $routes->get('work-orders/get/(:num)', 'WorkOrdersController::get/$1');
+    $routes->get('work-orders/get-items/(:num)', 'WorkOrdersController::getItems/$1');
     $routes->post('work-orders/update/(:num)', 'WorkOrdersController::update/$1');
     $routes->post('work-orders/delete/(:num)', 'WorkOrdersController::delete/$1');
     $routes->get('work-orders/search', 'WorkOrdersController::search');

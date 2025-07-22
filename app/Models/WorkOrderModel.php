@@ -128,8 +128,8 @@ class WorkOrderModel extends Model
      */
     public function getNextWorkOrderNumber()
     {
-        $prefix = 'WO-';
-        $year = date('Y');
+        $prefix = 'WRK-';
+        $year = substr(date('Y'), -3); // Use last 3 digits of year (e.g., 025 for 2025)
         $lastWorkOrder = $this->selectMax('work_order_number')
                            ->where('work_order_number LIKE', $prefix . $year . '%')
                            ->first();
@@ -248,5 +248,185 @@ class WorkOrderModel extends Model
             'cancelled' => $cancelled,
             'scheduled_appointment' => $scheduledAppointment
         ];
+    }
+    
+    /**
+     * Get services for a work order
+     */
+    public function getWorkOrderServices($workOrderId)
+    {
+        $services = $this->db->table('work_order_items woi')
+                             ->select('woi.*, ps.name as service_name, ps.price as service_rate')
+                             ->join('product_skus ps', 'ps.id = woi.service_id', 'left')
+                             ->where('woi.work_order_id', $workOrderId)
+                             ->where('woi.item_type', 'service')
+                             ->orderBy('woi.id')
+                             ->get()
+                             ->getResultArray();
+        
+        // Generate unique line item names for services if not already set
+        $serviceCounter = 1;
+        foreach ($services as &$service) {
+            if (empty($service['line_item_name'])) {
+                $service['line_item_name'] = 'SVC-' . $serviceCounter;
+                $service['service_line_item_name'] = 'SVC-' . $serviceCounter; // For backward compatibility
+            } else {
+                $service['service_line_item_name'] = $service['line_item_name'];
+            }
+            $serviceCounter++;
+        }
+        
+        return $services;
+    }
+    
+    /**
+     * Get parts for a work order
+     */
+    public function getWorkOrderParts($workOrderId)
+    {
+        $parts = $this->db->table('work_order_items woi')
+                          ->select('woi.*, ps.name as part_name, ps.price as part_rate')
+                          ->join('product_skus ps', 'ps.id = woi.service_id', 'left')
+                          ->where('woi.work_order_id', $workOrderId)
+                          ->where('woi.item_type', 'part')
+                          ->orderBy('woi.id')
+                          ->get()
+                          ->getResultArray();
+        
+        // Generate unique line item names for parts if not already set
+        $partCounter = 1;
+        foreach ($parts as &$part) {
+            if (empty($part['line_item_name'])) {
+                $part['line_item_name'] = 'PRT-' . $partCounter;
+                $part['part_line_item_name'] = 'PRT-' . $partCounter; // For backward compatibility
+            } else {
+                $part['part_line_item_name'] = $part['line_item_name'];
+            }
+            $partCounter++;
+        }
+        
+        return $parts;
+    }
+    
+    /**
+     * Save work order services
+     */
+    public function saveWorkOrderServices($workOrderId, $services)
+    {
+        // First, delete existing services for this work order
+        $this->db->table('work_order_items')
+                 ->where('work_order_id', $workOrderId)
+                 ->where('item_type', 'service')
+                 ->delete();
+        
+        // Insert new services
+        if (!empty($services)) {
+            $serviceCounter = 1;
+            foreach ($services as $service) {
+                if (!empty($service['service_id'])) {
+                    // Generate unique line item name
+                    $lineItemName = $service['line_item_name'] ?? 'SVC-' . $serviceCounter;
+                    
+                    $data = [
+                        'work_order_id' => $workOrderId,
+                        'item_type' => 'service',
+                        'service_id' => $service['service_id'],
+                        'item_name' => $service['item_name'] ?? '', // Service/Product name
+                        'line_item_name' => $lineItemName, // Unique line item identifier
+                        'quantity' => $service['quantity'] ?? 1,
+                        'rate' => $service['rate'] ?? 0,
+                        'amount' => $service['amount'] ?? ($service['quantity'] * $service['rate']),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    $this->db->table('work_order_items')->insert($data);
+                    $serviceCounter++;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Save work order parts
+     */
+    public function saveWorkOrderParts($workOrderId, $parts)
+    {
+        // First, delete existing parts for this work order
+        $this->db->table('work_order_items')
+                 ->where('work_order_id', $workOrderId)
+                 ->where('item_type', 'part')
+                 ->delete();
+        
+        // Insert new parts
+        if (!empty($parts)) {
+            $partCounter = 1;
+            foreach ($parts as $part) {
+                if (!empty($part['part_id'])) {
+                    // Generate unique line item name
+                    $lineItemName = $part['line_item_name'] ?? 'PRT-' . $partCounter;
+                    
+                    $data = [
+                        'work_order_id' => $workOrderId,
+                        'item_type' => 'part',
+                        'service_id' => $part['part_id'], // Note: using service_id column for both services and parts
+                        'item_name' => $part['item_name'] ?? '', // Part/Product name
+                        'line_item_name' => $lineItemName, // Unique line item identifier
+                        'quantity' => $part['quantity'] ?? 1,
+                        'rate' => $part['rate'] ?? 0,
+                        'amount' => $part['amount'] ?? ($part['quantity'] * $part['rate']),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    $this->db->table('work_order_items')->insert($data);
+                    $partCounter++;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get skills for a work order
+     */
+    public function getWorkOrderSkills($workOrderId)
+    {
+        return $this->db->table('work_order_skills wos')
+                       ->select('wos.*, s.name as skill_name')
+                       ->join('skills s', 's.id = wos.skill_id', 'left')
+                       ->where('wos.work_order_id', $workOrderId)
+                       ->orderBy('wos.id')
+                       ->get()
+                       ->getResultArray();
+    }
+    
+    /**
+     * Save work order skills
+     */
+    public function saveWorkOrderSkills($workOrderId, $skills)
+    {
+        // First, delete existing skills for this work order
+        $this->db->table('work_order_skills')
+                 ->where('work_order_id', $workOrderId)
+                 ->delete();
+        
+        // Insert new skills
+        if (!empty($skills)) {
+            foreach ($skills as $skill) {
+                if (!empty($skill['skill_id'])) {
+                    $data = [
+                        'work_order_id' => $workOrderId,
+                        'skill_id' => $skill['skill_id'],
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    $this->db->table('work_order_skills')->insert($data);
+                }
+            }
+        }
+        
+        return true;
     }
 }

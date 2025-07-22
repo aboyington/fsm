@@ -16,6 +16,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(workOrderForm);
             const workOrderId = document.getElementById('workOrderId').value;
             
+            // Debug: Log form data
+            console.log('Form submission - Work Order ID:', workOrderId);
+            for (let [key, value] of formData.entries()) {
+                console.log('FormData:', key, '=', value);
+            }
+            
             const url = workOrderId ? 
                 `${baseUrl}/work-order-management/work-orders/update/${workOrderId}` : 
                 `${baseUrl}/work-order-management/work-orders/create`;
@@ -393,6 +399,9 @@ function editWorkOrder(id) {
                     }
                 });
             }
+            
+            // Load services and parts data
+            loadWorkOrderServicesAndParts(workOrder.id);
             
             // Update modal title and button
             document.getElementById('createWorkOrderModalLabel').textContent = 'Edit Work Order';
@@ -1348,8 +1357,661 @@ function hideUploadProgress() {
     }
 }
 
+// Initialize default service and parts rows with dropdown options
+function initializeDefaultRows() {
+    // Initialize service dropdown options in existing default row
+    const serviceSelect = document.querySelector('#servicesTable .service-select');
+    if (serviceSelect && typeof servicesData !== 'undefined' && servicesData) {
+        let serviceOptions = '<option value="">Select Service</option>';
+        servicesData.forEach(serviceItem => {
+            serviceOptions += `<option value="${serviceItem.id}" data-rate="${serviceItem.price || 0}">${serviceItem.name}</option>`;
+        });
+        serviceSelect.innerHTML = serviceOptions;
+    }
+    
+    // Initialize parts dropdown options in existing default row
+    const partSelect = document.querySelector('#partsTable .part-select');
+    if (partSelect && typeof partsData !== 'undefined' && partsData) {
+        let partOptions = '<option value="">Select Part</option>';
+        partsData.forEach(partItem => {
+            partOptions += `<option value="${partItem.id}" data-rate="${partItem.price || 0}">${partItem.name}</option>`;
+        });
+        partSelect.innerHTML = partOptions;
+    }
+    
+    // Initialize skills dropdown options in existing default row
+    const skillSelect = document.querySelector('#skillsTable .skill-select');
+    if (skillSelect && typeof skillsData !== 'undefined' && skillsData) {
+        let skillOptions = '<option value="">Select Skill</option>';
+        skillsData.forEach(skillItem => {
+            skillOptions += `<option value="${skillItem.id}">${skillItem.name}</option>`;
+        });
+        skillSelect.innerHTML = skillOptions;
+    }
+}
+
+// Initialize service and parts handlers
+function initializeServicePartsHandlers() {
+    // Add event listeners for Add Service/Parts/Skills buttons
+    const addServiceBtn = document.getElementById('addServiceBtn');
+    const addPartBtn = document.getElementById('addPartBtn');
+    const addSkillBtn = document.getElementById('addSkillBtn');
+    
+    if (addServiceBtn) {
+        addServiceBtn.addEventListener('click', addServiceRow);
+    }
+    
+    if (addPartBtn) {
+        addPartBtn.addEventListener('click', addPartRow);
+    }
+    
+    if (addSkillBtn) {
+        addSkillBtn.addEventListener('click', addSkillRow);
+    }
+    
+    // Service and part selection handlers
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('service-select')) {
+            const rate = e.target.options[e.target.selectedIndex].getAttribute('data-rate') || 0;
+            const row = e.target.closest('tr');
+            const rateInput = row.querySelector('.rate-input');
+            if (rateInput) {
+                rateInput.value = parseFloat(rate).toFixed(2);
+                calculateRowAmount(row);
+                calculateTotals();
+            }
+        } else if (e.target.classList.contains('part-select')) {
+            const rate = e.target.options[e.target.selectedIndex].getAttribute('data-rate') || 0;
+            const row = e.target.closest('tr');
+            const rateInput = row.querySelector('.rate-input');
+            if (rateInput) {
+                rateInput.value = parseFloat(rate).toFixed(2);
+                calculateRowAmount(row);
+                calculateTotals();
+            }
+        }
+    });
+    
+    // Quantity and rate input handlers
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('quantity-input') || e.target.classList.contains('rate-input')) {
+            const row = e.target.closest('tr');
+            calculateRowAmount(row);
+            calculateTotals();
+        }
+    });
+    
+    // Remove button handlers
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-service')) {
+            const row = e.target.closest('tr');
+            row.remove();
+            updateRemoveButtons('#servicesTable');
+            calculateTotals();
+        } else if (e.target.closest('.remove-part')) {
+            const row = e.target.closest('tr');
+            row.remove();
+            updateRemoveButtons('#partsTable');
+            calculateTotals();
+        } else if (e.target.closest('.remove-skill')) {
+            const row = e.target.closest('tr');
+            row.remove();
+            updateRemoveButtons('#skillsTable');
+        }
+    });
+    
+    // Discount and adjustment handlers
+    const discountInput = document.getElementById('discount');
+    const adjustmentInput = document.getElementById('adjustment');
+    
+    if (discountInput) {
+        discountInput.addEventListener('input', calculateTotals);
+    }
+    
+    if (adjustmentInput) {
+        adjustmentInput.addEventListener('input', calculateTotals);
+    }
+}
+
+// Function to load existing services and parts for a work order
+function loadWorkOrderServicesAndParts(workOrderId) {
+    console.log('Loading services, parts, and skills for work order:', workOrderId);
+    
+    fetch(`${baseUrl}/work-order-management/work-orders/get-items/${workOrderId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Clear existing rows first
+            clearServicesPartsAndSkillsRows();
+            
+            // Populate services
+            if (data.services && data.services.length > 0) {
+                data.services.forEach((service, index) => {
+                    populateServiceRow(service, index);
+                });
+            } else {
+                // Ensure at least one empty service row exists
+                if (!document.querySelector('#servicesTable tbody tr')) {
+                    addServiceRow();
+                }
+            }
+            
+            // Populate parts
+            if (data.parts && data.parts.length > 0) {
+                data.parts.forEach((part, index) => {
+                    populatePartRow(part, index);
+                });
+            } else {
+                // Ensure at least one empty part row exists
+                if (!document.querySelector('#partsTable tbody tr')) {
+                    addPartRow();
+                }
+            }
+            
+            // Populate skills
+            if (data.skills && data.skills.length > 0) {
+                data.skills.forEach((skill, index) => {
+                    populateSkillRow(skill, index);
+                });
+            } else {
+                // Ensure at least one empty skill row exists
+                if (!document.querySelector('#skillsTable tbody tr')) {
+                    addSkillRow();
+                }
+            }
+            
+            // Update totals with loaded data
+            calculateTotals();
+            
+        } else {
+            console.warn('Failed to load services, parts, and skills:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading services, parts, and skills:', error);
+    });
+}
+
+function clearServicesPartsAndSkillsRows() {
+    // Clear services table
+    const servicesTableBody = document.querySelector('#servicesTable tbody');
+    if (servicesTableBody) {
+        servicesTableBody.innerHTML = '';
+    }
+    
+    // Clear parts table
+    const partsTableBody = document.querySelector('#partsTable tbody');
+    if (partsTableBody) {
+        partsTableBody.innerHTML = '';
+    }
+    
+    // Clear skills table
+    const skillsTableBody = document.querySelector('#skillsTable tbody');
+    if (skillsTableBody) {
+        skillsTableBody.innerHTML = '';
+    }
+}
+
+function populateServiceRow(service, index) {
+    const tbody = document.querySelector('#servicesTable tbody');
+    if (!tbody) return;
+    
+    const newRow = document.createElement('tr');
+    
+    // Build service options from global servicesData
+    let serviceOptions = '<option value="">Select Service</option>';
+    
+    if (typeof servicesData !== 'undefined' && servicesData) {
+        servicesData.forEach(serviceItem => {
+            const selected = serviceItem.id == service.service_id ? 'selected' : '';
+            serviceOptions += `<option value="${serviceItem.id}" data-rate="${serviceItem.price || 0}" ${selected}>${serviceItem.name}</option>`;
+        });
+    }
+    
+    newRow.innerHTML = `
+        <td>
+            <select class="form-select service-select" name="services[${index}][service_id]">
+                ${serviceOptions}
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control quantity-input" name="services[${index}][quantity]" value="${service.quantity || 1}" min="1" step="0.01">
+        </td>
+        <td>
+            <input type="number" class="form-control rate-input" name="services[${index}][rate]" value="${service.rate || 0}" min="0" step="0.01">
+        </td>
+        <td>
+            <input type="number" class="form-control amount-input" name="services[${index}][amount]" value="${service.amount || 0}" readonly>
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-service">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    updateRemoveButtons('#servicesTable');
+}
+
+function populatePartRow(part, index) {
+    const tbody = document.querySelector('#partsTable tbody');
+    if (!tbody) return;
+    
+    const newRow = document.createElement('tr');
+    
+    // Build part options from global partsData
+    let partOptions = '<option value="">Select Part</option>';
+    
+    if (typeof partsData !== 'undefined' && partsData) {
+        partsData.forEach(partItem => {
+            const selected = partItem.id == part.service_id ? 'selected' : '';
+            partOptions += `<option value="${partItem.id}" data-rate="${partItem.price || 0}" ${selected}>${partItem.name}</option>`;
+        });
+    }
+    
+    newRow.innerHTML = `
+        <td>
+            <select class="form-select part-select" name="parts[${index}][part_id]">
+                ${partOptions}
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control quantity-input" name="parts[${index}][quantity]" value="${part.quantity || 1}" min="1" step="0.01">
+        </td>
+        <td>
+            <input type="number" class="form-control rate-input" name="parts[${index}][rate]" value="${part.rate || 0}" min="0" step="0.01">
+        </td>
+        <td>
+            <input type="number" class="form-control amount-input" name="parts[${index}][amount]" value="${part.amount || 0}" readonly>
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-part">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    updateRemoveButtons('#partsTable');
+}
+
+function populateSkillRow(skill, index) {
+    const tbody = document.querySelector('#skillsTable tbody');
+    if (!tbody) return;
+    
+    const newRow = document.createElement('tr');
+    
+    // Build skill options from global skillsData
+    let skillOptions = '<option value="">Select Skill</option>';
+    
+    if (typeof skillsData !== 'undefined' && skillsData) {
+        skillsData.forEach(skillItem => {
+            const selected = skillItem.id == skill.skill_id ? 'selected' : '';
+            skillOptions += `<option value="${skillItem.id}" ${selected}>${skillItem.name}</option>`;
+        });
+    }
+    
+    newRow.innerHTML = `
+        <td>
+            <select class="form-select skill-select" name="skills[${index}][skill_id]">
+                ${skillOptions}
+            </select>
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-skill">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    updateRemoveButtons('#skillsTable');
+}
+
+// Service and Parts management functions
+function addServiceRow() {
+    const tbody = document.querySelector('#servicesTable tbody');
+    if (!tbody) return;
+    
+    const rowCount = tbody.children.length;
+    const newRow = document.createElement('tr');
+    
+    // Build service options from global servicesData
+    let serviceOptions = '<option value="">Select Service</option>';
+    
+    if (typeof servicesData !== 'undefined' && servicesData) {
+        servicesData.forEach(serviceItem => {
+            serviceOptions += `<option value="${serviceItem.id}" data-rate="${serviceItem.price || 0}">${serviceItem.name}</option>`;
+        });
+    }
+    
+    newRow.innerHTML = `
+        <td>
+            <select class="form-select service-select" name="services[${rowCount}][service_id]">
+                ${serviceOptions}
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control quantity-input" name="services[${rowCount}][quantity]" value="1" min="1" step="0.01">
+        </td>
+        <td>
+            <input type="number" class="form-control rate-input" name="services[${rowCount}][rate]" value="0.00" min="0" step="0.01">
+        </td>
+        <td>
+            <input type="number" class="form-control amount-input" name="services[${rowCount}][amount]" value="0.00" readonly>
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-service">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    updateRemoveButtons('#servicesTable');
+}
+
+function addPartRow() {
+    const tbody = document.querySelector('#partsTable tbody');
+    if (!tbody) return;
+    
+    const rowCount = tbody.children.length;
+    const newRow = document.createElement('tr');
+    
+    // Build part options from global partsData
+    let partOptions = '<option value="">Select Part</option>';
+    
+    if (typeof partsData !== 'undefined' && partsData) {
+        partsData.forEach(partItem => {
+            partOptions += `<option value="${partItem.id}" data-rate="${partItem.price || 0}">${partItem.name}</option>`;
+        });
+    }
+    
+    newRow.innerHTML = `
+        <td>
+            <select class="form-select part-select" name="parts[${rowCount}][part_id]">
+                ${partOptions}
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control quantity-input" name="parts[${rowCount}][quantity]" value="1" min="1" step="0.01">
+        </td>
+        <td>
+            <input type="number" class="form-control rate-input" name="parts[${rowCount}][rate]" value="0.00" min="0" step="0.01">
+        </td>
+        <td>
+            <input type="number" class="form-control amount-input" name="parts[${rowCount}][amount]" value="0.00" readonly>
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-part">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    updateRemoveButtons('#partsTable');
+}
+
+function addSkillRow() {
+    const tbody = document.querySelector('#skillsTable tbody');
+    if (!tbody) return;
+    
+    const rowCount = tbody.children.length;
+    const newRow = document.createElement('tr');
+    
+    // Build skill options from global skillsData
+    let skillOptions = '<option value="">Select Skill</option>';
+    
+    if (typeof skillsData !== 'undefined' && skillsData) {
+        skillsData.forEach(skillItem => {
+            skillOptions += `<option value="${skillItem.id}">${skillItem.name}</option>`;
+        });
+    }
+    
+    newRow.innerHTML = `
+        <td>
+            <select class="form-select skill-select" name="skills[${rowCount}][skill_id]">
+                ${skillOptions}
+            </select>
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-skill">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    updateRemoveButtons('#skillsTable');
+}
+
+function calculateRowAmount(row) {
+    const quantityInput = row.querySelector('.quantity-input');
+    const rateInput = row.querySelector('.rate-input');
+    const amountInput = row.querySelector('.amount-input');
+    
+    if (!quantityInput || !rateInput || !amountInput) return;
+    
+    const quantity = parseFloat(quantityInput.value) || 0;
+    const rate = parseFloat(rateInput.value) || 0;
+    const amount = quantity * rate;
+    
+    amountInput.value = amount.toFixed(2);
+}
+
+function calculateServiceAmount(row) {
+    calculateRowAmount(row);
+}
+
+function calculatePartAmount(row) {
+    calculateRowAmount(row);
+}
+
+function calculateTotals() {
+    let subTotal = 0;
+    
+    // Calculate services total
+    document.querySelectorAll('#servicesTable .amount-input').forEach(input => {
+        subTotal += parseFloat(input.value) || 0;
+    });
+    
+    // Calculate parts total
+    document.querySelectorAll('#partsTable .amount-input').forEach(input => {
+        subTotal += parseFloat(input.value) || 0;
+    });
+    
+    const discount = parseFloat(document.getElementById('discount').value) || 0;
+    const adjustment = parseFloat(document.getElementById('adjustment').value) || 0;
+    const taxRate = 0.13; // 13% tax rate - could be made configurable
+    const taxAmount = (subTotal - discount + adjustment) * taxRate;
+    const grandTotal = subTotal - discount + adjustment + taxAmount;
+    
+    document.getElementById('subTotal').value = subTotal.toFixed(2);
+    document.getElementById('subTotalDisplay').textContent = `CA$ ${subTotal.toFixed(2)}`;
+    document.getElementById('taxAmount').value = taxAmount.toFixed(2);
+    document.getElementById('taxAmountDisplay').textContent = `CA$ ${taxAmount.toFixed(2)}`;
+    document.getElementById('grandTotal').value = grandTotal.toFixed(2);
+    document.getElementById('grandTotalDisplay').textContent = `CA$ ${grandTotal.toFixed(2)}`;
+}
+
+function updateRemoveButtons(tableSelector) {
+    const rows = document.querySelectorAll(`${tableSelector} tbody tr`);
+    rows.forEach((row, index) => {
+        const removeBtn = row.querySelector('.remove-service, .remove-part, .remove-skill');
+        if (removeBtn) {
+            removeBtn.disabled = rows.length === 1;
+        }
+    });
+}
+
+// Function to load services and parts for view page (read-only)
+function loadWorkOrderServicesAndPartsView(workOrderId) {
+    console.log('Loading services, parts, and skills for work order view:', workOrderId);
+    
+    fetch(`${baseUrl}/work-order-management/work-orders/get-items/${workOrderId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Populate view tables
+            populateViewServices(data.services || []);
+            populateViewParts(data.parts || []);
+            
+            // Calculate and display totals
+            calculateViewTotals(data);
+        } else {
+            console.warn('Failed to load services, parts, and skills for view:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading services, parts, and skills for view:', error);
+    });
+}
+
+// Populate services table in view mode
+function populateViewServices(services) {
+    const tbody = document.getElementById('servicesViewTableBody');
+    if (!tbody) return;
+    
+    if (!services || services.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No services added</td></tr>';
+        return;
+    }
+    
+    let servicesHTML = '';
+    services.forEach(service => {
+        const serviceAmount = parseFloat(service.amount || 0);
+        const taxName = getTaxName(service.tax_rate || 0);
+        
+        servicesHTML += `
+            <tr>
+                <td>
+                    <div class="fw-medium text-success">${escapeHtml(service.service_line_item_name || 'SVC-1')}</div>
+                    <div class="small text-muted">
+                        <span class="badge bg-success">New</span>
+                        <span class="badge bg-light text-dark">Not yet invoiced</span>
+                    </div>
+                    <div class="small text-muted">--</div>
+                </td>
+                <td>
+                    <div class="fw-medium">${escapeHtml(service.service_name || 'Unknown Service')}</div>
+                    <div class="small text-muted">${escapeHtml(service.service_code || '')}</div>
+                    <div class="small">${escapeHtml(service.service_description || '')}</div>
+                </td>
+                <td class="text-center">${service.quantity || 1} ${service.unit || 'Hours'}</td>
+                <td class="text-end">CA$ ${parseFloat(service.rate || 0).toFixed(2)}</td>
+                <td class="text-center">${taxName}</td>
+                <td class="text-end fw-medium">CA$ ${serviceAmount.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = servicesHTML;
+}
+
+// Populate parts table in view mode
+function populateViewParts(parts) {
+    const tbody = document.getElementById('partsViewTableBody');
+    if (!tbody) return;
+    
+    if (!parts || parts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No parts added</td></tr>';
+        return;
+    }
+    
+    let partsHTML = '';
+    parts.forEach(part => {
+        const partAmount = parseFloat(part.amount || 0);
+        const taxName = getTaxName(part.tax_rate || 0);
+        
+        partsHTML += `
+            <tr>
+                <td>
+                    <div class="fw-medium text-success">${escapeHtml(part.part_line_item_name || 'PRT-1')}</div>
+                    <div class="small text-muted">
+                        <span class="badge bg-success">New</span>
+                        <span class="badge bg-light text-dark">Not yet invoiced</span>
+                    </div>
+                    <div class="small text-primary">
+                        <a href="#" class="text-decoration-none">Service Line Item</a>
+                    </div>
+                    <div class="small text-muted">${escapeHtml(part.service_line_item_name || 'SVC-1')}</div>
+                </td>
+                <td>
+                    <div class="fw-medium">${escapeHtml(part.part_name || 'Unknown Part')}</div>
+                    <div class="small text-muted">${escapeHtml(part.part_code || '')}</div>
+                    <div class="small">${escapeHtml(part.part_description || '')}</div>
+                </td>
+                <td class="text-center">${part.quantity || 1} ${part.unit || 'Each'}</td>
+                <td class="text-end">CA$ ${parseFloat(part.rate || 0).toFixed(2)}</td>
+                <td class="text-center">${taxName}</td>
+                <td class="text-end fw-medium">CA$ ${partAmount.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = partsHTML;
+}
+
+// Get tax name from tax rate
+function getTaxName(taxRate) {
+    const rate = parseFloat(taxRate || 0);
+    if (rate === 0.13) return 'ON HST [13%]';
+    if (rate === 0.05) return 'GST [5%]';
+    if (rate === 0) return 'No Tax';
+    return `Tax [${(rate * 100).toFixed(0)}%]`;
+}
+
+// Calculate and display totals for view
+function calculateViewTotals(data) {
+    let subTotal = 0;
+    let taxAmount = 0;
+    
+    // Calculate services totals
+    if (data.services) {
+        data.services.forEach(service => {
+            const amount = parseFloat(service.amount || 0);
+            subTotal += amount;
+            taxAmount += amount * parseFloat(service.tax_rate || 0);
+        });
+    }
+    
+    // Calculate parts totals
+    if (data.parts) {
+        data.parts.forEach(part => {
+            const amount = parseFloat(part.amount || 0);
+            subTotal += amount;
+            taxAmount += amount * parseFloat(part.tax_rate || 0);
+        });
+    }
+    
+    const discount = parseFloat(data.discount || 0);
+    const adjustment = parseFloat(data.adjustment || 0);
+    const grandTotal = subTotal + taxAmount - discount + adjustment;
+    
+    // Update display elements
+    const subTotalDisplay = document.getElementById('viewSubTotalDisplay');
+    const taxAmountDisplay = document.getElementById('viewTaxAmountDisplay');
+    const discountDisplay = document.getElementById('viewDiscountDisplay');
+    const adjustmentDisplay = document.getElementById('viewAdjustmentDisplay');
+    const grandTotalDisplay = document.getElementById('viewGrandTotalDisplay');
+    
+    if (subTotalDisplay) subTotalDisplay.textContent = `CA$ ${subTotal.toFixed(2)}`;
+    if (taxAmountDisplay) taxAmountDisplay.textContent = `CA$ ${taxAmount.toFixed(2)}`;
+    if (discountDisplay) discountDisplay.textContent = `CA$ ${discount.toFixed(2)}`;
+    if (adjustmentDisplay) adjustmentDisplay.textContent = `CA$ ${adjustment.toFixed(2)}`;
+    if (grandTotalDisplay) grandTotalDisplay.textContent = `CA$ ${grandTotal.toFixed(2)}`;
+}
+
 // Initialize notes and attachments functionality when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Service and Parts functionality for modal forms
+    initializeServicePartsHandlers();
+    
+    // Initialize default service and parts rows with dropdown options
+    initializeDefaultRows();
+    
     // Check if we're on the work order view page
     const isViewPage = window.location.pathname.includes('/view/');
     if (isViewPage) {

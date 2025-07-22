@@ -444,9 +444,127 @@ public function up()
 3. **Privacy**: Personal data handling in compliance with regulations
 4. **Consent Management**: Track customer consent for data usage
 
+## Work Order Management Schema
+
+### Work Orders Table
+
+The work_orders table manages formal work authorizations and job management for field service operations.
+
+```sql
+CREATE TABLE work_orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+    -- Core Information
+    work_order_number VARCHAR(50) NOT NULL UNIQUE,
+    summary VARCHAR(255) NOT NULL,
+    description TEXT,
+    priority VARCHAR(50) DEFAULT 'medium', -- none, low, medium, critical, high
+    type VARCHAR(100) DEFAULT 'service', -- service, corrective, preventive, etc.
+    status VARCHAR(50) DEFAULT 'pending', -- new, pending, in_progress, completed, etc.
+    due_date DATE,
+    
+    -- Customer Information
+    company_id INTEGER,
+    contact_id INTEGER,
+    email VARCHAR(255),
+    phone VARCHAR(50),
+    mobile VARCHAR(50),
+    asset_id INTEGER,
+    
+    -- Address Information
+    service_address TEXT,
+    billing_address TEXT,
+    
+    -- Scheduling Preferences
+    preferred_date_1 DATE,
+    preferred_date_2 DATE,
+    preferred_time VARCHAR(50), -- -none-, any, morning, afternoon, evening
+    preference_note TEXT,
+    
+    -- Financial Information
+    sub_total DECIMAL(10,2) DEFAULT 0.00,
+    tax_amount DECIMAL(10,2) DEFAULT 0.00,
+    discount DECIMAL(10,2) DEFAULT 0.00,
+    adjustment DECIMAL(10,2) DEFAULT 0.00,
+    grand_total DECIMAL(10,2) DEFAULT 0.00,
+    
+    -- System Fields
+    created_by INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
+    
+    -- Foreign Key Constraints
+    FOREIGN KEY (company_id) REFERENCES companies(id),
+    FOREIGN KEY (contact_id) REFERENCES contacts(id),
+    FOREIGN KEY (asset_id) REFERENCES assets(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+);
+```
+
+**Indexes:**
+- `idx_work_orders_number` on `work_order_number`
+- `idx_work_orders_company` on `company_id`
+- `idx_work_orders_contact` on `contact_id`
+- `idx_work_orders_asset` on `asset_id`
+- `idx_work_orders_status` on `status`
+- `idx_work_orders_priority` on `priority`
+- `idx_work_orders_type` on `type`
+- `idx_work_orders_created_by` on `created_by`
+- `idx_work_orders_created_at` on `created_at`
+- `idx_work_orders_deleted_at` on `deleted_at`
+
+### Work Order Items Table
+
+The work_order_items table manages line items for services, parts, and skills within work orders.
+
+```sql
+CREATE TABLE work_order_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+    -- Core Information
+    work_order_id INTEGER NOT NULL,
+    item_type VARCHAR(50) NOT NULL, -- service, part, skill
+    service_id INTEGER, -- Reference to product_skus table
+    item_name VARCHAR(255) NOT NULL, -- Name of the service/part
+    line_item_name VARCHAR(50), -- Unique identifier (SVC-1, PRT-1, etc.)
+    description TEXT,
+    
+    -- Quantity and Pricing
+    quantity DECIMAL(10,2) DEFAULT 1.00,
+    rate DECIMAL(10,2) DEFAULT 0.00,
+    amount DECIMAL(10,2) DEFAULT 0.00,
+    
+    -- Display Order
+    sort_order INTEGER DEFAULT 0,
+    
+    -- System Fields
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Foreign Key Constraints
+    FOREIGN KEY (work_order_id) REFERENCES work_orders(id) ON DELETE CASCADE
+);
+```
+
+**Indexes:**
+- `idx_work_order_items_work_order` on `work_order_id`
+- `idx_work_order_items_service` on `service_id`
+- `idx_work_order_items_type` on `item_type`
+- `idx_work_order_items_sort` on `sort_order`
+
+### Line Item Name Generation
+
+The system automatically generates unique line item names for services and parts:
+
+- **Service Items**: `SVC-1`, `SVC-2`, `SVC-3`, etc.
+- **Part Items**: `PRT-1`, `PRT-2`, `PRT-3`, etc.
+- **Sequential Numbering**: Within each work order, items are numbered sequentially
+- **Persistent Storage**: Line item names are stored in the database for consistency
+
 ---
 
 *Last Updated*: January 2025  
-*Version*: 2.0  
-*Database Schema*: FSM Customer Management
+*Version*: 2.1  
+*Database Schema*: FSM Customer Management & Work Orders
 

@@ -55,7 +55,10 @@ Scheduled Maintenance → Work Order → Service Appointment → Service Report
 
 ### Supporting Tables
 - `estimate_items` - Line items for estimates
-- `work_order_items` - Work order line items
+- `work_order_items` - Work order line items with unique identifiers
+  - **Line Item Names**: Automatically generated unique identifiers (SVC-1, SVC-2, PRT-1, PRT-2, etc.)
+  - **Item Types**: Services, parts, and skills
+  - **Pricing**: Quantity, rate, and total amount calculations
 
 ## Technical Implementation
 
