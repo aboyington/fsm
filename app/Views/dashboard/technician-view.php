@@ -84,7 +84,7 @@
     <div class="col-md-6 mb-4">
         <div class="card border-0 h-100">
             <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 text-warning">
+                <h6 class="mb-0 text-body">
                     <i class="bi bi-truck"></i> My Dispatched Service Appointments
                 </h6>
                 <button class="btn btn-sm btn-outline-warning">
@@ -92,10 +92,44 @@
                 </button>
             </div>
             <div class="card-body">
-                <div class="text-center py-5">
-                    <i class="bi bi-truck display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No Records Found</p>
-                </div>
+                <?php if (!empty($technician_stats['my_dispatched_appointments']) && count($technician_stats['my_dispatched_appointments']) > 0): ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Work Order</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($technician_stats['my_dispatched_appointments'] as $appointment): ?>
+                                <tr>
+                                    <td>
+                                        <a href="<?= base_url('work-order-management/work-orders/view/' . $appointment['work_order_id']) ?>" class="text-decoration-none">
+                                            <strong>WRK-<?= str_pad($appointment['work_order_id'], 3, '0', STR_PAD_LEFT) ?></strong>
+                                        </a>
+                                    </td>
+                                    <td><?= date('M j, Y', strtotime($appointment['appointment_date'])) ?></td>
+                                    <td><?= date('g:i A', strtotime($appointment['appointment_time'])) ?></td>
+                                    <td><?= $appointment['duration'] ?> min</td>
+                                    <td><span class="badge bg-info">Scheduled</span></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <small class="text-muted">Total records: <?= count($technician_stats['my_dispatched_appointments']) ?></small>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-5">
+                        <i class="bi bi-truck display-1 text-muted"></i>
+                        <p class="text-muted mt-3">No Records Found</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -104,7 +138,7 @@
     <div class="col-md-6 mb-4">
         <div class="card border-0 h-100">
             <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 text-warning">
+                <h6 class="mb-0 text-body">
                     <i class="bi bi-clock-history"></i> My In Progress Service Appointments
                 </h6>
                 <button class="btn btn-sm btn-outline-warning">
@@ -112,10 +146,44 @@
                 </button>
             </div>
             <div class="card-body">
-                <div class="text-center py-5">
-                    <i class="bi bi-clock-history display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No Records Found</p>
-                </div>
+                <?php if (!empty($technician_stats['my_in_progress_appointments']) && count($technician_stats['my_in_progress_appointments']) > 0): ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Work Order</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Duration</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($technician_stats['my_in_progress_appointments'] as $appointment): ?>
+                                <tr>
+                                    <td>
+                                        <a href="<?= base_url('work-order-management/work-orders/view/' . $appointment['work_order_id']) ?>" class="text-decoration-none">
+                                            <strong>WRK-<?= str_pad($appointment['work_order_id'], 3, '0', STR_PAD_LEFT) ?></strong>
+                                        </a>
+                                    </td>
+                                    <td><?= date('M j, Y', strtotime($appointment['appointment_date'])) ?></td>
+                                    <td><?= date('g:i A', strtotime($appointment['appointment_time'])) ?></td>
+                                    <td><?= $appointment['duration'] ?> min</td>
+                                    <td><?= esc(substr($appointment['notes'] ?? 'In progress...', 0, 25)) ?><?= strlen($appointment['notes'] ?? '') > 25 ? '...' : '' ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <small class="text-muted">Total records: <?= count($technician_stats['my_in_progress_appointments']) ?></small>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-5">
+                        <i class="bi bi-clock-history display-1 text-muted"></i>
+                        <p class="text-muted mt-3">No Records Found</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -124,7 +192,7 @@
     <div class="col-md-6 mb-4">
         <div class="card border-0 h-100">
             <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 text-warning">
+                <h6 class="mb-0 text-body">
                     <i class="bi bi-check-circle"></i> My Completed Service Appointments
                 </h6>
                 <button class="btn btn-sm btn-outline-warning">
@@ -132,10 +200,44 @@
                 </button>
             </div>
             <div class="card-body">
-                <div class="text-center py-5">
-                    <i class="bi bi-check-circle display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No Records Found</p>
-                </div>
+                <?php if (!empty($technician_stats['my_completed_appointments']) && count($technician_stats['my_completed_appointments']) > 0): ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Work Order</th>
+                                    <th>Date</th>
+                                    <th>Duration</th>
+                                    <th>Completed</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($technician_stats['my_completed_appointments'] as $appointment): ?>
+                                <tr>
+                                    <td>
+                                        <a href="<?= base_url('work-order-management/work-orders/view/' . $appointment['work_order_id']) ?>" class="text-decoration-none">
+                                            <strong>WRK-<?= str_pad($appointment['work_order_id'], 3, '0', STR_PAD_LEFT) ?></strong>
+                                        </a>
+                                    </td>
+                                    <td><?= date('M j, Y', strtotime($appointment['appointment_date'])) ?></td>
+                                    <td><?= $appointment['duration'] ?> min</td>
+                                    <td><?= date('M j', strtotime($appointment['updated_at'])) ?></td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <small class="text-muted">Total records: <?= count($technician_stats['my_completed_appointments']) ?></small>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-5">
+                        <i class="bi bi-check-circle display-1 text-muted"></i>
+                        <p class="text-muted mt-3">No Records Found</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -144,7 +246,7 @@
     <div class="col-md-6 mb-4">
         <div class="card border-0 h-100">
             <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 text-warning">
+                <h6 class="mb-0 text-body">
                     <i class="bi bi-x-circle"></i> My Cancelled Service Appointments
                 </h6>
                 <button class="btn btn-sm btn-outline-warning">
@@ -152,10 +254,44 @@
                 </button>
             </div>
             <div class="card-body">
-                <div class="text-center py-5">
-                    <i class="bi bi-x-circle display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No Records Found</p>
-                </div>
+                <?php if (!empty($technician_stats['my_cancelled_appointments']) && count($technician_stats['my_cancelled_appointments']) > 0): ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Work Order</th>
+                                    <th>Date</th>
+                                    <th>Reason</th>
+                                    <th>Cancelled</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($technician_stats['my_cancelled_appointments'] as $appointment): ?>
+                                <tr>
+                                    <td>
+                                        <a href="<?= base_url('work-order-management/work-orders/view/' . $appointment['work_order_id']) ?>" class="text-decoration-none">
+                                            <strong>WRK-<?= str_pad($appointment['work_order_id'], 3, '0', STR_PAD_LEFT) ?></strong>
+                                        </a>
+                                    </td>
+                                    <td><?= date('M j, Y', strtotime($appointment['appointment_date'])) ?></td>
+                                    <td><?= esc(substr($appointment['notes'] ?? 'No reason provided', 0, 20)) ?><?= strlen($appointment['notes'] ?? '') > 20 ? '...' : '' ?></td>
+                                    <td><?= date('M j', strtotime($appointment['updated_at'])) ?></td>
+                                    <td><span class="badge bg-danger">Cancelled</span></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <small class="text-muted">Total records: <?= count($technician_stats['my_cancelled_appointments']) ?></small>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-5">
+                        <i class="bi bi-x-circle display-1 text-muted"></i>
+                        <p class="text-muted mt-3">No Records Found</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

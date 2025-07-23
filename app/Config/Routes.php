@@ -17,6 +17,7 @@ $routes->get('logout', 'AuthController::logout');
 $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
 $routes->get('dashboard/overview', 'DashboardController::overview', ['filter' => 'auth']);
 $routes->get('dashboard/request-management', 'DashboardController::requestManagement', ['filter' => 'auth']);
+$routes->get('dashboard/request-management-debug', 'DashboardController::requestManagementDebug', ['filter' => 'auth']);
 $routes->get('dashboard/service-appointment-management', 'DashboardController::serviceAppointmentManagement', ['filter' => 'auth']);
 $routes->get('dashboard/technician-view', 'DashboardController::technicianView', ['filter' => 'auth']);
 

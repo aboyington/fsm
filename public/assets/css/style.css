@@ -10,14 +10,7 @@
     /* box-shadow hover effect disabled */
 }
 
-.card-header {
-    background-color: #f5f5f5;
-    font-weight: bold;
-}
 
-.card-body {
-    background-color: #ffffff;
-}
 
 .text-muted {
     color: #212129 !important;
@@ -292,12 +285,30 @@ main {
 /* Card styling */
 .card {
     border-radius: 0.5rem;
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 0.5px solid #dee2e6;
+    overflow: hidden; /* Ensures content respects border radius */
 }
 
 .card:hover {
     /* box-shadow hover effect disabled */
+}
+
+/* Card header styling to match card borders */
+.card-header {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    border-bottom: 0.5px solid #dee2e6;
+}
+
+/* Transparent card headers in dashboards */
+.card-header.bg-transparent {
+    background-color: transparent;
+    border-bottom: 0.5px solid #dee2e6;
+}
+
+/* Remove conflicting border styling on transparent headers */
+.card-header.bg-transparent.border-0 {
+    border-bottom: 0.5px solid #dee2e6 !important;
 }
 
 /* Table styling */
@@ -311,6 +322,13 @@ main {
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
+    background-color: #F5F5F5;
+}
+
+/* Dashboard table headers - specific styling for dashboard cards */
+.card .table thead th {
+    background-color: #F5F5F5;
+    border-bottom: 1px solid #dee2e6;
 }
 
 /* Form styling */
@@ -407,10 +425,25 @@ main {
 /* Dashboard stats */
 .stat-card {
     border-left: 4px solid var(--primary-color);
+    border: 0.5px solid #dee2e6;
 }
 
 .stat-card:hover {
     /* hover effect removed */
+}
+
+/* Dashboard cards - override border-0 class for better visual definition */
+.container-fluid .card.border-0 {
+    border: 0.5px solid #dee2e6 !important;
+}
+
+/* Specific dashboard view overrides */
+#overview .card.border-0,
+#request-management .card.border-0,
+#service-appointment-management .card.border-0,
+#technician-view .card.border-0,
+.dashboard-content .card.border-0 {
+    border: 0.5px solid #dee2e6 !important;
 }
 
 .stat-card .stat-value {
