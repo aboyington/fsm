@@ -6,7 +6,7 @@ The Enhanced Detail Views feature represents a significant improvement to the FS
 
 ## Release Information
 
-- **Version**: 2.5.0
+- **Version**: 2.9.0-alpha
 - **Release Date**: January 2025
 - **Module**: Customer Management
 - **Status**: ✅ Implemented
@@ -211,6 +211,6 @@ The implementation maintains backward compatibility while introducing modern UI 
 ---
 
 **Last Updated**: January 2025  
-**Version**: 2.5.0  
+**Version**: 2.9.0-alpha  
 **Module**: Customer Management - Enhanced Detail Views  
 **Status**: ✅ Production Ready

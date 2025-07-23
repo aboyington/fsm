@@ -6,7 +6,7 @@
                 <h5 class="modal-title" id="createWorkOrderModalLabel">Create Work Order</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="workOrderForm">
+            <form id="workOrderForm" action="<?= base_url('work-order-management/work-orders/create') ?>" method="POST">
                 <div class="modal-body">
                     <input type="hidden" id="workOrderId" name="id">
                     <?= csrf_field() ?>
@@ -56,14 +56,10 @@
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status</label>
                                 <select class="form-select" id="status" name="status">
-                                    <option value="new" selected>New</option>
-                                    <option value="pending">Pending</option>
+                                    <option value="pending" selected>Pending</option>
                                     <option value="in_progress">In Progress</option>
-                                    <option value="cannot_complete">Cannot Complete</option>
                                     <option value="completed">Completed</option>
-                                    <option value="closed">Closed</option>
                                     <option value="cancelled">Cancelled</option>
-                                    <option value="scheduled_appointment">Scheduled Appointment</option>
                                 </select>
                             </div>
                         </div>

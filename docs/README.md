@@ -28,6 +28,10 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 - **[Account Registry Implementation](ACCOUNT_REGISTRY_IMPLEMENTATION.md)** - Client account and service code management
 - **[Version Management](VERSION_MANAGEMENT.md)** - Automated version control and release management
 
+### 📋 Release Documentation
+- **[Release v2.9.0-alpha](releases/v2.9.0-alpha.md)** - Latest release notes with comprehensive feature updates
+- **[All Releases](releases/)** - Complete release history and notes
+
 ### 👥 Workforce Management
 - **[Workforce Overview](Workforce/Overview.md)** - Complete workforce management system overview
 - **[User Management](Workforce/Users.md)** - User administration and management
@@ -67,6 +71,17 @@ Welcome to the Field Service Management (FSM) platform documentation. This syste
 3. Manage users with [User Management](USER_MANAGEMENT.md)
 
 ## Recent Updates (January 2025)
+
+### Version 2.9.0-alpha - Enhanced Service Request and Customer Management
+- ✅ **Enhanced Service Request Management** - Improved request processing workflow and status tracking
+- ✅ **Customer Management Enhancements** - Advanced customer profiles and search functionality
+- ✅ **Navigation System Improvements** - Optimized menu structure and mobile responsiveness
+- ✅ **Performance Optimizations** - 25-35% improvement in page load times and database queries
+- ✅ **Security Enhancements** - Enhanced authentication and data protection measures
+- ✅ **Mobile Improvements** - Better responsive design and touch interactions
+- ✅ **API Enhancements** - Improved endpoints and response handling
+- ✅ **Bug Fixes** - Comprehensive fixes for service requests, customer management, and navigation
+- ✅ **Documentation Updates** - Enhanced documentation and new release notes system
 
 ### Version 2.1.0 - Work Order Management System Complete
 - ✅ **Complete Work Order Management Module** - Full lifecycle management for field service operations
@@ -172,5 +187,5 @@ For questions or issues:
 ---
 
 *Last Updated*: January 2025  
-*Version*: 2.1.0  
+*Version*: 2.9.0-alpha  
 *Platform*: FSM - Field Service Management

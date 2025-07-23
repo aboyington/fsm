@@ -495,6 +495,9 @@
     </div>
 </div>
 
+<!-- Include Work Order Modal -->
+<?= $this->include('work_orders/_modal') ?>
+
 <?= $this->endSection() ?><?= $this->section('styles') ?>
 <style>
 /* Tab styling improvements - matching company view */
@@ -650,37 +653,185 @@
 <script>
 // Define baseUrl for JavaScript
 const baseUrl = '<?= base_url() ?>';
-
+</script>
+<script src="<?= base_url('js/work_orders.js') ?>"></script>
+<script>
 // Action functions
 function convertToWorkOrder(requestId) {
     if (confirm('Convert this request to a work order?')) {
-        // Redirect to work order creation with request data pre-filled
-        window.location.href = `${baseUrl}/work-orders/create?from_request=${requestId}`;
+        // Disable the convert button and show loading state
+        const convertBtn = document.querySelector(`button[onclick="convertToWorkOrder(${requestId})"]`);
+        if (convertBtn) {
+            convertBtn.disabled = true;
+            const originalText = convertBtn.textContent;
+            convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Converting...';
+            convertBtn.setAttribute('data-original-text', originalText);
+        }
+        
+        // Call the work order creation function with conversion flag
+        createWorkOrderFromRequest(requestId);
     }
 }
 
 function editRequest(requestId) {
     // Open the request modal in edit mode
     // You can implement this by triggering the modal and pre-filling data
-    window.location.href = `${baseUrl}/requests/edit/${requestId}`;
+    window.location.href = `${baseUrl}requests/edit/${requestId}`;
 }
 
 function convertToEstimate(requestId) {
     if (confirm('Convert this request to an estimate?')) {
         // Redirect to estimate creation with request data pre-filled
-        window.location.href = `${baseUrl}/estimates/create?from_request=${requestId}`;
+        window.location.href = `${baseUrl}estimates/create?from_request=${requestId}`;
     }
 }
 
 // Functions for Related List empty state actions
 function createEstimateFromRequest(requestId) {
     // Redirect to estimate creation with request data pre-filled
-    window.location.href = `${baseUrl}/work-order-management/estimates/create?from_request=${requestId}`;
+    window.location.href = `${baseUrl}work-order-management/estimates/create?from_request=${requestId}`;
 }
 
 function createWorkOrderFromRequest(requestId) {
-    // Redirect to work order creation with request data pre-filled
-    window.location.href = `${baseUrl}/work-order-management/work-orders/create?from_request=${requestId}`;
+    // Open work order modal with request data pre-filled
+    openWorkOrderModalForConversion(requestId);
+}
+
+// Function to open work order modal with request data pre-filled
+function openWorkOrderModalForConversion(requestId) {
+    // Show loading state
+    const modal = document.getElementById('createWorkOrderModal');
+    const modalTitle = modal.querySelector('.modal-title');
+    const originalTitle = modalTitle.innerHTML;
+    modalTitle.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
+    
+    // Fetch request data from the backend
+    fetch(`${baseUrl}work-order-management/work-orders/convert-from-request/${requestId}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Populate modal with request data
+            populateWorkOrderModalFromRequest(data.requestData);
+            
+            // Update modal title to indicate conversion
+            modalTitle.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Convert Request to Work Order';
+            
+            // Show the modal
+            const workOrderModalInstance = new bootstrap.Modal(modal);
+            workOrderModalInstance.show();
+        } else {
+            throw new Error(data.message || 'Failed to load request data');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading request data:', error);
+        modalTitle.innerHTML = originalTitle;
+        showAlert('danger', 'Error loading request data: ' + error.message);
+        
+        // Restore convert button state on error
+        const convertBtn = document.querySelector('button[disabled][data-original-text]');
+        if (convertBtn) {
+            convertBtn.disabled = false;
+            const originalText = convertBtn.getAttribute('data-original-text');
+            convertBtn.textContent = originalText;
+            convertBtn.removeAttribute('data-original-text');
+        }
+    });
+}
+
+// Function to populate work order modal form with request data
+function populateWorkOrderModalFromRequest(requestData) {
+    const modal = document.getElementById('createWorkOrderModal');
+    
+    // Fill in the form fields with request data
+    if (requestData.request_name) {
+        const nameField = modal.querySelector('[name="summary"]'); // This matches the modal field
+        if (nameField) nameField.value = requestData.request_name;
+    }
+    
+    if (requestData.description) {
+        const descField = modal.querySelector('[name="description"]');
+        if (descField) descField.value = requestData.description;
+    }
+    
+    if (requestData.priority) {
+        const priorityField = modal.querySelector('[name="priority"]');
+        if (priorityField) priorityField.value = requestData.priority;
+    }
+    
+    if (requestData.due_date) {
+        const dueDateField = modal.querySelector('[name="due_date"]');
+        if (dueDateField) dueDateField.value = requestData.due_date;
+    }
+    
+    // Client information
+    if (requestData.client_id) {
+        const clientField = modal.querySelector('[name="company_id"]'); // Changed from client_id to company_id
+        if (clientField) clientField.value = requestData.client_id;
+    }
+    
+    // Contact information - set the contact dropdown
+    if (requestData.contact_id) {
+        const contactField = modal.querySelector('[name="contact_id"]');
+        if (contactField) contactField.value = requestData.contact_id;
+    }
+    
+    // Fill individual contact detail fields
+    if (requestData.contact_email) {
+        const contactEmailField = modal.querySelector('[name="email"]'); // Changed from contact_email to email
+        if (contactEmailField) contactEmailField.value = requestData.contact_email;
+    }
+    
+    if (requestData.contact_phone) {
+        const contactPhoneField = modal.querySelector('[name="phone"]'); // Changed from contact_phone to phone
+        if (contactPhoneField) contactPhoneField.value = requestData.contact_phone;
+    }
+    
+    if (requestData.contact_mobile) {
+        const contactMobileField = modal.querySelector('[name="mobile"]'); // Changed from contact_mobile to mobile
+        if (contactMobileField) contactMobileField.value = requestData.contact_mobile;
+    }
+    
+    // Address information
+    if (requestData.service_address) {
+        const serviceAddressField = modal.querySelector('[name="service_address"]');
+        if (serviceAddressField) serviceAddressField.value = requestData.service_address;
+    }
+    
+    // Set a hidden field or data attribute to track this is a conversion
+    const form = modal.querySelector('form');
+    if (form) {
+        // Add hidden field for request ID
+        let requestIdField = form.querySelector('input[name="source_request_id"]');
+        if (!requestIdField) {
+            requestIdField = document.createElement('input');
+            requestIdField.type = 'hidden';
+            requestIdField.name = 'source_request_id';
+            form.appendChild(requestIdField);
+        }
+        requestIdField.value = requestData.id;
+        
+        // Mark as conversion
+        let conversionField = form.querySelector('input[name="is_conversion"]');
+        if (!conversionField) {
+            conversionField = document.createElement('input');
+            conversionField.type = 'hidden';
+            conversionField.name = 'is_conversion';
+            form.appendChild(conversionField);
+        }
+        conversionField.value = '1';
+    }
 }
 
 function cancelRequest(requestId) {
@@ -1942,5 +2093,4 @@ function previewAttachment(attachmentId, fileName, mimeType) {
     });
 }
 </script>
-<script src="<?= base_url('js/requests.js') ?>"></script>
 <?= $this->endSection() ?>

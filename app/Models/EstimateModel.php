@@ -10,7 +10,7 @@ class EstimateModel extends Model
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
-    protected $useSoftDeletes = true;
+    protected $useSoftDeletes = false;
     protected $protectFields = true;
     protected $allowedFields = [
         'estimate_number',
@@ -138,7 +138,6 @@ class EstimateModel extends Model
                            ->join('contacts ct', 'ct.id = e.contact_id', 'left')
                            ->join('assets a', 'a.id = e.asset_id', 'left')
                            ->join('users u', 'u.id = e.created_by', 'left')
-                           ->where('e.deleted_at IS NULL')
                            ->orderBy('e.created_at', 'DESC');
         
         if ($status) {
@@ -174,7 +173,6 @@ class EstimateModel extends Model
                        ->join('assets a', 'a.id = e.asset_id', 'left')
                        ->join('users u', 'u.id = e.created_by', 'left')
                        ->where('e.id', $id)
-                       ->where('e.deleted_at IS NULL')
                        ->get()
                        ->getRowArray();
     }
@@ -189,7 +187,6 @@ class EstimateModel extends Model
                        ->join('contacts ct', 'ct.id = e.contact_id', 'left')
                        ->join('assets a', 'a.id = e.asset_id', 'left')
                        ->where('e.company_id', $companyId)
-                       ->where('e.deleted_at IS NULL')
                        ->orderBy('e.created_at', 'DESC')
                        ->get()
                        ->getResultArray();
@@ -207,7 +204,6 @@ class EstimateModel extends Model
                        ->join('assets a', 'a.id = e.asset_id', 'left')
                        ->join('users u', 'u.id = e.created_by', 'left')
                        ->where('e.request_id', $requestId)
-                       ->where('e.deleted_at IS NULL')
                        ->orderBy('e.created_at', 'DESC')
                        ->get()
                        ->getResultArray();

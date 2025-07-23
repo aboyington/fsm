@@ -276,7 +276,9 @@ function editRequest(id) {
 
 function viewRequest(id) {
     // Redirect to the request view page
-    window.location.href = `${baseUrl}/work-order-management/request/view/${id}`;
+    // Remove trailing slash from baseUrl to prevent double slashes
+    const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+    window.location.href = `${cleanBaseUrl}/work-order-management/request/view/${id}`;
 }
 
 function deleteRequest(id) {
@@ -378,7 +380,7 @@ function updateRequestsTable(requests) {
             <tr>
                 <td>
                     <div class="text-center">
-                        <a href="${baseUrl}/work-order-management/request/view/${request.id}" class="fw-medium text-decoration-none">
+                        <a href="${baseUrl.replace(/\/$/, '')}/work-order-management/request/view/${request.id}" class="fw-medium text-decoration-none">
                             ${escapeHtml(request.request_number || '')}
                         </a>
                     </div>

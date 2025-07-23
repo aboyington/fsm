@@ -10,7 +10,7 @@ class WorkOrderModel extends Model
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
-    protected $useSoftDeletes = true;
+    protected $useSoftDeletes = false;
     protected $protectFields = true;
     protected $allowedFields = [
         'work_order_number',
@@ -74,7 +74,7 @@ class WorkOrderModel extends Model
         'discount' => 'permit_empty|decimal',
         'adjustment' => 'permit_empty|decimal',
         'grand_total' => 'permit_empty|decimal',
-        'status' => 'permit_empty|in_list[new,pending,in_progress,cannot_complete,completed,closed,cancelled,scheduled_appointment]',
+        'status' => 'permit_empty|in_list[pending,in_progress,completed,cancelled]',
         'created_by' => 'permit_empty|integer'
     ];
 
@@ -130,18 +130,42 @@ class WorkOrderModel extends Model
     {
         $prefix = 'WRK-';
         $year = substr(date('Y'), -3); // Use last 3 digits of year (e.g., 025 for 2025)
-        $lastWorkOrder = $this->selectMax('work_order_number')
-                           ->where('work_order_number LIKE', $prefix . $year . '%')
-                           ->first();
+        $yearPrefix = $prefix . $year . '-';
         
-        if ($lastWorkOrder && $lastWorkOrder['work_order_number']) {
-            $lastNumber = intval(substr($lastWorkOrder['work_order_number'], -4));
-            $newNumber = $lastNumber + 1;
+        // Get all existing work order numbers for this year
+        $query = "SELECT work_order_number FROM {$this->table} 
+                  WHERE work_order_number LIKE ? 
+                  ORDER BY work_order_number DESC 
+                  LIMIT 1";
+        
+        $result = $this->db->query($query, [$yearPrefix . '%']);
+        $row = $result->getRowArray();
+        
+        if ($row && $row['work_order_number']) {
+            // Extract the numeric part and increment
+            $number = intval(substr($row['work_order_number'], -4));
+            $newNumber = $number + 1;
         } else {
+            // Start with 1 if no previous work orders found
             $newNumber = 1;
         }
         
-        return $prefix . $year . '-' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        // Keep checking and incrementing until we find an unused number
+        do {
+            $candidateNumber = $yearPrefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+            
+            // Check if this work order number already exists
+            $checkQuery = "SELECT id FROM {$this->table} WHERE work_order_number = ?";
+            $checkResult = $this->db->query($checkQuery, [$candidateNumber]);
+            
+            if ($checkResult->getNumRows() === 0) {
+                // Found an unused number
+                return $candidateNumber;
+            }
+            
+            // This number exists, try the next one
+            $newNumber++;
+        } while (true);
     }
 
     /**
@@ -155,7 +179,6 @@ class WorkOrderModel extends Model
                            ->join('contacts ct', 'ct.id = w.contact_id', 'left')
                            ->join('assets a', 'a.id = w.asset_id', 'left')
                            ->join('users u', 'u.id = w.created_by', 'left')
-                           ->where('w.deleted_at IS NULL')
                            ->orderBy('w.created_at', 'DESC');
         
         if ($status) {
@@ -191,7 +214,6 @@ class WorkOrderModel extends Model
                        ->join('assets a', 'a.id = w.asset_id', 'left')
                        ->join('users u', 'u.id = w.created_by', 'left')
                        ->where('w.id', $id)
-                       ->where('w.deleted_at IS NULL')
                        ->get()
                        ->getRowArray();
     }
@@ -216,7 +238,6 @@ class WorkOrderModel extends Model
                        ->join('contacts ct', 'ct.id = w.contact_id', 'left')
                        ->join('assets a', 'a.id = w.asset_id', 'left')
                        ->where('w.company_id', $companyId)
-                       ->where('w.deleted_at IS NULL')
                        ->orderBy('w.created_at', 'DESC')
                        ->get()
                        ->getResultArray();
@@ -228,25 +249,17 @@ class WorkOrderModel extends Model
     public function getWorkOrderStats()
     {
         $total = $this->countAllResults();
-        $new = $this->where('status', 'new')->countAllResults();
         $pending = $this->where('status', 'pending')->countAllResults();
         $inProgress = $this->where('status', 'in_progress')->countAllResults();
-        $cannotComplete = $this->where('status', 'cannot_complete')->countAllResults();
         $completed = $this->where('status', 'completed')->countAllResults();
-        $closed = $this->where('status', 'closed')->countAllResults();
         $cancelled = $this->where('status', 'cancelled')->countAllResults();
-        $scheduledAppointment = $this->where('status', 'scheduled_appointment')->countAllResults();
         
         return [
             'total' => $total,
-            'new' => $new,
             'pending' => $pending,
             'in_progress' => $inProgress,
-            'cannot_complete' => $cannotComplete,
             'completed' => $completed,
-            'closed' => $closed,
-            'cancelled' => $cancelled,
-            'scheduled_appointment' => $scheduledAppointment
+            'cancelled' => $cancelled
         ];
     }
     

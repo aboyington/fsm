@@ -94,6 +94,125 @@ class WorkOrdersController extends BaseController
         return view('work_orders/index', $data);
     }
 
+    /**
+     * Convert a request to work order
+     */
+    public function convertFromRequest($requestId)
+    {
+        // Load the request model
+        $requestModel = new \App\Models\RequestModel();
+        $request = $requestModel->getRequestWithDetails($requestId);
+        
+        if (!$request) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Request not found'
+            ]);
+        }
+        
+        // Check if request status allows conversion (not already converted)
+        if ($request['status'] === 'in_progress') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'This request has already been converted to a work order'
+            ]);
+        }
+        
+        if ($this->request->getMethod() === 'POST') {
+            $data = $this->request->getPost();
+            
+            // Extract services, parts, and skills data before validation
+            $services = $data['services'] ?? [];
+            $parts = $data['parts'] ?? [];
+            $skills = $data['skills'] ?? [];
+            
+            // Remove services, parts, and skills from main data array for validation
+            unset($data['services']);
+            unset($data['parts']);
+            unset($data['skills']);
+            
+            // Validate the data
+            if (!$this->workOrderModel->validate($data)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'errors' => $this->workOrderModel->errors()
+                ]);
+            }
+            
+            // Set created_by to current user
+            $userId = $this->getCurrentUserId();
+            if (!$userId) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ]);
+            }
+            $data['created_by'] = $userId;
+            
+            // For conversions, always ensure we get the next available work order number
+            // even if there's already a work_order_number in the form data
+            $data['work_order_number'] = $this->workOrderModel->getNextWorkOrderNumber();
+            
+            // Insert the work order
+            $workOrderId = $this->workOrderModel->insert($data);
+            if ($workOrderId) {
+                
+                // Save services and parts
+                try {
+                    // Save services
+                    $this->workOrderModel->saveWorkOrderServices($workOrderId, $services);
+                    
+                    // Save parts
+                    $this->workOrderModel->saveWorkOrderParts($workOrderId, $parts);
+                    
+                    // Save skills
+                    $this->workOrderModel->saveWorkOrderSkills($workOrderId, $skills);
+                    
+                } catch (\Exception $e) {
+                    log_message('error', 'Error saving work order services/parts/skills: ' . $e->getMessage());
+                    // Continue with the response - work order was created successfully
+                }
+                
+                // Update the original request status to 'in_progress'
+                $requestModel->update($requestId, ['status' => 'in_progress']);
+                
+                // Get the created work order to retrieve the generated work order number
+                $createdWorkOrder = $this->workOrderModel->find($workOrderId);
+                $workOrderNumber = $createdWorkOrder['work_order_number'] ?? 'WO-' . str_pad($workOrderId, 6, '0', STR_PAD_LEFT);
+                
+                // Log the work order creation event
+                $this->auditLogModel->logEvent(
+                    AuditLogModel::EVENT_WORK_ORDER_CREATED,
+                    'Work order created from request',
+                    "Work order {$workOrderNumber} has been created from request {$request['request_number']}",
+                    null,
+                    null,
+                    json_encode($data),
+                    'work_orders',
+                    'work_order',
+                    $workOrderId
+                );
+                
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Work Order created successfully from request',
+                    'id' => $workOrderId
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to create work order'
+                ]);
+            }
+        }
+        
+        // Return request data for prefilling the form
+        return $this->response->setJSON([
+            'success' => true,
+            'requestData' => $request
+        ]);
+    }
+    
     public function create()
     {
         if ($this->request->getMethod() === 'POST') {
@@ -127,8 +246,37 @@ class WorkOrdersController extends BaseController
             }
             $data['created_by'] = $userId;
             
+            // Debug: Log data before creation
+            log_message('debug', 'Work order data before creation: ' . json_encode($data));
+            
+            // Debug: Check what work order number will be generated
+            $nextWorkOrderNumber = $this->workOrderModel->getNextWorkOrderNumber();
+            log_message('debug', 'Next work order number would be: ' . $nextWorkOrderNumber);
+            
+            // Check if this is a conversion from a request
+            $isConversion = isset($_POST['is_conversion']) && $_POST['is_conversion'] === '1';
+            $sourceRequestId = $_POST['source_request_id'] ?? null;
+            
             // Insert the work order
-            $workOrderId = $this->workOrderModel->insert($data);
+            try {
+                $workOrderId = $this->workOrderModel->insert($data);
+            } catch (\Exception $e) {
+                log_message('error', 'Error creating work order: ' . $e->getMessage());
+                
+                // Check if it's a duplicate work order number error
+                if (strpos($e->getMessage(), 'UNIQUE constraint failed: work_orders.work_order_number') !== false) {
+                    return $this->response->setJSON([
+                        'success' => false,
+                        'message' => 'A work order with this number already exists. Please try again.'
+                    ]);
+                }
+                
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to create work order: ' . $e->getMessage()
+                ]);
+            }
+            
             if ($workOrderId) {
                 
                 // Save services and parts
@@ -147,12 +295,25 @@ class WorkOrdersController extends BaseController
                     // Continue with the response - work order was created successfully
                 }
                 
+                // If this is a conversion from a request, update the request status
+                if ($isConversion && $sourceRequestId) {
+                    $requestModel = new \App\Models\RequestModel();
+                    $requestModel->update($sourceRequestId, ['status' => 'in_progress']);
+                    
+                    // Load the original request for logging
+                    $request = $requestModel->find($sourceRequestId);
+                }
+                
                 // Log the work order creation event
                 $workOrderNumber = $data['work_order_number'] ?? 'WO-' . str_pad($workOrderId, 6, '0', STR_PAD_LEFT);
+                $eventMessage = $isConversion && $sourceRequestId ? 
+                    "Work order {$workOrderNumber} has been created from request" . (isset($request) ? " {$request['request_number']}" : '') : 
+                    "Work order {$workOrderNumber} has been created";
+                
                 $this->auditLogModel->logEvent(
                     AuditLogModel::EVENT_WORK_ORDER_CREATED,
-                    'Work order created',
-                    "Work order {$workOrderNumber} has been created",
+                    $isConversion ? 'Work order created from request' : 'Work order created',
+                    $eventMessage,
                     null,
                     null,
                     json_encode($data),

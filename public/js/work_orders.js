@@ -15,6 +15,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const formData = new FormData(workOrderForm);
             const workOrderId = document.getElementById('workOrderId').value;
+            const saveButton = document.getElementById('saveWorkOrderBtn');
+            
+            // Disable the save button and show loading state
+            if (saveButton) {
+                saveButton.disabled = true;
+                const originalText = saveButton.textContent;
+                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+                
+                // Store original text for later restoration
+                saveButton.setAttribute('data-original-text', originalText);
+            }
             
             // Debug: Log form data
             console.log('Form submission - Work Order ID:', workOrderId);
@@ -23,15 +34,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const url = workOrderId ? 
-                `${baseUrl}/work-order-management/work-orders/update/${workOrderId}` : 
-                `${baseUrl}/work-order-management/work-orders/create`;
+                `${baseUrl}work-order-management/work-orders/update/${workOrderId}` : 
+                `${baseUrl}work-order-management/work-orders/create`;
+            
+            console.log('Submitting form to URL:', url);
+            console.log('Form data entries:', Array.from(formData.entries()));
             
             fetch(url, {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.success) {
                     createModal.hide();
                     showAlert('success', data.message);
@@ -49,6 +68,15 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error:', error);
                 showAlert('danger', 'An error occurred while saving the work order.');
+            })
+            .finally(() => {
+                // Re-enable the save button and restore original text
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    const originalText = saveButton.getAttribute('data-original-text') || 'Save Work Order';
+                    saveButton.textContent = originalText;
+                    saveButton.removeAttribute('data-original-text');
+                }
             });
         });
     }
@@ -71,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (status) params.append('status', status);
             if (priority) params.append('priority', priority);
             
-            fetch(`${baseUrl}/work-order-management/work-orders/search?${params.toString()}`)
+            fetch(`${baseUrl}work-order-management/work-orders/search?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -171,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Reset default values
             document.getElementById('priority').value = 'medium';
-            document.getElementById('status').value = 'new';
+            document.getElementById('status').value = 'pending';
             
             // Clear any error messages
             const errorElements = document.querySelectorAll('.text-danger');

@@ -65,14 +65,10 @@
                         <div class="col-md-2">
                             <select class="form-select" id="statusFilter">
                                 <option value="">All Status</option>
-                                <option value="new">New</option>
                                 <option value="pending">Pending</option>
                                 <option value="in_progress">In Progress</option>
-                                <option value="cannot_complete">Cannot Complete</option>
                                 <option value="completed">Completed</option>
-                                <option value="closed">Closed</option>
                                 <option value="cancelled">Cancelled</option>
-                                <option value="scheduled_appointment">Scheduled Appointment</option>
                             </select>
                         </div>
                         <div class="col-md-2">

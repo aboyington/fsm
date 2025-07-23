@@ -9,6 +9,10 @@ use App\Models\TerritoryModel;
 use App\Models\UserSessionModel;
 use App\Models\EstimateModel;
 use App\Models\WorkOrderModel;
+use App\Models\AssetModel;
+use App\Models\ServicesModel;
+use App\Models\PartsModel;
+use App\Models\SkillModel;
 
 class RequestsController extends BaseController
 {
@@ -20,6 +24,10 @@ class RequestsController extends BaseController
     protected $auditLogModel;
     protected $estimateModel;
     protected $workOrderModel;
+    protected $assetModel;
+    protected $servicesModel;
+    protected $partsModel;
+    protected $skillModel;
 
     public function __construct()
     {
@@ -31,6 +39,10 @@ class RequestsController extends BaseController
         $this->auditLogModel = new \App\Models\AuditLogModel();
         $this->estimateModel = new EstimateModel();
         $this->workOrderModel = new WorkOrderModel();
+        $this->assetModel = new AssetModel();
+        $this->servicesModel = new ServicesModel();
+        $this->partsModel = new PartsModel();
+        $this->skillModel = new SkillModel();
     }
     
     /**
@@ -276,9 +288,29 @@ class RequestsController extends BaseController
             return redirect()->to('/work-order-management/requests')->with('error', 'Request not found');
         }
         
+        // Load data needed for Work Order modal (for conversion feature)
+        $companies = $this->clientModel->where('status', 'active')->findAll();
+        $contacts = $this->contactModel->findAll();
+        $assets = $this->assetModel->findAll();
+        
+        // Load active services from product_skus table (category = 'SRV')
+        $services = $this->servicesModel->getAllServices(['status' => 'active']);
+        
+        // Load active parts from product_skus table (category = 'PRT')
+        $parts = $this->partsModel->getAllParts(['status' => 'active']);
+        
+        // Load active skills
+        $skills = $this->skillModel->getActiveSkills();
+        
         $data = [
             'title' => 'REQ' . str_pad($id, 3, '0', STR_PAD_LEFT) . ' - Request Details',
-            'request' => $request
+            'request' => $request,
+            'companies' => $companies,
+            'contacts' => $contacts,
+            'assets' => $assets,
+            'services' => $services,
+            'parts' => $parts,
+            'skills' => $skills
         ];
         
         return view('requests/view', $data);
